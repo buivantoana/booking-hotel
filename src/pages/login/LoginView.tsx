@@ -21,9 +21,9 @@ import apple from "../../images/Group.png";
 import vn from "../../images/VN - Vietnam.png";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 
-const RegisterView = () => {
+const LoginView = () => {
   const theme = useTheme();
-  const [currentStep, setCurrentStep] = useState("register"); // 'register' or 'otp'
+  const [currentStep, setCurrentStep] = useState("pin"); // 'register' or 'otp'
   const [phoneNumber, setPhoneNumber] = useState("123456789");
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -50,202 +50,7 @@ const RegisterView = () => {
     }
   };
 
-  const handleOtpChange = (newValue) => {
-    setOtp(newValue);
-  };
-
-  const handleResendOtp = () => {
-    setTimer(55);
-    setIsResendEnabled(false);
-    setOtp("");
-  };
-
-  const handleOtpSubmit = (e) => {
-    e.preventDefault();
-    if (otp.length === 6) {
-      console.log("OTP submitted:", otp);
-      // Handle OTP verification
-    }
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  const formatPhoneNumber = (phone) => {
-    return phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
-  };
-
-  // OTP Verification Component
-  const OtpVerification = () => (
-    <Container
-      maxWidth='xl'
-      sx={{ height: "100vh", display: "flex", alignItems: "center" }}>
-      <Grid
-        container
-        sx={{
-          alignItems: "center",
-          minHeight: "60vh",
-        }}>
-        {/* LEFT ILLUSTRATION */}
-        <Grid
-          item
-          xs={12}
-          md={6}
-          sx={{
-            display: { xs: "none", md: "flex" },
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-          <Box
-            component='img'
-            src={image_left}
-            alt='Hotel illustration'
-            sx={{
-              width: "592px",
-              height: "557px",
-              maxWidth: "100%",
-            }}
-          />
-        </Grid>
-
-        {/* RIGHT OTP FORM */}
-        <Grid item xs={12} md={6}>
-        <Box
-          sx={{
-            px: { xs: 3, sm: 4, md: 8 },
-            display: "flex",
-            flexDirection: "column",
-            width: { xs: "100%", sm: "400px", md: "486px" },
-            mx: "auto",
-          }}
-        >
-          {/* TITLE */}
-          <Typography
-            sx={{
-              fontSize: { xs: "26px", md: "30px" },
-              fontWeight: 700,
-              mb: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-           <ArrowBackIosNewIcon/> Nhập mã xác nhận
-          </Typography>
-
-          {/* DESCRIPTION */}
-          <Typography
-            sx={{
-              fontSize: "16px",
-              mb: 4,
-              color: "text.secondary",
-              lineHeight: 1.5,
-            }}
-          >
-            Mã xác nhận đã được gửi đến số{" "}
-            <Typography
-              component="span"
-              fontWeight={600}
-              color="text.primary"
-            >
-              {formatPhoneNumber(phoneNumber)}
-            </Typography>
-          </Typography>
-
-          {/* OTP INPUT */}
-          <Box component="form" onSubmit={handleOtpSubmit}>
-            <Box sx={{ display: "flex",  mb: 2 }}>
-              <MuiOtpInput
-                value={otp}
-                onChange={handleOtpChange}
-                length={4}
-                sx={{
-                  gap: 2,
-                  "& .MuiOtpInput-TextField": {
-                    "& .MuiOutlinedInput-root": {
-                      width: 80,
-                      height: 80,
-                      borderRadius: "24px",
-                      backgroundColor: "#fff",
-                      "& fieldset": {
-                        borderColor: "#9AC700",
-                        borderWidth: "1px",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#7cb400",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#9AC700",
-                        borderWidth: "1px",
-                      },
-                    },
-                    "& input": {
-                      textAlign: "center",
-                      fontSize: "24px",
-                      fontWeight: 700,
-                      color: "#9AC700",
-                    },
-                  },
-                }}
-              />
-            </Box>
-
-            {/* RESEND */}
-            <Typography
-              variant="body2"
-             
-              sx={{
-                mb: 4,
-                color: "#FF7A00",
-                fontSize: "14px",
-                fontWeight: 500,
-              }}
-            >
-              {isResendEnabled
-                ? (
-                  <Link
-                    onClick={handleResendOtp}
-                    sx={{ cursor: "pointer", color: "#FF7A00" }}
-                  >
-                    Gửi lại mã
-                  </Link>
-                )
-                : `Gửi lại mã trong (${formatTime(timer)})`}
-            </Typography>
-
-            {/* SUBMIT BUTTON */}
-            <Button
-              type="submit"
-              fullWidth
-              sx={{
-                py: 1.6,
-                borderRadius: "30px",
-                backgroundColor: "#9AC700",
-                color: "#fff",
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: "18px",
-                height: "56px",
-                "&:hover": {
-                  backgroundColor: "#7cb400",
-                },
-              }}
-            >
-              Xác nhận OTP
-            </Button>
-          </Box>
-        </Box>
-      </Grid>
-      </Grid>
-    </Container>
-  );
-
-  // Registration Component
+  
   const RegistrationForm = () => (
     <Container
       maxWidth='xl'
@@ -292,12 +97,11 @@ const RegisterView = () => {
               sx={{ fontSize: { xs: "28px", md: "32px" } }}
               fontWeight={700}
               mb={1}>
-              Đăng ký Hotel Booking
+             Hotel Booking xin chào!
             </Typography>
 
             <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
-              Đăng ký để đặt phòng với những ưu đãi độc quyền dành cho thành
-              viên.
+            Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
             </Typography>
 
             <Box component='form' onSubmit={handleRegister}>
@@ -362,91 +166,13 @@ const RegisterView = () => {
               />
 
               {/* TÊN */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                Tên của bạn
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder='Nhập tên của bạn'
-                variant='outlined'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px",
-                    height: "60px",
-                    backgroundColor: "#fff",
-                    "& fieldset": {
-                      borderColor: "#e0e0e0",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#bdbdbd",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#ff7a00",
-                      borderWidth: 1.5,
-                    },
-                  },
-                  "& input": {
-                    py: 1.5,
-                  },
-                }}
-              />
+             
 
               {/* NGÀY SINH */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                Ngày sinh của bạn
-              </Typography>
-              <TextField
-                fullWidth
-                type='date'
-                variant='outlined'
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px",
-                    height: "60px",
-                    backgroundColor: "#fff",
-                    "& fieldset": {
-                      borderColor: "#e0e0e0",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#bdbdbd",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#ff7a00",
-                      borderWidth: 1.5,
-                    },
-                  },
-                  "& input": {
-                    py: 1.5,
-                  },
-                }}
-              />
+             
 
               {/* AGREEMENT */}
-              <Typography
-                sx={{ fontSize: "14px" }}
-                display='block'
-                mb={3}
-                color='text.secondary'>
-                Bằng việc đăng kí tài khoản, tôi đồng ý với{" "}
-                <Link
-                  href='#'
-                  sx={{
-                    color: "#9AC700",
-                    fontWeight: 500,
-                    textDecoration: "underline",
-                    "&:hover": { textDecoration: "underline" },
-                  }}>
-                  điều khoản và chính sách bảo mật
-                </Link>{" "}
-                của Hotel Booking
-              </Typography>
+              
 
               {/* REGISTER BUTTON */}
               <Button
@@ -473,7 +199,7 @@ const RegisterView = () => {
                   },
                   boxShadow: "none",
                 }}>
-                Đăng ký
+               Đăng nhập
               </Button>
 
               <Typography
@@ -540,7 +266,7 @@ const RegisterView = () => {
 
               {/* LOGIN LINK */}
               <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
-                Bạn đã có tài khoản Booking Hotel?{" "}
+              Bạn chưa có tài khoản Booking Hotel?
                 <Link
                   href='#'
                   sx={{
@@ -549,7 +275,7 @@ const RegisterView = () => {
                     textDecoration: "underline",
                     "&:hover": { textDecoration: "underline" },
                   }}>
-                  Đăng nhập ngay
+                  Đăng ký ngay
                 </Link>
               </Typography>
             </Box>
@@ -562,12 +288,12 @@ const RegisterView = () => {
   return (
   <>
     {currentStep === "register" && <RegistrationForm />}
-    {currentStep === "otp" && <OtpVerification />}
+    
     {currentStep === "pin" && <PinCreation />}
   </>)
 };
 
-export default RegisterView;
+export default LoginView;
 
 // PIN Creation Component
 import Visibility from '@mui/icons-material/Visibility';
@@ -739,7 +465,27 @@ const PinCreation = () => {
                
               </Box>
 
-             
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 4,
+                  color: "#FF7A00",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  
+                }}
+              >
+                <Link
+                  href="#"
+                  sx={{
+                    cursor: "pointer",
+                    color: "#FF7A00",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Quên mã PIN?
+                </Link>
+              </Typography>
 
               {/* ERROR MESSAGE */}
               {confirmPin && pin !== confirmPin && (
