@@ -10,6 +10,7 @@ const ListRoom = ({ title }) => {
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
+
     autoplaySpeed: 4000,
     cssEase: "ease-in-out",
     prevArrow: <PrevArrow />,
@@ -45,8 +46,10 @@ const ListRoom = ({ title }) => {
       <Box my={3}>
         <Slider {...settings}>
           {[1, 2, 3, 4].map((hotel) => (
-            <Box sx={{ px: 1 }}>
-              <HotelCard />
+            <Box sx={{ display: "flex", justifyContent: "end" }}>
+              <Box width={"95%"} py={4} pl={0.8} pr={2}>
+                <HotelCard />
+              </Box>
             </Box>
           ))}
         </Slider>
@@ -77,17 +80,17 @@ const HotelCard = () => {
     <Card
       elevation={3}
       sx={{
-        maxWidth: { xs: 340, sm: 340 },
         borderRadius: "24px",
         overflow: "hidden",
         mx: "auto",
         bgcolor: "white",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
         transition: "transform 0.3s, box-shadow 0.3s",
         "&:hover": {
           transform: "translateY(-4px)",
           boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
         },
+        padding: "10px",
       }}>
       {/* Badge "Đăng tin cậy" */}
       <Box
@@ -218,7 +221,7 @@ const PrevArrow = (props: any) => {
       onClick={onClick}
       sx={{
         position: "absolute",
-        left: { xs: 8, md: 16 },
+        left: { xs: 8, md: "-20px" },
         top: "50%",
         transform: "translateY(-50%)",
         bgcolor: "white",
@@ -240,7 +243,7 @@ const NextArrow = (props: any) => {
       onClick={onClick}
       sx={{
         position: "absolute",
-        right: { xs: 8, md: 16 },
+        right: { xs: 8, md: "-20px" },
         top: "50%",
         transform: "translateY(-50%)",
         bgcolor: "white",
