@@ -2,7 +2,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import image_room from "../../images/Rectangle 29975.png";
-const ListRoom = ({ title }) => {
+const ListRoom = ({ title, isDetail }) => {
   const settings = {
     dots: false,
     infinite: true,
@@ -36,14 +36,19 @@ const ListRoom = ({ title }) => {
         display={"flex"}
         justifyContent={"space-between"}
         alignItems={"center"}>
-        <Typography variant='h4' fontWeight={"500"} fontSize={"36px"}>
+        <Typography
+          variant='h4'
+          fontWeight={"500"}
+          fontSize={isDetail ? "1.1rem" : "36px"}>
           {title}
         </Typography>
-        <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
-          Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
-        </Typography>
+        {!isDetail && (
+          <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
+            Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
+          </Typography>
+        )}
       </Box>
-      <Box my={3}>
+      <Box my={1}>
         <Slider {...settings}>
           {[1, 2, 3, 4].map((hotel) => (
             <Box sx={{ display: "flex", justifyContent: "end" }}>
@@ -139,7 +144,7 @@ const HotelCard = () => {
             fontWeight='bold'
             color='#333'
             sx={{
-              fontSize: { xs: "1.1rem", sm: "1.25rem" },
+              fontSize: { xs: "1rem", sm: "18px" },
               lineHeight: 1.3,
             }}>
             Hoàng gia Luxury hotel

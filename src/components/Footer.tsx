@@ -1,169 +1,212 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React from "react";
 import {
   Box,
+  Container,
+  Stack,
   Typography,
-  Grid,
   Link,
-  IconButton,
+  Divider,
   useTheme,
   useMediaQuery,
-  Container,
+  Grid,
 } from "@mui/material";
-
-import { Instagram, Facebook, YouTube, LinkedIn } from "@mui/icons-material";
-import Logo from "../images/dabeb7fcebd00c596297e51a1cf6134d57e64622-removebg-preview.png";
-import { RiTiktokFill } from "react-icons/ri";
-import { getAllCompanies } from "../service/company";
-import { useNavigate } from "react-router-dom";
+import {
+  Instagram as InstagramIcon,
+  Facebook as FacebookIcon,
+  MusicNote as TikTokIcon,
+  YouTube as YouTubeIcon,
+} from "@mui/icons-material";
+import momo from "../../src/images/Rectangle 30024.png";
+import vnpay from "../../src/images/Frame 1321317955.png";
+import app from "../../src/images/App.png";
+import app1 from "../../src/images/App (1).png";
 const Footer = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [companies, setCompanies] = useState(null);
-  const navigate = useNavigate();
-  const fetchCompanies = async () => {
-    try {
-      const res = await getAllCompanies();
-      if (res.status === 0 && res.data && res.data[0]) {
-        setCompanies(res.data[0]);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
   return (
-    <Box sx={{ backgroundColor: "#fff" }}>
-      <Container maxWidth='lg' sx={{ pt: 6, pb: 2 }}>
-        <Grid container spacing={4} justifyContent='space-between'>
-          {/* Thông tin công ty */}
+    <Box sx={{ bgcolor: "#f9f9f9", borderTop: "1px solid #eee", py: 4, mt: 8 }}>
+      <Container maxWidth='lg'>
+        <Grid container spacing={4} alignItems='flex-start'>
+          {/* LOGO & INFO */}
           <Grid item xs={12} md={4}>
-            <Box display='flex' alignItems='center' mb={3}>
-              <Box
-                display='flex'
-                onClick={() => navigate("/")}
-                alignItems='center'
-                gap={1}>
-                <img src={Logo} width={48} height={48} alt='PAM Media' />
-                <Typography fontWeight={"bold"} fontSize={"16px"}>
-                  PAM Media
-                </Typography>
-              </Box>
-            </Box>
+            <Stack spacing={2}>
+              <Typography fontWeight={700} fontSize='1.5rem' color='#333'>
+                Logo
+              </Typography>
+              <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
+                Địa chỉ: Lorem Ipsum is simply dummy text of the printing and
+                typesetting
+              </Typography>
+              <Typography fontSize='0.9rem' color='#666'>
+                Liên hệ hợp tác:{" "}
+                <strong style={{ color: "#333" }}>LoremIpsum@gmail.com</strong>
+              </Typography>
+              <Typography fontSize='0.9rem' color='#666'>
+                Hỗ trợ khách hàng:{" "}
+                <strong style={{ color: "#333" }}>LoremIpsum@gmail.com</strong>
+              </Typography>
+              <Typography fontSize='0.9rem' color='#666'>
+                Điện thoại: <strong style={{ color: "#333" }}>123456789</strong>
+              </Typography>
 
-            <Typography variant='body2' color='black' fontWeight={700} mb={3}>
-              Địa chỉ:{" "}
-              <Typography
-                variant='body2'
-                color='textSecondary'
-                fontWeight={500}>
-                {companies && companies?.address}
-              </Typography>
-            </Typography>
-            <Typography variant='body2' color='black' fontWeight={700} mb={3}>
-              Mail:{" "}
-              <Typography
-                variant='body2'
-                color='textSecondary'
-                fontWeight={500}>
-                {companies && companies?.email}
-              </Typography>
-            </Typography>
-            <Typography variant='body2' color='black' fontWeight={700} mb={2}>
-              Điện thoại:{" "}
-              <Typography
-                variant='body2'
-                color='textSecondary'
-                fontWeight={500}>
-                {companies && companies?.phone}
-              </Typography>
-            </Typography>
-
-            <Box>
-              {[
-                { icon: <Instagram />, color: "#E4405F" },
-                { icon: <Facebook />, color: "#1877F2" },
-                { icon: <RiTiktokFill />, color: "#000000" },
-                { icon: <LinkedIn />, color: "#0077B5" },
-                { icon: <YouTube />, color: "#FF0000" },
-              ].map((item, idx) => (
-                <IconButton key={idx} sx={{ color: item.color }} size='large'>
-                  {item.icon}
-                </IconButton>
-              ))}
-            </Box>
+              {/* SOCIAL ICONS */}
+              <Stack direction='row' spacing={1.5} mt={1}>
+                <Link href='#' color='inherit'>
+                  <InstagramIcon sx={{ fontSize: 28, color: "#E4405F" }} />
+                </Link>
+                <Link href='#' color='inherit'>
+                  <FacebookIcon sx={{ fontSize: 28, color: "#1877F2" }} />
+                </Link>
+                <Link href='#' color='inherit'>
+                  <TikTokIcon sx={{ fontSize: 28, color: "#000" }} />
+                </Link>
+                <Link href='#' color='inherit'>
+                  <YouTubeIcon sx={{ fontSize: 28, color: "#FF0000" }} />
+                </Link>
+              </Stack>
+            </Stack>
           </Grid>
 
-          {/* Menu giữa */}
-          <Grid item xs={6} md={4}>
-            <Box display='flex' flexDirection='column' gap={3}>
-              <Link href='/' underline='none' color='textPrimary'>
+          {/* GIỚI THIỆU */}
+          <Grid item xs={12} sm={6} md={2.5}>
+            <Stack spacing={1.5}>
+              <Typography fontWeight={600} fontSize='1rem' color='#333'>
+                Giới thiệu
+              </Typography>
+              <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
                 Về chúng tôi
               </Link>
-              <Link href='/product' underline='none' color='textPrimary'>
-                Sản phẩm
+              <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
+                Trang Blog
               </Link>
-              <Link href='cooperate' underline='none' color='textPrimary'>
-                Hợp tác
+              <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
+                Quy chế hoạt động website
               </Link>
-            </Box>
+              <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
+                Cơ hội nghề nghiệp
+              </Link>
+              <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
+                Dành cho đối tác
+              </Link>
+            </Stack>
           </Grid>
 
-          {/* Menu phải */}
-          <Grid item xs={6} md={4}>
-            <Box display='flex' flexDirection='column' gap={3}>
-              <Link href='/recruitment' underline='none' color='textPrimary'>
-                Tuyển dụng
-              </Link>
-              <Link href='/news?type=news' underline='none' color='textPrimary'>
-                Tin tức
-              </Link>
-            </Box>
+          {/* ĐỐI TÁC THANH TOÁN & APP */}
+          <Grid item xs={12} sm={6} md={5.5}>
+            <Stack
+              spacing={3}
+              direction={isMobile ? "column" : "column"}
+              alignItems={isMobile ? "flex-start" : "center"}>
+              {/* ĐỐI TÁC */}
+              <Stack spacing={1.5}>
+                <Typography fontWeight={600} fontSize='1rem' color='#333'>
+                  Đối tác thanh toán
+                </Typography>
+                <Box display={"flex"} gap={2}>
+                  <Box
+                    component='img'
+                    src={momo}
+                    alt='Momo'
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "#ddd",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.7rem",
+                      color: "#999",
+                    }}
+                  />
+                  <Box
+                    component='img'
+                    src={vnpay}
+                    alt='Momo'
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      bgcolor: "#ddd",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "0.7rem",
+                      color: "#999",
+                    }}
+                  />
+                </Box>
+              </Stack>
+
+              {/* TẢI ỨNG DỤNG */}
+              <Stack spacing={1.5}>
+                <Typography fontWeight={600} fontSize='1rem' color='#333'>
+                  Tải ứng dụng
+                </Typography>
+                <Stack direction='row' spacing={1}>
+                  <Box
+                    component='img'
+                    src={app}
+                    alt='App Store'
+                    sx={{
+                      bgcolor: "#000",
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: "0.7rem",
+                    }}
+                  />
+
+                  <Box
+                    component='img'
+                    src={app1}
+                    alt='Google Play'
+                    sx={{
+                      bgcolor: "#000",
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: "0.7rem",
+                    }}
+                  />
+                </Stack>
+              </Stack>
+            </Stack>
           </Grid>
         </Grid>
 
-        {/* Dòng cuối */}
-        <Grid
-          container
+        {/* DIVIDER */}
+        <Divider sx={{ my: 3, bgcolor: "#eee" }} />
+
+        {/* COPYRIGHT & LINKS */}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
           justifyContent='space-between'
           alignItems='center'
-          sx={{ mt: 4 }}>
-          <Grid item>
-            <Typography
-              fontWeight={"bold"}
-              variant='body2'
-              style={{ fontWeight: "bold" }}>
-              © 2025 PAM Media. Bảo lưu mọi quyền
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Box display='flex' fontWeight={"bold"} gap={2}>
-              <Link
-                href='#'
-                underline='none'
-                variant='body2'
-                style={{ fontWeight: "bold", color: "black" }}>
-                Điều khoản
-              </Link>
-              <Link
-                href='#'
-                underline='none'
-                variant='body2'
-                style={{ fontWeight: "bold", color: "black" }}>
-                Bảo mật
-              </Link>
-              <Link
-                href='#'
-                underline='none'
-                variant='body2'
-                style={{ fontWeight: "bold", color: "black" }}>
-                Cookie
-              </Link>
-            </Box>
-          </Grid>
-        </Grid>
+          spacing={1}
+          textAlign={{ xs: "center", sm: "left" }}>
+          <Typography fontSize='0.85rem' color='#999'>
+            © 2025 Booking Hotel. Bảo lưu mọi quyền
+          </Typography>
+          <Stack direction='row' spacing={2}>
+            <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
+              Điều khoản
+            </Link>
+            <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
+              Bảo mật
+            </Link>
+            <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
+              Cookie
+            </Link>
+          </Stack>
+        </Stack>
       </Container>
     </Box>
   );

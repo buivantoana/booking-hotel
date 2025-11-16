@@ -709,6 +709,7 @@ const SearchBarWithDropdown = () => {
                     sx={{ zIndex: 20, width: "18%" }}>
                     <Paper
                       elevation={3}
+                      className='hidden-add-voice'
                       sx={{
                         mt: 1,
                         borderRadius: "16px",
