@@ -42,16 +42,21 @@ const Header = () => {
             bgcolor: "white",
             borderBottom: "1px solid #eee",
             py: 1,
-            px:0
+            px: 0,
           }}>
           <Toolbar
             sx={{
-              
-              px:"0px !important",
+              px: "0px !important",
               justifyContent: "space-between",
             }}>
             {/* LEFT: LOGO + TEXT */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2,width:"200px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                width: "200px",
+              }}>
               {isMobile ? (
                 <IconButton edge='start' onClick={handleMenuOpen}>
                   <MenuIcon sx={{ color: "#333" }} />
@@ -77,29 +82,14 @@ const Header = () => {
                 </>
               )}
             </Box>
-             {location.pathname == "/rooms"&& <SearchBarWithDropdownHeader/>}
+            {location.pathname == "/rooms" && <SearchBarWithDropdownHeader />}
             {/* RIGHT: AVATAR */}
             <Box>
-              <IconButton
-                onClick={handleMenuOpen}
-                sx={{
-                  p: 0,
-                  "&:hover": { bgcolor: "transparent" },
-                }}>
-                <Avatar
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    bgcolor: "#f0f8f0",
-                    border: "2px solid #98b720",
-                  }}>
-                  <PersonIcon sx={{ color: "#98b720", fontSize: 22 }} />
-                </Avatar>
-              </IconButton>
+              <UserDropdownMenuV2 />
             </Box>
 
             {/* MOBILE MENU */}
-            <Menu
+            {/* <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
@@ -125,7 +115,7 @@ const Header = () => {
               <Divider />
               <MenuItem onClick={handleMenuClose}>Hồ sơ</MenuItem>
               <MenuItem onClick={handleMenuClose}>Đăng xuất</MenuItem>
-            </Menu>
+            </Menu> */}
           </Toolbar>
         </AppBar>
       </Container>
@@ -134,3 +124,159 @@ const Header = () => {
 };
 
 export default Header;
+("use client");
+
+import { ListItemIcon, ListItemText, Stack } from "@mui/material";
+import {
+  RoomPreferencesOutlined as BookingIcon,
+  Logout as LogoutIcon,
+} from "@mui/icons-material";
+
+function UserDropdownMenuV2() {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleNavigate = (path: string) => {
+    handleClose();
+  };
+
+  const handleLogout = () => {
+    // TODO: xử lý logout thật
+    alert("Đã đăng xuất!");
+
+    handleClose();
+  };
+
+  return (
+    <>
+      {/* Nút kích hoạt dropdown */}
+      <IconButton
+        onClick={handleClick}
+        sx={{
+          p: 0,
+          borderRadius: "50%",
+          width: 44,
+          height: 44,
+          bgcolor: "transparent",
+          "&:hover": { bgcolor: "rgba(0,0,0,0.04)" },
+        }}>
+        <Avatar
+          sx={{
+            width: 44,
+            height: 44,
+            bgcolor: "#e8f5e8",
+            border: "3px solid white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}>
+          <PersonIcon sx={{ color: "#98b720", fontSize: 26 }} />
+        </Avatar>
+      </IconButton>
+
+      {/* Dropdown Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            borderRadius: "20px",
+            width: 280,
+            overflow: "hidden",
+            boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+            bgcolor: "white",
+          },
+        }}>
+        {/* Header: Avatar + Tên + SĐT */}
+        <Box sx={{}}>
+          <Stack direction='row' spacing={2} alignItems='center'>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                bgcolor: "rgba(152, 183, 32, 1)",
+              }}>
+              <PersonIcon sx={{ color: "#98b b720", fontSize: 32 }} />
+            </Avatar>
+            <Box>
+              <Typography fontWeight={700} fontSize='16px' color='#333'>
+                Thangdv
+              </Typography>
+              <Typography fontSize='14px' color='#666' mt={0.5}>
+                +(84) 123456789
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+
+        {/* Menu Items */}
+        <Box sx={{ py: 1 }}>
+          <MenuItem
+            onClick={() => handleNavigate("/profile")}
+            sx={{
+              py: 2,
+              px: 3,
+              borderRadius: "0 0 12px 12px",
+              "&:hover": { bgcolor: "#f8f8f8" },
+            }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "#666" }}>
+              <PersonIcon fontSize='small' />
+            </ListItemIcon>
+            <ListItemText>
+              <Typography fontWeight={500} fontSize='15px'>
+                Hồ sơ của tôi
+              </Typography>
+            </ListItemText>
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => handleNavigate("/my-bookings")}
+            sx={{
+              py: 2,
+              px: 3,
+              "&:hover": { bgcolor: "#f8f8f8" },
+            }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "#666" }}>
+              <BookingIcon fontSize='small' />
+            </ListItemIcon>
+            <ListItemText>
+              <Typography fontWeight={500} fontSize='15px'>
+                Đặt phòng của tôi
+              </Typography>
+            </ListItemText>
+          </MenuItem>
+
+          <Divider sx={{ mx: 3, my: 1 }} />
+
+          <MenuItem
+            onClick={handleLogout}
+            sx={{
+              py: 2,
+              px: 3,
+              color: "#e91e63",
+              "&:hover": { bgcolor: "#ffebee" },
+            }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "#e91e63" }}>
+              <LogoutIcon fontSize='small' />
+            </ListItemIcon>
+            <ListItemText>
+              <Typography fontWeight={500} fontSize='15px'>
+                Đăng xuất
+              </Typography>
+            </ListItemText>
+          </MenuItem>
+        </Box>
+      </Menu>
+    </>
+  );
+}

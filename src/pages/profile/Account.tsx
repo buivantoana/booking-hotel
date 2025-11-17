@@ -1,0 +1,193 @@
+import React from "react";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  InputAdornment,
+  TextField,
+  Typography,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import Flag from "react-country-flag"; // bạn cần cài thêm: npm i react-country-flag
+
+const Account = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  return (
+    <Box
+      sx={{
+        backgroundColor: "#f8f9fa",
+      }}>
+      {/* Tiêu đề */}
+      <Typography
+        variant='h5'
+        fontWeight={600}
+        color='#212529'
+        mb={3}
+        textAlign={isMobile ? "center" : "left"}>
+        Hồ sơ của tôi
+      </Typography>
+
+      <Box
+        sx={{
+          backgroundColor: "#fff",
+          borderRadius: 3,
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+          p: { xs: 3, sm: 5 },
+        }}>
+        <Grid container spacing={3}>
+          {/* Số điện thoại */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant='body2' color='#6c757d' mb={1}>
+              Số điện thoại
+            </Typography>
+            <TextField
+              fullWidth
+              value='0123456789'
+              disabled
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position='start'>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}>
+                      <Flag
+                        countryCode='VN'
+                        svg
+                        style={{ width: 24, height: 24 }}
+                      />
+                      <Typography variant='body1' fontWeight={500}>
+                        +84
+                      </Typography>
+                    </Box>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#212529",
+                  fontWeight: 500,
+                  borderRadius: "16px",
+                },
+                "& .MuiInputBase-input.Mui-disabled": {
+                  WebkitTextFillColor: "#212529",
+                  fontWeight: 500,
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#dee2e6",
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Ngày sinh */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant='body2' color='#6c757d' mb={1}>
+              Ngày sinh của bạn
+            </Typography>
+            <TextField
+              fullWidth
+              value='01/01/2000'
+              placeholder='dd/mm/yyyy'
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <CalendarTodayIcon sx={{ color: "#adb5bd" }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#212529",
+                  fontWeight: 500,
+                  borderRadius: "16px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#dee2e6",
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Tên của bạn */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant='body2' color='#6c757d' mb={1}>
+              Tên của bạn
+            </Typography>
+            <TextField
+              fullWidth
+              value='Thangdv'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#212529",
+                  fontWeight: 500,
+                  borderRadius: "16px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#dee2e6",
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Email */}
+          <Grid item xs={12} sm={6}>
+            <Typography variant='body2' color='#6c757d' mb={1}>
+              Email
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder='Nhập mail của bạn'
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  color: "#6c757d",
+                  borderRadius: "16px",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#dee2e6",
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Nút Cập nhật */}
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: isMobile ? "center" : "flex-end",
+                mt: 2,
+              }}>
+              <Button
+                variant='contained'
+                size='large'
+                sx={{
+                  backgroundColor: "#a0d468",
+                  borderRadius: 50,
+                  px: 6,
+                  py: 1.5,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  boxShadow: "0 4px 15px rgba(160, 212, 104, 0.4)",
+                  "&:hover": {
+                    backgroundColor: "#8bc34a",
+                  },
+                }}>
+                Cập nhật
+              </Button>
+            </Box>
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
+  );
+};
+
+export default Account;

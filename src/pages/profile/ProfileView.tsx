@@ -19,6 +19,10 @@ import {
   ListItemText,
   Avatar,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -30,20 +34,30 @@ import {
   Room as RoomIcon,
   Logout as LogoutIcon,
   Home as HomeIcon,
+  Close,
 } from "@mui/icons-material";
 import image_room from "../../images/Rectangle 29975.png";
+import logout from "../../images/logout2.png";
+import success from "../../images/15. Hotel.png";
+import Account from "./Account";
+import AccountSettingsPage from "./AccountSetting";
+import MyBookingsPage from "./MyBookingsPage";
 const ProfileView = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
-
+  const [activeMenu, setActiveMenu] = useState("Hồ sơ của tôi");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [detailBooking, setDetailBooking] = useState(false);
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
     { text: "Đặt phòng của tôi", icon: <RoomIcon />, active: true },
     { text: "Đăng xuất", icon: <LogoutIcon />, active: false },
   ];
-
+  const handleClickItemMenu = (active) => {
+    setActiveMenu(active);
+  };
   const Sidebar = () => (
     <Paper
       elevation={0}
@@ -81,37 +95,53 @@ const ProfileView = () => {
         <Divider sx={{ bgcolor: "#eee" }} />
 
         {/* MENU */}
-        <List disablePadding>
+        <List disablePadding sx={{ cursor: "pointer" }}>
           {menuItems.map((item) => (
-            <ListItem
-              key={item.text}
-              disablePadding
-              sx={{
-                borderRadius: "12px",
-                mb: 1,
-                bgcolor: item.active ? "#f0f8f0" : "transparent",
-                border: item.active ? "1px solid #98b720" : "none",
-                px: 1,
-                py: 0.5,
-              }}>
-              <ListItemIcon
-                sx={{
-                  minWidth: 36,
-                  color: item.active ? "rgba(152, 183, 32, 1)" : "#999",
-                }}>
-                {React.cloneElement(item.icon, { fontSize: "small" })}
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography
-                    fontWeight={item.active ? 600 : 500}
-                    fontSize='0.9rem'
-                    color={item.active ? "rgba(152, 183, 32, 1)" : "#666"}>
-                    {item.text}
-                  </Typography>
+            <>
+              {item.text == "Đăng xuất" && <Divider sx={{ my: 2 }} />}
+              <ListItem
+                onClick={
+                  item.text == "Đăng xuất"
+                    ? () => setDeleteDialogOpen(true)
+                    : () => handleClickItemMenu(item.text)
                 }
-              />
-            </ListItem>
+                key={item.text}
+                disablePadding
+                sx={{
+                  borderRadius: "12px",
+                  mb: 1,
+                  bgcolor: activeMenu == item.text ? "#f0f8f0" : "transparent",
+                  border:
+                    activeMenu == item.text ? "1px solid #98b720" : "none",
+                  px: 1,
+                  py: 1,
+                }}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 36,
+                    color:
+                      activeMenu == item.text
+                        ? "rgba(152, 183, 32, 1)"
+                        : "#999",
+                  }}>
+                  {React.cloneElement(item.icon, { fontSize: "small" })}
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography
+                      fontWeight={activeMenu == item.text ? 600 : 500}
+                      fontSize='0.9rem'
+                      color={
+                        activeMenu == item.text
+                          ? "rgba(152, 183, 32, 1)"
+                          : "#666"
+                      }>
+                      {item.text}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </>
           ))}
         </List>
       </Stack>
@@ -124,7 +154,9 @@ const ProfileView = () => {
       <Stack direction='row' alignItems='center' spacing={1}>
         <IconButton
           size='small'
-          onClick={() => isMobile && setDrawerOpen(true)}>
+          onClick={() =>
+            isMobile ? setDrawerOpen(true) : setDetailBooking(false)
+          }>
           {isMobile ? (
             <MenuIcon sx={{ fontSize: 22 }} />
           ) : (
@@ -149,20 +181,12 @@ const ProfileView = () => {
           justifyContent='space-between'
           alignItems='center'>
           <Stack direction='row' spacing={2} alignItems='center'>
-            <Box
-              sx={{
-                width: 40,
-                height: 40,
-                bgcolor: "#98b720",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-              <CheckCircleIcon sx={{ fontSize: 24, color: "white" }} />
-            </Box>
+            <img src={success} alt='' />
             <Stack>
-              <Typography fontWeight={700} fontSize='1rem' color='#333'>
+              <Typography
+                fontWeight={700}
+                fontSize='1rem'
+                color='rgba(152, 183, 32, 1)'>
                 Hoàn thành
               </Typography>
               <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
@@ -181,7 +205,7 @@ const ProfileView = () => {
               px: 3,
               py: 1,
               fontSize: "0.9rem",
-              minWidth: 80,
+              minWidth: 120,
               "&:hover": { bgcolor: "#7a9a1a" },
             }}>
             Đặt lại
@@ -250,7 +274,7 @@ const ProfileView = () => {
               alignItems='center'
               justifyContent='start'
               mb={1}>
-              <CheckCircleIcon sx={{ fontSize: 14, color: "#98b720" }} />
+              <CheckCircleIcon sx={{ fontSize: 16, color: "#98b720" }} />
               <Typography fontSize='0.75rem' color='#98b720' fontWeight={600}>
                 Theo giờ
               </Typography>
@@ -258,10 +282,10 @@ const ProfileView = () => {
             <Divider />
             <Grid container spacing={0.5} mt={1} fontSize='0.7rem'>
               <Grid item xs={4}>
-                <Typography color='#888' fontSize='0.65rem'>
+                <Typography color='#888' fontSize='0.75rem'>
                   Nhận phòng
                 </Typography>
-                <Typography fontWeight={600} color='#333' fontSize='0.7rem'>
+                <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                   10:00, 4/11
                 </Typography>
               </Grid>
@@ -269,10 +293,10 @@ const ProfileView = () => {
                 item
                 xs={4}
                 sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
-                <Typography color='#888' fontSize='0.65rem'>
+                <Typography color='#888' fontSize='0.75rem'>
                   Trả phòng
                 </Typography>
-                <Typography fontWeight={600} color='#333' fontSize='0.7rem'>
+                <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                   12:00, 4/11
                 </Typography>
               </Grid>
@@ -280,10 +304,10 @@ const ProfileView = () => {
                 item
                 xs={4}
                 sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
-                <Typography color='#888' fontSize='0.65rem'>
+                <Typography color='#888' fontSize='0.75rem'>
                   Số giờ
                 </Typography>
-                <Typography fontWeight={600} color='#333' fontSize='0.7rem'>
+                <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                   02
                 </Typography>
               </Grid>
@@ -423,7 +447,82 @@ const ProfileView = () => {
   );
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", minHeight: "100vh", py: { xs: 2, md: 3 } }}>
+    <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "16px" },
+        }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={logout} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setDeleteDialogOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='18px' mb={1}>
+            Đăng xuất tài khoản?
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            Bạn có chắc muốn đăng xuất không?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={() => setDeleteDialogOpen(true)}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            Đồng ý
+          </Button>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+              ml: "0px !important",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Container maxWidth='lg'>
         {isMobile ? (
           <>
@@ -443,7 +542,14 @@ const ProfileView = () => {
               <Sidebar />
             </Grid>
             <Grid item xs={12} md={8} lg={8.5}>
-              <MainContent />
+              {detailBooking && (
+                <MainContent setDetailBooking={setDetailBooking} />
+              )}
+              {activeMenu == "Hồ sơ của tôi" && <Account />}
+              {activeMenu == "Thiết lập tài khoản" && <AccountSettingsPage />}
+              {activeMenu == "Đặt phòng của tôi" && !detailBooking && (
+                <MyBookingsPage setDetailBooking={setDetailBooking} />
+              )}
             </Grid>
           </Grid>
         )}
