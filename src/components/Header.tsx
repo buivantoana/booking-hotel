@@ -16,12 +16,14 @@ import {
   Container,
 } from "@mui/material";
 import { Menu as MenuIcon, Person as PersonIcon } from "@mui/icons-material";
+import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
+import { useLocation } from "react-router-dom";
 
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const location = useLocation();
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -31,7 +33,7 @@ const Header = () => {
   };
 
   return (
-    <Box bgcolor={"white"}>
+    <Box bgcolor={"white"} p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
@@ -40,15 +42,16 @@ const Header = () => {
             bgcolor: "white",
             borderBottom: "1px solid #eee",
             py: 1,
+            px:0
           }}>
           <Toolbar
             sx={{
-              minHeight: { xs: 56, sm: 64 },
-              px: { xs: 2, sm: 3 },
+              
+              px:"0px !important",
               justifyContent: "space-between",
             }}>
             {/* LEFT: LOGO + TEXT */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2,width:"200px" }}>
               {isMobile ? (
                 <IconButton edge='start' onClick={handleMenuOpen}>
                   <MenuIcon sx={{ color: "#333" }} />
@@ -74,7 +77,7 @@ const Header = () => {
                 </>
               )}
             </Box>
-
+             {location.pathname == "/rooms"&& <SearchBarWithDropdownHeader/>}
             {/* RIGHT: AVATAR */}
             <Box>
               <IconButton

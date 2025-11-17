@@ -68,7 +68,7 @@ const CheckOutView = () => {
   ];
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", minHeight: "100vh", py: { xs: 2, md: 4 } }}>
+    <Box sx={{ bgcolor: "#f9f9f9",  py: { xs: 2, md: 6 } }}>
       <Container maxWidth='lg'>
         <Stack spacing={3}>
           {/* HEADER */}
@@ -493,6 +493,7 @@ const CheckOutView = () => {
                 {/* CHÍNH SÁCH + NÚT THANH TOÁN */}
                 <Stack
                   direction='row'
+                  pt={3}
                   justifyContent='space-between'
                   alignItems='center'>
                   <Typography

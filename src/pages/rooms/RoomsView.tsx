@@ -15,6 +15,7 @@ import {
   Button,
   Divider,
   CircularProgress,
+  Container,
 } from "@mui/material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 
@@ -166,13 +167,14 @@ const RoomsView = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
+    <Container maxWidth="lg" sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
+
       <Stack
         spacing={3}
-        sx={{ maxWidth: 1400, mx: "auto", px: { xs: 2, md: 3 } }}>
+        sx={{  }}>
         {/* ================= HEADER: KẾT QUẢ + SẮP XẾP ================= */}
 
-        <Grid container spacing={3}>
+        <Grid container justifyContent={"space-between"}>
           {/* ================= LEFT: FILTERS ================= */}
           <Grid item xs={12} md={4} lg={3.3}>
             <Paper
@@ -442,7 +444,7 @@ const RoomsView = () => {
           </Grid>
 
           {/* ================= RIGHT: DANH SÁCH KHÁCH SẠN (DỌC) ================= */}
-          <Grid item xs={12} md={8} lg={8.7}>
+          <Grid item xs={12} md={8} lg={8.4}>
             <Box
               sx={{
                 display: "flex",
@@ -726,7 +728,7 @@ const RoomsView = () => {
           </Grid>
         </Grid>
       </Stack>
-    </Box>
+    </Container>
   );
 };
 

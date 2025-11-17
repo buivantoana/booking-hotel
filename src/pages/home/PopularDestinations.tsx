@@ -63,20 +63,19 @@ const PopularDestinations = () => {
   const columns = isMobile ? 2 : isTablet ? 3 : 4;
 
   return (
-    <Box sx={{ py: { xs: 6, md: 8 }, bgcolor: "#fff" }}>
+    <Box sx={{ pt: { xs: 6, md: 4 }}}>
       <Box sx={{}}>
         {/* Tiêu đề */}
+        
         <Typography
-          variant='h4'
-          fontWeight='bold'
-          color='#333'
-          gutterBottom
-          sx={{
-            fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2rem" },
-            textAlign: { xs: "center", md: "left" },
-          }}>
+            variant='h4'
+            fontWeight='bold'
+            color='#333'
+            sx={{
+              fontSize: { xs: "1.5rem", md: "1.875rem" },
+            }}>
           Các địa điểm thu hút nhất Việt Nam
-        </Typography>
+          </Typography>
 
         {/* Grid địa điểm */}
         <Stack

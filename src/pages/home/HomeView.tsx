@@ -108,7 +108,7 @@ const HomeView = () => {
           sx={{ cursor: "pointer" }}>
           <img
             src={type_booking}
-            width={"80%"}
+            width={"100%"}
             style={{ objectFit: "contain" }}
             alt=''
           />

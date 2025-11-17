@@ -19,6 +19,7 @@ import {
   useTheme,
   ClickAwayListener,
   IconButton,
+  Container,
 } from "@mui/material";
 
 import {
@@ -39,6 +40,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import in_time from "../../images/login.png";
 import out_time from "../../images/logout.png";
+import { useNavigate } from "react-router-dom";
 // === POPUP CHUNG ===
 interface DateRangePickerProps {
   open: boolean;
@@ -536,7 +538,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 const SearchBarWithDropdown = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const navigate = useNavigate()
   const [bookingType, setBookingType] = useState<
     "hourly" | "nightly" | "daily"
   >("hourly");
@@ -573,20 +575,36 @@ const SearchBarWithDropdown = () => {
   };
 
   const formatCheckIn = () => {
-    if (!checkIn) return "Bất kỳ";
+    if (!checkIn) return "Nhận phòng";
     if (bookingType === "hourly" && checkInTime)
       return `${checkInTime}, ${checkIn.format("DD/MM")}`;
     return checkIn.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
   };
 
   const formatCheckOut = () => {
-    if (!checkOut) return "Bất kỳ";
+    if (!checkOut) return "Trả phòng";
     if (bookingType === "hourly") {
       return checkOut.format("HH:mm, DD/MM");
     }
     return checkOut.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
   };
 
+  const handleSearch = () => {
+    const searchParams = {
+      location: searchValue,
+      type: bookingType,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : null, // string
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : null, // string
+      checkInTime: checkInTime,
+      duration: checkInDuration,
+    };
+  
+    localStorage.setItem("filter_booking", JSON.stringify(searchParams));
+    
+    setTimeout(() => {
+      navigate("/rooms");
+    }, 300);
+  };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={handleClickAway}>
@@ -597,7 +615,7 @@ const SearchBarWithDropdown = () => {
           justifyContent='center'
           bottom='-80px'
           zIndex={10}>
-          <Box width={{ xs: "90%", md: "75%" }}>
+          <Container maxWidth="lg" >
             {/* Toggle */}
             <Stack direction='row' justifyContent='center' sx={{ mb: "-40px" }}>
               <ToggleButtonGroup
@@ -621,7 +639,7 @@ const SearchBarWithDropdown = () => {
                     value={x.v}
                     sx={{
                       px: { xs: 2, md: 4 },
-                      py: 1.5,
+                      py: 1,
                       color:
                         bookingType === x.v
                           ? "rgba(152, 183, 32, 1) !important"
@@ -641,7 +659,7 @@ const SearchBarWithDropdown = () => {
                       },
                     }}>
                     {x.i}
-                    <Box component='span' sx={{ ml: 1 }}>
+                    <Box component='span' sx={{ ml: 1,textTransform:"none" }}>
                       {x.l}
                     </Box>
                   </ToggleButton>
@@ -870,6 +888,7 @@ const SearchBarWithDropdown = () => {
                 {/* Tìm kiếm */}
                 <Button
                   variant='contained'
+                  onClick={handleSearch}
                   size='large'
                   startIcon={<Search sx={{ fontSize: 22 }} />}
                   sx={{
@@ -888,7 +907,7 @@ const SearchBarWithDropdown = () => {
                 </Button>
               </Stack>
             </Paper>
-          </Box>
+          </Container>
         </Box>
       </ClickAwayListener>
     </LocalizationProvider>

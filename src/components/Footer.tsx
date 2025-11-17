@@ -22,16 +22,20 @@ import momo from "../../src/images/Rectangle 30024.png";
 import vnpay from "../../src/images/Frame 1321317955.png";
 import app from "../../src/images/App.png";
 import app1 from "../../src/images/App (1).png";
+import ins from "../../src/images/Logos.png"
+import fb from "../../src/images/Logos (1).png"
+import tiktok from "../../src/images/Logos (2).png"
+import youtube from "../../src/images/Logos (3).png"
 const Footer = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", borderTop: "1px solid #eee", py: 4, mt: 8 }}>
+    <Box sx={{ bgcolor: "#f9f9f9", borderTop: "1px solid #eee", py: 4, }}>
       <Container maxWidth='lg'>
         <Grid container spacing={4} alignItems='flex-start'>
           {/* LOGO & INFO */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={5.5}>
             <Stack spacing={2}>
               <Typography fontWeight={700} fontSize='1.5rem' color='#333'>
                 Logo
@@ -42,29 +46,29 @@ const Footer = () => {
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
                 Liên hệ hợp tác:{" "}
-                <strong style={{ color: "#333" }}>LoremIpsum@gmail.com</strong>
+                <strong style={{ color: "#666" }}>LoremIpsum@gmail.com</strong>
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
                 Hỗ trợ khách hàng:{" "}
-                <strong style={{ color: "#333" }}>LoremIpsum@gmail.com</strong>
+                <strong style={{ color: "#666" }}>LoremIpsum@gmail.com</strong>
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
-                Điện thoại: <strong style={{ color: "#333" }}>123456789</strong>
+                Điện thoại: <strong style={{ color: "#666" }}>123456789</strong>
               </Typography>
 
               {/* SOCIAL ICONS */}
               <Stack direction='row' spacing={1.5} mt={1}>
                 <Link href='#' color='inherit'>
-                  <InstagramIcon sx={{ fontSize: 28, color: "#E4405F" }} />
+                  <img src={ins} alt="" />
                 </Link>
                 <Link href='#' color='inherit'>
-                  <FacebookIcon sx={{ fontSize: 28, color: "#1877F2" }} />
+                <img src={fb} alt="" />
                 </Link>
                 <Link href='#' color='inherit'>
-                  <TikTokIcon sx={{ fontSize: 28, color: "#000" }} />
+                <img src={tiktok} alt="" />
                 </Link>
                 <Link href='#' color='inherit'>
-                  <YouTubeIcon sx={{ fontSize: 28, color: "#FF0000" }} />
+                <img src={youtube} alt="" />
                 </Link>
               </Stack>
             </Stack>
@@ -72,7 +76,7 @@ const Footer = () => {
 
           {/* GIỚI THIỆU */}
           <Grid item xs={12} sm={6} md={2.5}>
-            <Stack spacing={1.5}>
+            <Stack spacing={2.5}>
               <Typography fontWeight={600} fontSize='1rem' color='#333'>
                 Giới thiệu
               </Typography>
@@ -95,11 +99,13 @@ const Footer = () => {
           </Grid>
 
           {/* ĐỐI TÁC THANH TOÁN & APP */}
-          <Grid item xs={12} sm={6} md={5.5}>
+          <Grid item xs={12} sm={6} md={4}>
+            <Box display={"flex"} justifyContent={"end"}>
+
             <Stack
               spacing={3}
               direction={isMobile ? "column" : "column"}
-              alignItems={isMobile ? "flex-start" : "center"}>
+              alignItems={isMobile ? "flex-start" : "start"}>
               {/* ĐỐI TÁC */}
               <Stack spacing={1.5}>
                 <Typography fontWeight={600} fontSize='1rem' color='#333'>
@@ -146,7 +152,7 @@ const Footer = () => {
                 <Typography fontWeight={600} fontSize='1rem' color='#333'>
                   Tải ứng dụng
                 </Typography>
-                <Stack direction='row' spacing={1}>
+                <Box display={"flex"} gap={2}>
                   <Box
                     component='img'
                     src={app}
@@ -176,9 +182,10 @@ const Footer = () => {
                       fontSize: "0.7rem",
                     }}
                   />
-                </Stack>
+                </Box>
               </Stack>
             </Stack>
+            </Box>
           </Grid>
         </Grid>
 

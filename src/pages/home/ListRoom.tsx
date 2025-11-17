@@ -2,6 +2,7 @@ import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import image_room from "../../images/Rectangle 29975.png";
+import tag  from "../../images/Tag.png";
 const ListRoom = ({ title, isDetail }) => {
   const settings = {
     dots: false,
@@ -36,12 +37,21 @@ const ListRoom = ({ title, isDetail }) => {
         display={"flex"}
         justifyContent={"space-between"}
         alignItems={"center"}>
-        <Typography
+       {isDetail? <Typography
           variant='h4'
           fontWeight={"500"}
           fontSize={isDetail ? "1.1rem" : "36px"}>
           {title}
-        </Typography>
+        </Typography>:
+        <Typography
+            variant='h4'
+            fontWeight='bold'
+            color='#333'
+            sx={{
+              fontSize: { xs: "1.5rem", md: "1.875rem" },
+            }}>
+           {title}
+          </Typography>}
         {!isDetail && (
           <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
             Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
@@ -85,7 +95,7 @@ const HotelCard = () => {
     <Card
       elevation={3}
       sx={{
-        borderRadius: "24px",
+        borderRadius: "14px",
         overflow: "hidden",
         mx: "auto",
         bgcolor: "white",
@@ -101,27 +111,11 @@ const HotelCard = () => {
       <Box
         sx={{
           position: "absolute",
-          top: 16,
-          left: 16,
+          top: 10,
+          left: 30,
           zIndex: 2,
         }}>
-        <Chip
-          label='Đăng tin cậy'
-          size='small'
-          sx={{
-            bgcolor: "#ffb300",
-            color: "white",
-            fontWeight: "bold",
-            fontSize: "0.75rem",
-            height: 28,
-            borderRadius: "14px",
-            pl: 1,
-            pr: 1.5,
-            "& .MuiChip-label": {
-              px: 1,
-            },
-          }}
-        />
+       <img src={tag} alt="" />
       </Box>
 
       {/* Ảnh phòng */}
@@ -132,7 +126,7 @@ const HotelCard = () => {
         alt='Hoàng gia Luxury hotel'
         sx={{
           objectFit: "cover",
-          borderRadius: "24px",
+          borderRadius: "14px",
         }}
       />
 
@@ -196,9 +190,9 @@ const HotelCard = () => {
             <Typography
               variant='h6'
               fontWeight='bold'
-              color='#e53935'
+              color='#EA6A00'
               sx={{
-                fontSize: { xs: "1.3rem", sm: "1.5rem" },
+                fontSize: { xs: "1.1rem", sm: "1.3rem" },
                 lineHeight: 1,
               }}>
               160.000đ
