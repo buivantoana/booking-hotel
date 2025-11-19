@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -27,7 +27,22 @@ const Header = () => {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+  const [locationAddress,setLocationAddress] = useState([])
+  
 
+  useEffect(()=>{
+    (async()=>{
+      try {
+        let result = await getLocation();
+        console.log("AAA location",result)
+        if(result?.locations){
+          setLocationAddress(result?.locations)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    })()
+  },[])
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -82,7 +97,7 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {location.pathname == "/rooms" && <SearchBarWithDropdownHeader />}
+            {location.pathname == "/rooms" && <SearchBarWithDropdownHeader locationAddress={locationAddress} />}
             {/* RIGHT: AVATAR */}
             <Box>
               <UserDropdownMenuV2 />
@@ -131,6 +146,7 @@ import {
   RoomPreferencesOutlined as BookingIcon,
   Logout as LogoutIcon,
 } from "@mui/icons-material";
+import { getLocation } from "../service/hotel";
 
 function UserDropdownMenuV2() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

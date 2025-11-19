@@ -132,7 +132,7 @@ const ratings = [
   { label: "≥ 4.5", active: false },
 ];
 
-const RoomsView = () => {
+const RoomsView = ({dataHotel,setLoading,loading}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -142,12 +142,12 @@ const RoomsView = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([
     20000, 10000000,
   ]);
-  const [loading, setLoading] = useState(true);
+ 
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => setLoading(false), 2000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   const handleAmenityToggle = (index: number) => {
     const newList = [...amenityList];
@@ -542,35 +542,10 @@ const RoomsView = () => {
                 </Stack>
               </Stack>
             ) : (
-              /* DANH SÁCH THẬT – DỌC */
+            <>
+             {dataHotel.length>0?
               <Stack spacing={3}>
-                {[
-                  {
-                    name: "Hoàng gia Luxury hotel",
-                    location: "Cầu Giấy, Hà Nội",
-                    rating: 4.9,
-                    reviews: 100,
-                    price: 1600000,
-                    remaining: 2,
-                    tag: "Đông nhất",
-                  },
-                  {
-                    name: "Hoàng gia Luxury hotel",
-                    location: "Cầu Giấy, Hà Nội",
-                    rating: 4.9,
-                    reviews: 100,
-                    price: 1600000,
-                    remaining: null,
-                  },
-                  {
-                    name: "Hoàng gia Luxury hotel",
-                    location: "Cầu Giấy, Hà Nội",
-                    rating: 4.9,
-                    reviews: 100,
-                    price: 1600000,
-                    remaining: null,
-                  },
-                ].map((hotel, i) => (
+                {dataHotel.map((hotel, i) => (
                   <Paper
                     key={i}
                     elevation={0}
@@ -590,7 +565,7 @@ const RoomsView = () => {
                             position: "relative",
                             height: { xs: 200, sm: "200px" },
                           }}>
-                          {hotel.tag && (
+                          {hotel?.tag && (
                             <Box
                               sx={{
                                 position: "absolute",
@@ -605,12 +580,12 @@ const RoomsView = () => {
                                 fontWeight: 600,
                                 zIndex: 1,
                               }}>
-                              {hotel.tag}
+                              {hotel?.tag}
                             </Box>
                           )}
                           <img
                             src={image_room}
-                            alt={hotel.name}
+                            alt={JSON.parse(hotel.images)[0]}
                             style={{
                               width: "100%",
                               height: "100%",
@@ -630,13 +605,13 @@ const RoomsView = () => {
                           justifyContent='space-between'>
                           <Box>
                             <Typography fontWeight={600} fontSize='1.1rem'>
-                              {hotel.name}
+                              {JSON.parse(hotel.name).en}
                             </Typography>
                             <Typography
                               fontSize='0.85rem'
                               color='#999'
                               mt={0.5}>
-                              {hotel.location}
+                               {JSON.parse(hotel.address).en}
                             </Typography>
                             <Stack
                               direction='row'
@@ -655,7 +630,7 @@ const RoomsView = () => {
                                 {hotel.rating}
                               </Typography>
                               <Typography fontSize='0.8rem' color='#666'>
-                                ({hotel.reviews})
+                                ({hotel.reviews||100})
                               </Typography>
                             </Stack>
                           </Box>
@@ -683,7 +658,7 @@ const RoomsView = () => {
                                   color='#999'>
                                   Chỉ từ
                                 </Typography>{" "}
-                                {hotel.price.toLocaleString("vi-VN")}đ
+                                {hotel.price_min.toLocaleString("vi-VN")}đ
                               </Typography>
 
                               <Box
@@ -706,24 +681,26 @@ const RoomsView = () => {
                     </Grid>
                   </Paper>
                 ))}
-              </Stack>
-              // <Box
-              //   display={"flex"}
-              //   justifyContent={"center"}
-              //   height={"60vh"}
-              //   alignItems={"center"}>
-              //   <Box
-              //     display={"flex"}
-              //     justifyContent={"center"}
-              //     flexDirection={"column"}
-              //     alignItems={"center"}>
-              //     <img src={no_room} alt='' />
-              //     <Typography mt={3}>
-              //       Tệ thật, mình không thấy khách sạn vào phù hợp với tìm kiếm
-              //       của bạn.
-              //     </Typography>
-              //   </Box>
-              // </Box>
+              </Stack>:
+              <Box
+                display={"flex"}
+                justifyContent={"center"}
+                height={"60vh"}
+                alignItems={"center"}>
+                <Box
+                  display={"flex"}
+                  justifyContent={"center"}
+                  flexDirection={"column"}
+                  alignItems={"center"}>
+                  <img src={no_room} alt='' />
+                  <Typography mt={3}>
+                    Tệ thật, mình không thấy khách sạn vào phù hợp với tìm kiếm
+                    của bạn.
+                  </Typography>
+                </Box>
+              </Box>}
+            </>
+             
             )}
           </Grid>
         </Grid>

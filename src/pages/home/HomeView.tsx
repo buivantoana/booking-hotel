@@ -30,7 +30,7 @@ import PopularDestinations from "./PopularDestinations";
 import FirstTimeExplore from "./FirstTimeExplore";
 import SearchBarWithDropdown from "./SearchBarWithDropdown";
 
-const HomeView = () => {
+const HomeView = ({location}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -87,7 +87,7 @@ const HomeView = () => {
             Tìm khách sạn lý tưởng – Chạm một lần, ở thoải mái mãi
           </Typography>
         </Container>
-        <SearchBarWithDropdown />
+        <SearchBarWithDropdown location={location} />
       </Box>
 
       {/* Booking Options Section */}

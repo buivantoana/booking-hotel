@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -41,6 +41,7 @@ import dayjs, { Dayjs } from "dayjs";
 import in_time from "../../images/login.png";
 import out_time from "../../images/logout.png";
 import { useNavigate } from "react-router-dom";
+import { getLocation } from "../../service/hotel";
 // === POPUP CHUNG ===
 interface DateRangePickerProps {
   open: boolean;
@@ -52,24 +53,13 @@ interface DateRangePickerProps {
     time?: string,
     duration?: number
   ) => void;
-  bookingType: "hourly" | "nightly" | "daily";
+  bookingType: "hourly" | "overnight" | "daily";
   initialCheckIn?: Dayjs | null;
   initialCheckOut?: Dayjs | null;
   initialTime?: string | null;
   initialDuration?: number | null;
 }
-const allLocations = [
-  "Ba Đình",
-  "T.P Hồ Chí Minh",
-  "T.P Uông Bí",
-  "Hai Bà Trưng",
-  "Ba Vì",
-  "Hà Nội",
-  "Đà Nẵng",
-  "Cần Thơ",
-  "Hải Phòng",
-  "Nha Trang",
-];
+
 const DateRangePicker: React.FC<DateRangePickerProps> = ({
   open,
   anchorEl,
@@ -100,6 +90,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const hourIndex = hours.indexOf(time);
   const durationIndex = durations.indexOf(duration);
+  
 
   const handleApply = () => {
     if (bookingType === "hourly" && checkIn) {
@@ -122,7 +113,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   };
 
   const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
-    if (bookingType === "nightly") {
+    if (bookingType === "overnight") {
       setCheckIn(date);
       setCheckOut(date.add(1, "day"));
     } else if (bookingType === "daily") {
@@ -535,12 +526,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 };
 
 // === MAIN COMPONENT ===
-const SearchBarWithDropdown = () => {
+const SearchBarWithDropdown = ({location}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate()
   const [bookingType, setBookingType] = useState<
-    "hourly" | "nightly" | "daily"
+    "hourly" | "overnight" | "daily"
   >("hourly");
   const [searchValue, setSearchValue] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -555,10 +546,9 @@ const SearchBarWithDropdown = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
-
-  const filteredLocations = allLocations.filter((loc) =>
-    loc.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const filteredLocations = location.filter((loc) =>
+  loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
+);
 
   const handleLocationClick = (loc: string) => {
     setSearchValue(loc);
@@ -591,19 +581,16 @@ const SearchBarWithDropdown = () => {
 
   const handleSearch = () => {
     const searchParams = {
-      location: searchValue,
+      location: location.find((item)=>item.name.vi == searchValue)?.id,
       type: bookingType,
-      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : null, // string
-      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : null, // string
-      checkInTime: checkInTime,
-      duration: checkInDuration,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime: checkInTime || "",
+      duration: checkInDuration || "",
     };
-  
-    localStorage.setItem("filter_booking", JSON.stringify(searchParams));
+    const queryString = new URLSearchParams(searchParams).toString();
     
-    setTimeout(() => {
-      navigate("/rooms");
-    }, 300);
+    navigate(`/rooms?${queryString}`);
   };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -631,7 +618,7 @@ const SearchBarWithDropdown = () => {
                 }}>
                 {[
                   { v: "hourly", i: <AccessTime />, l: "Theo giờ" },
-                  { v: "nightly", i: <Nightlight />, l: "Qua đêm" },
+                  { v: "overnight", i: <Nightlight />, l: "Qua đêm" },
                   { v: "daily", i: <CalendarToday />, l: "Theo ngày" },
                 ].map((x) => (
                   <ToggleButton
@@ -747,7 +734,7 @@ const SearchBarWithDropdown = () => {
                         {filteredLocations.map((loc, i) => (
                           <ListItemButton
                             key={i}
-                            onClick={() => handleLocationClick(loc)}
+                            onClick={() => handleLocationClick(loc.name.vi)}
                             sx={{
                               px: 2,
                               py: 1.5,
@@ -763,7 +750,7 @@ const SearchBarWithDropdown = () => {
                               />
                             </ListItemIcon>
                             <ListItemText
-                              primary={loc}
+                              primary={loc.name.vi}
                               primaryTypographyProps={{
                                 fontSize: "0.95rem",
                                 color: "#333",
