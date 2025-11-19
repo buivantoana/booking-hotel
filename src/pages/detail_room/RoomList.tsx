@@ -292,7 +292,7 @@ const RoomCard = ({
 
         {/* TIỆN ÍCH */}
         <Stack direction='row' gap={1} flexWrap='wrap'>
-          {room.amenities.map((amenity) => (
+          {["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"].map((amenity) => (
             <Chip
               key={amenity}
               icon={amenityIcons[amenity]}
@@ -323,14 +323,14 @@ const RoomCard = ({
                   color={isLowStock ? "#d32f2f" : "#666"}>
                   {isLowStock
                     ? "Chỉ còn 1 phòng"
-                    : `Chỉ còn ${room.remaining} phòng`}
+                    : `Chỉ còn ${room.remaining|| 1} phòng`}
                 </Typography>
               )}
               <Typography
                 fontWeight={700}
                 fontSize='1.1rem'
                 color='rgba(234, 106, 0, 1)'>
-                {room.price.toLocaleString("vi-VN")}đ
+                {room.price_daily.toLocaleString("vi-VN")}đ
               </Typography>
             </Stack>
           )}
@@ -367,15 +367,12 @@ const RoomCard = ({
   );
 };
 
-const RoomList = () => {
-  const [loading, setLoading] = useState(true);
+const RoomList = ({loading ,data}) => {
+ 
   const [openModal, setOpenModal] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("123456789");
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
+ 
+  console.log("AAA data",data)
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
       <Stack spacing={3} sx={{}}>
@@ -500,8 +497,8 @@ const RoomList = () => {
             </Typography>
           </Box>
         </Modal>
-        <Grid container justifyContent={"space-between"}>
-          {rooms.map((room) => (
+        <Grid container justifyContent={data.length>=3 ?"space-between" : "start"} gap={data.length<=3?3:0}>
+          {data?.map((room) => (
             <Grid item xs={12} md={3.8} key={room.id}>
               <RoomCard
                 room={room}

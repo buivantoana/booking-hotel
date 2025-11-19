@@ -53,18 +53,14 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const DetailRoomView = () => {
+const DetailRoomView = ({detailHotel,loading}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  const [loading, setLoading] = useState(true);
+  
   const [tabValue, setTabValue] = useState(0);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -96,12 +92,12 @@ const DetailRoomView = () => {
                 fontWeight={700}
                 fontSize={{ xs: "1.25rem", md: "1.5rem" }}
                 color='#333'>
-                Hoàng gia Luxury hotel
+               {detailHotel?.hotel?.name?.en}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />
                 <Typography fontSize='0.9rem' color='#666'>
-                  Cầu Giấy, Hà Nội
+                {detailHotel?.hotel?.address?.en}
                 </Typography>
                 <Typography
                   fontSize='0.85rem'
@@ -117,10 +113,10 @@ const DetailRoomView = () => {
                     fontWeight={600}
                     color='#98b720'
                     fontSize='0.9rem'>
-                    4.9
+                    {detailHotel?.hotel?.rating}
                   </Typography>
                   <Typography fontSize='0.85rem' color='#666'>
-                    (100 reviews)
+                    ({detailHotel?.reviews?.length || 0} reviews)
                   </Typography>
                 </Stack>
                 <Box sx={{ flex: 1 }} />
@@ -216,7 +212,7 @@ const DetailRoomView = () => {
                       position: "relative",
                     }}>
                     <img
-                      src={imgMain}
+                      src={detailHotel?.hotel?.images?.[0]}
                       alt='main'
                       style={{
                         width: "100%",
@@ -230,7 +226,7 @@ const DetailRoomView = () => {
                 {/* 4 ảnh nhỏ */}
                 <Grid item xs={12} md={6}>
                   <Grid container spacing={2}>
-                    {[img1, img2, img3, img4].map((img, i) => (
+                    {detailHotel?.hotel?.images?.slice(1, 5)?.map((img, i) => (
                       <Grid item xs={6} key={i}>
                         <Box
                           sx={{
@@ -309,8 +305,8 @@ const DetailRoomView = () => {
             )}
           </TabPanel> */}
         </Stack>
-        <RoomList />
-        <HotelDetailInfo />
+        <RoomList loading={loading} data={detailHotel?.room_types || []} />
+        <HotelDetailInfo info={detailHotel?.hotel||{}} reviews={detailHotel?.reviews||[]} />
         <ListRoom title={"Ưu đãi độc quyền"} isDetail={true} />
       </Container>
     </Box>

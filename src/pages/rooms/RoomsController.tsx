@@ -13,17 +13,12 @@ const RoomsController = (props: Props) => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [page,setPage] = useState(1);
+  const [total,setTotal] = useState(1);
   const [loading, setLoading] = useState(true);
   const limit = 2
   useEffect(() => {
-    // Lấy query từ URL
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
-    const checkInTimeParam = searchParams.get("checkInTime") || "10:00";
-    const durationParam = searchParams.get("duration") || 2;
-    const checkInParam = searchParams.get("checkIn");
-    const checkOutParam = searchParams.get("checkOut");
-  
     setQueryHotel({
       city:locationParam,
       rent_types:typeParam,
@@ -31,7 +26,7 @@ const RoomsController = (props: Props) => {
       page
     })
   
-  }, [location.pathname, searchParams]);
+  }, [location.pathname, searchParams,page]);
   useEffect(()=>{
     (async()=>{
       try {
@@ -56,13 +51,27 @@ const RoomsController = (props: Props) => {
       let result = await searchHotel(queryHotel)
       if(result?.hotels?.length>0){
         setDataHotel(result?.hotels);
+        setTotal(result?.total_pages)
       }
     } catch (error) {
       console.log(error)
     }
     setLoading(false)
   }
-  return <RoomsView dataHotel={dataHotel} loading={loading} setLoading={setLoading} />;
+  const getHotelLatLon = async (query)=>{
+    setLoading(true)
+    try {
+      let result = await searchHotel(query)
+      if(result?.hotels){
+        setDataHotel(result?.hotels);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    setLoading(false)
+  }
+  console.log("AAAAA page",page)
+  return <RoomsView dataHotel={dataHotel} getHotel={getHotel} loading={loading} total={total} setPage={setPage} page={page} getHotelLatLon={getHotelLatLon} setLoading={setLoading} />;
 };
 
 export default RoomsController;

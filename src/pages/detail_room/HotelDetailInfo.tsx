@@ -61,7 +61,7 @@ const reviews: Review[] = [
   },
 ];
 
-const HotelDetailInfo = () => {
+const HotelDetailInfo = ({info,reviews}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -95,10 +95,7 @@ const HotelDetailInfo = () => {
             Giới thiệu khách sạn
           </Typography>
           <Typography fontSize='0.95rem' color='#666' lineHeight={1.7}>
-            It is a long established fact that a reader will be distracted by
-            the readable content of a page when looking at its layout. The point
-            of using Lorem Ipsum is that it has a more-or-less normal
-            distribution of letters...{" "}
+            {info?.description?.vi}
             <Typography
               component='span'
               color='#98b720'
@@ -254,8 +251,8 @@ const HotelDetailInfo = () => {
           {/* DANH SÁCH REVIEW */}
           <Grid container justifyContent={"space-between"}>
             {reviews.map((review) => {
-              const isExpanded = expandedReviews.includes(review.id);
-              const shortContent = review.content.slice(0, 120) + "...";
+              const isExpanded = expandedReviews.includes(review.created_at);
+              const shortContent = review.comment.slice(0, 120) + "...";
               return (
                 <Grid item xs={12} md={3.8} key={review.id}>
                   <Paper
@@ -272,21 +269,7 @@ const HotelDetailInfo = () => {
                         spacing={1.5}
                         justifyContent={"space-between"}
                         alignItems='center'>
-                        <Box
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            borderRadius: "50%",
-                            bgcolor: "#eee",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 600,
-                            fontSize: "0.8rem",
-                            color: "#666",
-                          }}>
-                          T
-                        </Box>
+                        <img src={review?.avatar} width={40} height={40} style={{borderRadius:"50%"}} alt="" />
                         <Box
                           display={"flex"}
                           width={"90%"}
@@ -296,15 +279,15 @@ const HotelDetailInfo = () => {
                               fontWeight={600}
                               fontSize='0.95rem'
                               color='#333'>
-                              {review.author}
+                              {review.user_name}
                             </Typography>
                             <Stack direction='row' spacing={0.5}>
-                              {renderStars(review.rating)}
+                              {renderStars(review.rate)}
                             </Stack>
                           </Box>
 
                           <Typography fontSize='0.75rem' color='#999'>
-                            {review.date}
+                            {review.created_at}
                           </Typography>
                         </Box>
                       </Stack>
@@ -320,10 +303,10 @@ const HotelDetailInfo = () => {
                           WebkitLineClamp: isExpanded ? "unset" : 3,
                           WebkitBoxOrient: "vertical",
                         }}>
-                        {isExpanded ? review.content : shortContent}
+                        {isExpanded ? review.comment : shortContent}
                       </Typography>
 
-                      {review.content.length > 120 && (
+                      {review.comment.length > 120 && (
                         <Typography
                           fontSize='0.85rem'
                           color='#98b720'
@@ -331,7 +314,7 @@ const HotelDetailInfo = () => {
                             cursor: "pointer",
                             textDecoration: "underline",
                           }}
-                          onClick={() => toggleExpand(review.id)}>
+                          onClick={() => toggleExpand(review.created_at)}>
                           {isExpanded ? "Ẩn bớt" : "Xem thêm"}
                         </Typography>
                       )}
@@ -526,33 +509,20 @@ const HotelDetailInfo = () => {
                   elevation={0}
                   sx={{ p: 3, borderRadius: "12px", border: "1px solid #eee" }}>
                   <Stack direction='row' spacing={2} alignItems='center' mb={1}>
-                    <Box
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        bgcolor: "#eee",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 600,
-                        fontSize: "0.8rem",
-                      }}>
-                      T
-                    </Box>
+                    <img src={review?.avatar} width={40} height={40} style={{borderRadius:"50%"}} alt="" />
                     <Box>
-                      <Typography fontWeight={600}>{review.author}</Typography>
+                      <Typography fontWeight={600}>{review.user_name}</Typography>
                       <Typography fontSize='0.8rem' color='#999'>
                         {review.date}
                       </Typography>
                     </Box>
                     <Box sx={{ flex: 1 }} />
                     <Stack direction='row' spacing={0.3}>
-                      {renderStars(review.rating)}
+                      {renderStars(review.rate)}
                     </Stack>
                   </Stack>
                   <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
-                    {review.content}
+                    {review.comment}
                   </Typography>
                 </Paper>
               ))}
