@@ -48,14 +48,15 @@ const Header = () => {
   };
 
   return (
-    <Box bgcolor={"white"} p={0}>
+    <Box bgcolor={"white"} sx={{
+     
+    }} p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
           elevation={0}
           sx={{
             bgcolor: "white",
-            borderBottom: "1px solid #eee",
             py: 1,
             px: 0,
           }}>

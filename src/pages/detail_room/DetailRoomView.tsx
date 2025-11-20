@@ -305,7 +305,7 @@ const DetailRoomView = ({detailHotel,loading}) => {
             )}
           </TabPanel> */}
         </Stack>
-        <RoomList loading={loading} data={detailHotel?.room_types || []} />
+        <RoomList loading={loading} hotel={detailHotel?.hotel || {}} data={detailHotel?.room_types || []} />
         <HotelDetailInfo info={detailHotel?.hotel||{}} reviews={detailHotel?.reviews||[]} />
         <ListRoom title={"Ưu đãi độc quyền"} isDetail={true} />
       </Container>

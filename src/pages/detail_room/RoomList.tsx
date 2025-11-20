@@ -29,11 +29,8 @@ import {
 import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-// Mock ảnh
-import img1 from "../../images/Rectangle 13.png";
-import img2 from "../../images/Rectangle 14.png";
-import img3 from "../../images/Rectangle 7.png";
 import vn from "../../images/VN - Vietnam.png";
+import { useNavigate } from "react-router-dom";
 interface Room {
   id: number;
   name: string;
@@ -44,35 +41,6 @@ interface Room {
   remaining: number | null; // null = hết phòng
 }
 
-const rooms: Room[] = [
-  {
-    id: 1,
-    name: "Deluxe room",
-    type: "1 Giường đôi",
-    images: [img1, img2, img3, img1],
-    amenities: ["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"],
-    price: 160000,
-    remaining: 3,
-  },
-  {
-    id: 2,
-    name: "Deluxe room",
-    type: "1 Giường đôi",
-    images: [img2, img3, img1, img2],
-    amenities: ["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"],
-    price: 160000,
-    remaining: 1,
-  },
-  {
-    id: 3,
-    name: "Deluxe room",
-    type: "1 Giường đôi",
-    images: [img3, img1, img2, img3],
-    amenities: ["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"],
-    price: 160000,
-    remaining: null,
-  },
-];
 
 const amenityIcons: Record<string, React.ReactNode> = {
   Wifi: <WifiIcon sx={{ fontSize: 16 }} />,
@@ -86,12 +54,15 @@ const RoomCard = ({
   room,
   loading,
   setOpenModal,
+  setSelectedRoom,
+  setOpenDetail
 }: {
   room: Room;
   loading: boolean;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const sliderRef = useRef<any>(null);
   const settings = {
     dots: true,
@@ -184,6 +155,7 @@ const RoomCard = ({
         position: "relative",
       }}>
       {/* HẾT PHÒNG BADGE */}
+
       {isSoldOut && (
         <Box
           sx={{
@@ -323,7 +295,7 @@ const RoomCard = ({
                   color={isLowStock ? "#d32f2f" : "#666"}>
                   {isLowStock
                     ? "Chỉ còn 1 phòng"
-                    : `Chỉ còn ${room.remaining|| 1} phòng`}
+                    : `Chỉ còn ${room.remaining || 1} phòng`}
                 </Typography>
               )}
               <Typography
@@ -338,7 +310,10 @@ const RoomCard = ({
           {!isSoldOut && (
             <Button
               variant='contained'
-              onClick={() => setOpenModal(true)}
+              onClick={() => {
+                setSelectedRoom(room)
+                setOpenDetail(true)
+              }}
               sx={{
                 bgcolor: "#98b720",
                 color: "white",
@@ -367,12 +342,13 @@ const RoomCard = ({
   );
 };
 
-const RoomList = ({loading ,data}) => {
- 
+const RoomList = ({ loading, data,hotel }) => {
+
   const [openModal, setOpenModal] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("123456789");
- 
-  console.log("AAA data",data)
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [openDetail, setOpenDetail] = useState(false)
+  console.log("AAA data", data)
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
       <Stack spacing={3} sx={{}}>
@@ -497,13 +473,17 @@ const RoomList = ({loading ,data}) => {
             </Typography>
           </Box>
         </Modal>
-        <Grid container justifyContent={data.length>=3 ?"space-between" : "start"} gap={data.length<=3?3:0}>
+        <RoomDetailModal open={openDetail} hotel={hotel} onClose={() => setOpenDetail(false)} room={selectedRoom} />
+        <Grid container justifyContent={data.length >= 3 ? "space-between" : "start"} gap={data.length <= 3 ? 3 : 0}>
           {data?.map((room) => (
             <Grid item xs={12} md={3.8} key={room.id}>
               <RoomCard
                 room={room}
                 setOpenModal={setOpenModal}
                 loading={loading}
+                setOpenDetail={setOpenDetail}
+                setSelectedRoom={setSelectedRoom}
+
               />
             </Grid>
           ))}
@@ -514,3 +494,304 @@ const RoomList = ({loading ,data}) => {
 };
 
 export default RoomList;
+
+
+
+
+const RoomDetailModal = ({ open, onClose, room,hotel }) => {
+  const sliderRef = useRef<any>(null);
+  const thumbRef = useRef<any>(null);
+  const navigate = useNavigate()
+
+  const [navMain, setNavMain] = useState(null);
+  const [navThumb, setNavThumb] = useState(null);
+
+  const sliderMain = useRef();
+  const sliderThumb = useRef();
+
+  const settingsMain = {
+    asNavFor: navThumb,
+    arrows: false,
+    infinite: true,
+  };
+
+  const settingsThumb = {
+    asNavFor: navMain,
+    slidesToShow: 4,
+    swipeToSlide: true,
+    focusOnSelect: true,
+    centerMode: false,
+  };
+
+  if (!room) return null;
+
+  const handleBooking = ()=>{
+    if(localStorage.getItem("booking")){
+      localStorage.setItem("booking",JSON.stringify({
+        ...JSON.parse(localStorage.getItem("booking")),
+        hotel_id:hotel.id,
+        rooms:[
+          {
+            quantity:1,
+            room_type_id:room.id
+          }
+        ],
+        price:room.price_daily,
+        address:hotel?.address?.en,
+        name:hotel?.name?.en,
+        image:hotel?.images?.[0]
+      }))
+      setTimeout(()=>{
+        navigate("/check-out")
+      },300)
+    }
+  }
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box
+        className="hidden-add-voice"
+        sx={{
+          width: { xs: "95%", md: "1000px" },
+
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          bgcolor: "white",
+          borderRadius: "18px",
+          transform: "translate(-50%, -50%)",
+          p: { xs: 2, md: 3 },
+
+
+          height: "max-content"
+        }}
+      >
+        {/* HEADER */}
+        <Stack direction="row" justifyContent="space-between" mb={2}>
+          <Typography fontSize="1.4rem" fontWeight={700}>
+            {room.name}
+          </Typography>
+
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+
+        <Stack direction={{ xs: "column", md: "row" }} gap={3}>
+          {/* LEFT: SLIDER */}
+          <Box width={"60%"} position="relative">
+            <Box mb={1}>
+              <Slider
+                {...settingsMain}
+                ref={(slider) => {
+                  sliderMain.current = slider;
+                  setNavMain(slider);
+                }}
+              >
+                {room.images.map((img, i) => (<Box height={"360px !important"}>
+
+                  <img
+                    key={i}
+                    src={img}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: 12,
+                    }}
+                  />
+                </Box>
+
+                ))}
+              </Slider>
+
+              {/* CUSTOM ARROWS */}
+              <IconButton
+                onClick={() => sliderMain.current?.slickPrev()}
+                sx={{
+                  position: "absolute",
+                  top: "40%",
+                  left: 10,
+                  bgcolor: "white",
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  transform: "translateY(-50%)",
+                  boxShadow: 2,
+                  transition: "all 0.3s ease", // mượt khi hover
+
+                  // Hover effect
+                  "&:hover": {
+                    bgcolor: "#98b720",        // nền chuyển xanh
+                    boxShadow: 6,              // bóng đậm hơn tí
+
+                    "& .MuiSvgIcon-root": {    // đổi màu icon khi hover
+                      color: "white !important",
+                    },
+                  },
+
+                  // Icon mặc định
+                  "& .MuiSvgIcon-root": {
+                    fontSize: 16,
+                    color: "#333",
+                    transition: "color 0.3s ease",
+                  },
+                }}
+              >
+                <ArrowBackIosNewIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+
+              <IconButton
+                onClick={() => sliderMain.current?.slickNext()}
+                sx={{
+                  position: "absolute",
+                  top: "40%",
+                  right: 10,
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  bgcolor: "white",
+                  boxShadow: 2,
+                  transform: "translateY(-50%)",
+                  transition: "all 0.3s ease", // mượt khi hover
+
+                  // Hover effect
+                  "&:hover": {
+                    bgcolor: "#98b720",        // nền chuyển xanh
+                    boxShadow: 6,              // bóng đậm hơn tí
+
+                    "& .MuiSvgIcon-root": {    // đổi màu icon khi hover
+                      color: "white !important",
+                    },
+                  },
+
+                  // Icon mặc định
+                  "& .MuiSvgIcon-root": {
+                    fontSize: 16,
+                    color: "#333",
+                    transition: "color 0.3s ease",
+                  },
+                }}
+              >
+                <ArrowForwardIosIcon />
+              </IconButton>
+            </Box>
+
+            {/* Thumbnail */}
+            <Box sx={{
+              '.slick-current img': {
+                outline: '2px solid #98b720',
+                outlineOffset: '-2px', // kéo viền vào trong đúng 2px → trông như border trong
+                opacity: 1,
+                // optional: thêm viền ngoài nếu muốn đậm hơn
+              },
+              // Đảm bảo tất cả ảnh đều có kích thước cố định và không bị co giãn do border/outline
+              img: {
+                display: 'block',
+                width: '100%',
+                height: '100px',
+                objectFit: 'cover',
+                borderRadius: 1,
+                opacity: 0.6,
+                transition: 'all 0.3s ease',
+                boxSizing: 'border-box',
+              }
+            }}>
+              <Slider
+                {...settingsThumb}
+                ref={(slider) => {
+                  sliderThumb.current = slider;
+                  setNavThumb(slider);
+                }}
+              >
+                {room.images.map((img, i) => (
+                  <Box width={"95% !important"} height={"100px"}>
+
+                    <img
+                      key={i}
+                      src={img}
+
+                    />
+                  </Box>
+                ))}
+              </Slider>
+            </Box>
+          </Box>
+          {/* RIGHT: ROOM INFO */}
+          <Box width={"37%"}>
+            <Typography fontWeight={600} fontSize="1.1rem" mb={1}>
+              Thông tin phòng
+            </Typography>
+            <Typography color="gray" fontSize="0.9rem" mb={2}>
+              Giường king-size (1m8 × 2m) – 25m² – hướng vườn
+            </Typography>
+
+            <Typography fontWeight={600} mb={1}>
+              Quyền lợi đặt phòng
+            </Typography>
+            <Typography color="gray" fontSize="0.9rem" mb={2}>
+              Tất cả phương thức thanh toán
+            </Typography>
+
+            <Typography fontWeight={600} mb={1}>
+              Tiện ích
+            </Typography>
+
+            <Stack direction='row' gap={1} flexWrap='wrap'>
+              {["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"].map((amenity) => (
+                <Chip
+                  key={amenity}
+                  icon={amenityIcons[amenity]}
+                  label={amenity}
+                  size='small'
+                  sx={{
+                    bgcolor: "#f0f8f0",
+                    color: "#98b720",
+                    fontSize: "0.75rem",
+                    height: 32,
+                    "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
+                  }}
+                />
+              ))}
+            </Stack>
+
+            <Typography fontWeight={600} my={2}>
+              Mô tả phòng
+            </Typography>
+            <Typography color="gray" fontSize="0.9rem" mb={3}>
+              It is a long established fact that a reader will be distracted by
+              the readable content of a page…
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            {/* PRICE + BUTTON */}
+            <Stack direction="row" alignItems="center" justifyContent={"space-between"} gap={2}>
+              <Typography
+                fontWeight={700}
+                color="rgba(234, 106, 0, 1)"
+                fontSize="1.3rem"
+              >
+                {room?.price_daily?.toLocaleString("vi-VN")}đ <Typography variant="span" fontSize={"14px"} color="#5D6679" >/2 giờ</Typography>
+              </Typography>
+
+              <Button
+                onClick={handleBooking}
+                variant="contained"
+                sx={{
+                  bgcolor: "#98b720",
+                  color: "white",
+                  borderRadius: "50px",
+                  px: 3,
+                  py: 1.2,
+                  textTransform: "none",
+                }}
+              >
+                Đặt phòng
+              </Button>
+            </Stack>
+          </Box>
+        </Stack>
+      </Box>
+    </Modal>
+  );
+};
+
+

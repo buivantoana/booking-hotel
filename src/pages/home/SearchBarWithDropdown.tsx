@@ -588,9 +588,19 @@ const SearchBarWithDropdown = ({location}) => {
       checkInTime: checkInTime || "",
       duration: checkInDuration || "",
     };
+    localStorage.setItem("booking",JSON.stringify({
+      location: location.find((item)=>item.name.vi == searchValue)?.id,
+      type: bookingType,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime: checkInTime || "",
+      duration: checkInDuration || "",
+    }))
     const queryString = new URLSearchParams(searchParams).toString();
     
-    navigate(`/rooms?${queryString}`);
+    setTimeout(()=>{
+      navigate(`/rooms?${queryString}`);
+    },300)
   };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

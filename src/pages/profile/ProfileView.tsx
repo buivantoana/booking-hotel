@@ -42,7 +42,7 @@ import success from "../../images/15. Hotel.png";
 import Account from "./Account";
 import AccountSettingsPage from "./AccountSetting";
 import MyBookingsPage from "./MyBookingsPage";
-const ProfileView = () => {
+const ProfileView = ({historyBooking}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -445,7 +445,7 @@ const ProfileView = () => {
       </Stack>
     </Stack>
   );
-
+  console.log("AAAA historyBooking",historyBooking)
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
       <Dialog
@@ -548,7 +548,7 @@ const ProfileView = () => {
               {activeMenu == "Hồ sơ của tôi" && <Account />}
               {activeMenu == "Thiết lập tài khoản" && <AccountSettingsPage />}
               {activeMenu == "Đặt phòng của tôi" && !detailBooking && (
-                <MyBookingsPage setDetailBooking={setDetailBooking} />
+                <MyBookingsPage historyBooking={historyBooking} setDetailBooking={setDetailBooking} />
               )}
             </Grid>
           </Grid>

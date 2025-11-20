@@ -32,18 +32,8 @@ import {
 import { DateCalendar, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-
-const allLocations = [
-  "Hà Nội",
-  "Đà Nẵng",
-  "TP. Hồ Chí Minh",
-  "Cầu Giấy, Hà Nội",
-  "Hai Bà Trưng, Hà Nội",
-  "Nha Trang",
-  "Hải Phòng",
-];
 
 // === DROPDOWN CHỌN LOẠI (giống ảnh) ===
 const BookingTypeDropdown: React.FC<{
@@ -611,7 +601,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const typeRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
-
+  const navigate = useNavigate()
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -633,7 +623,33 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     if (bookingType === "overnight") return "Qua đêm";
     return "Qua ngày";
   };
-  const isLocationSelected = allLocations.includes(searchValue);
+  const selectedLocation = locationAddress.find(
+    loc => loc.name.vi === searchValue
+  );
+  const isLocationSelected = !!selectedLocation;
+  const handleSearch = () => {
+    const searchParams = {
+      location: locationAddress.find((item)=>item.name.vi == searchValue)?.id,
+      type: bookingType,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime: checkInTime || "",
+      duration: checkInDuration || "",
+    };
+    localStorage.setItem("booking",JSON.stringify({
+      location: locationAddress.find((item)=>item.name.vi == searchValue)?.id,
+      type: bookingType,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime: checkInTime || "",
+      duration: checkInDuration || "",
+    }))
+    const queryString = new URLSearchParams(searchParams).toString();
+    
+    setTimeout(()=>{
+      navigate(`/rooms?${queryString}`);
+    },300)
+  };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={(e: any) => {
@@ -749,6 +765,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 {/* Tìm kiếm */}
                 <Button
                   variant="contained"
+                  onClick={handleSearch}
                   size="large"
                   sx={{
                     bgcolor: "#98b720",
