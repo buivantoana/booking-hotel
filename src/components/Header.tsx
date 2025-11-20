@@ -27,30 +27,29 @@ const Header = () => {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const [locationAddress,setLocationAddress] = useState([])
-  
+  const [locationAddress, setLocationAddress] = useState([]);
 
-  useEffect(()=>{
-    (async()=>{
+  useEffect(() => {
+    (async () => {
       try {
-        let result = await getLocation();
-        console.log("AAA location",result)
-        if(result?.locations){
-          setLocationAddress(result?.locations)
+        if (location.pathname == "/rooms") {
+          let result = await getLocation();
+          console.log("AAA location", result);
+          if (result?.locations) {
+            setLocationAddress(result?.locations);
+          }
         }
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-    })()
-  },[])
+    })();
+  }, []);
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
   return (
-    <Box bgcolor={"white"} sx={{
-     
-    }} p={0}>
+    <Box bgcolor={"white"} sx={{}} p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
@@ -98,7 +97,9 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {location.pathname == "/rooms" && <SearchBarWithDropdownHeader locationAddress={locationAddress} />}
+            {location.pathname == "/rooms" && (
+              <SearchBarWithDropdownHeader locationAddress={locationAddress} />
+            )}
             {/* RIGHT: AVATAR */}
             <Box>
               <UserDropdownMenuV2 />

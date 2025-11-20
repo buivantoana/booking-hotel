@@ -39,7 +39,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import building from "../../images/building.png";
 import remove from "../../images/delete.png";
 import { format } from "date-fns";
-import { reviewBooking } from "../../service/booking";
+import { deleteBooking, reviewBooking } from "../../service/booking";
+import { toast } from "react-toastify";
 
 // ==================== HELPER FUNCTIONS ====================
 const parseJsonField = (field: string) => {
@@ -70,7 +71,7 @@ const getThumbnail = (booking: any) => {
     try {
       const arr = JSON.parse(imagesStr.replace(/\\"/g, '"'));
       return arr[0] || "";
-    } catch { }
+    } catch {}
   }
   return "";
 };
@@ -92,7 +93,11 @@ const getBookingStatus = (booking: any) => {
   if (paymentStatus === "paid") {
     return { label: "Hoàn thành", color: "#1A9A50", bg: "#E8F5E9" };
   }
-  if (paymentStatus === "failed" || paymentStatus === "pending" || bookingStatus === "pending") {
+  if (
+    paymentStatus === "failed" ||
+    paymentStatus === "pending" ||
+    bookingStatus === "pending"
+  ) {
     return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
   }
   return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
@@ -102,6 +107,8 @@ const getBookingStatus = (booking: any) => {
 const BookingCard = ({
   booking,
   setDetailBooking,
+  getHistoryBooking,
+  hastag,
 }: {
   booking: any;
 }) => {
@@ -115,11 +122,25 @@ const BookingCard = ({
   const statusConfig = getBookingStatus(booking);
   const hotelName = parseJsonField(booking.hotel_name);
   const roomCount = booking.rooms.length;
-  const timeDisplay = `${formatDateTime(booking.check_in)} - ${formatDateTime(booking.check_out)}`;
+  const timeDisplay = `${formatDateTime(booking.check_in)} - ${formatDateTime(
+    booking.check_out
+  )}`;
   const isCompleted = statusConfig.label === "Hoàn thành";
   const isWaitingPayment = statusConfig.label === "Chờ thanh toán";
   const isCancelled = statusConfig.label === "Đã hủy";
-  console.log("AAA booking ",booking)
+  console.log("AAA booking ", booking);
+  const handleDeleteBooking = async (id) => {
+    try {
+      let result = await deleteBooking(id);
+      if (result.code == "OK") {
+        toast.success(result.message);
+        getHistoryBooking();
+        setDeleteDialogOpen(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <ReviewModal
@@ -129,6 +150,7 @@ const BookingCard = ({
         roomType={`${roomCount} phòng`}
         bookingTime={timeDisplay}
         id={booking.booking_id}
+        hastag={hastag}
       />
 
       <Box
@@ -139,18 +161,20 @@ const BookingCard = ({
           boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
           mb: 2,
           border: "1px solid #eee",
-        }}
-      >
+        }}>
         {/* Header */}
         <Box sx={{ px: 2.5, pt: 3 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography fontSize="13px" color="#666">
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'>
+            <Typography fontSize='13px' color='#666'>
               Mã đặt phòng: {booking.booking_code}
             </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
+            <Box display='flex' alignItems='center' gap={2}>
               <Chip
                 label={statusConfig.label}
-                size="small"
+                size='small'
                 sx={{
                   bgcolor: statusConfig.bg,
                   color: statusConfig.color,
@@ -160,7 +184,9 @@ const BookingCard = ({
                   borderRadius: "13px",
                 }}
               />
-              <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} size="small">
+              <IconButton
+                onClick={(e) => setMenuAnchor(e.currentTarget)}
+                size='small'>
                 <MoreVertIcon sx={{ color: "rgba(93, 102, 121, 1)" }} />
               </IconButton>
             </Box>
@@ -172,13 +198,12 @@ const BookingCard = ({
           <Stack
             direction={isMobile ? "column" : "row"}
             spacing={isMobile ? 2 : 3}
-            alignItems={isMobile ? "stretch" : "center"}
-          >
+            alignItems={isMobile ? "stretch" : "center"}>
             {/* Ảnh */}
             <Avatar
-              variant="rounded"
+              variant='rounded'
               src={getThumbnail(booking)}
-              alt="hotel"
+              alt='hotel'
               sx={{
                 width: isMobile ? "100%" : 140,
                 height: isMobile ? 120 : 105,
@@ -189,33 +214,42 @@ const BookingCard = ({
 
             {/* Thông tin */}
             <Box flex={1}>
-              <Typography fontSize="16px" fontWeight={700} lineHeight={1.3} mb={0.5}>
+              <Typography
+                fontSize='16px'
+                fontWeight={700}
+                lineHeight={1.3}
+                mb={0.5}>
                 {hotelName}
               </Typography>
-              <Typography fontSize="15px" fontWeight={500} color="#333" mb={1}>
-                {roomCount} phòng {booking.rent_type === "hourly" ? "(theo giờ)" : ""}
+              <Typography fontSize='15px' fontWeight={500} color='#333' mb={1}>
+                {roomCount} phòng{" "}
+                {booking.rent_type === "hourly" ? "(theo giờ)" : ""}
               </Typography>
-              <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack direction='row' alignItems='center' spacing={1}>
                 <AccessTimeIcon sx={{ fontSize: 16, color: "#999" }} />
-                <Typography fontSize="13px" color="#666">
+                <Typography fontSize='13px' color='#666'>
                   {timeDisplay}
                 </Typography>
               </Stack>
               {booking.note && (
-                <Typography fontSize="12px" color="#888" mt={1}>
+                <Typography fontSize='12px' color='#888' mt={1}>
                   Ghi chú: {booking.note}
                 </Typography>
               )}
             </Box>
 
             {/* Giá + hành động */}
-            <Box textAlign="right">
-              <Typography fontSize="18px" fontWeight={700} color="#FF6D00">
+            <Box textAlign='right'>
+              <Typography fontSize='18px' fontWeight={700} color='#FF6D00'>
                 {formatVND(booking.total_price)}
               </Typography>
-              <Stack direction="row" alignItems="center" justifyContent="flex-end" mb={2}>
+              <Stack
+                direction='row'
+                alignItems='center'
+                justifyContent='flex-end'
+                mb={2}>
                 <Box
-                  component="span"
+                  component='span'
                   sx={{
                     color: "rgba(93, 102, 121, 1)",
                     py: 0.5,
@@ -224,33 +258,35 @@ const BookingCard = ({
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
-                  }}
-                >
-                  <img src={building} alt="" style={{ height: 16 }} />
-                  {booking.payments[0]?.method === "momo" ? "Thanh toán MoMo" : "Thanh toán VNPay"}
+                  }}>
+                  <img src={building} alt='' style={{ height: 16 }} />
+                  {booking.payments[0]?.method === "momo"
+                    ? "Thanh toán MoMo"
+                    : "Thanh toán VNPay"}
                 </Box>
               </Stack>
               <Typography
                 onClick={() => setDetailBooking(booking)}
-                fontSize="14px"
+                fontSize='14px'
                 sx={{ textDecoration: "underline", cursor: "pointer" }}
-                color="rgba(72, 80, 94, 1)"
-              >
+                color='rgba(72, 80, 94, 1)'>
                 Chi tiết
               </Typography>
             </Box>
           </Stack>
 
           {/* Divider */}
-          {(isCompleted || isWaitingPayment || isCancelled) && <Divider sx={{ my: 2.5 }} />}
+          {(isCompleted || isWaitingPayment || isCancelled) && (
+            <Divider sx={{ my: 2.5 }} />
+          )}
 
           {/* Nút hành động */}
-          <Stack direction="row" justifyContent="flex-end" spacing={1}>
+          <Stack direction='row' justifyContent='flex-end' spacing={1}>
             {isCompleted && (
               <>
                 <Button
                   onClick={() => setReviewModalOpen(true)}
-                  variant="outlined"
+                  variant='outlined'
                   sx={{
                     borderRadius: "24px",
                     textTransform: "none",
@@ -258,20 +294,18 @@ const BookingCard = ({
                     color: "#666",
                     borderColor: "#ddd",
                     minWidth: 120,
-                  }}
-                >
+                  }}>
                   Đánh giá
                 </Button>
                 <Button
-                  variant="contained"
+                  variant='contained'
                   sx={{
                     borderRadius: "24px",
                     textTransform: "none",
                     minWidth: 120,
                     bgcolor: "#98b720",
                     "&:hover": { bgcolor: "#8ab020" },
-                  }}
-                >
+                  }}>
                   Đặt lại
                 </Button>
               </>
@@ -279,15 +313,14 @@ const BookingCard = ({
 
             {(isWaitingPayment || isCancelled) && (
               <Button
-                variant="contained"
+                variant='contained'
                 sx={{
                   borderRadius: "24px",
                   textTransform: "none",
                   minWidth: 120,
                   bgcolor: "#98b720",
                   "&:hover": { bgcolor: "#8ab020" },
-                }}
-              >
+                }}>
                 {isWaitingPayment ? "Thanh toán" : "Đặt lại"}
               </Button>
             )}
@@ -299,30 +332,36 @@ const BookingCard = ({
       <Menu
         anchorEl={menuAnchor}
         anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
+          vertical: "bottom",
+          horizontal: "right",
         }}
         transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
+          vertical: "top",
+          horizontal: "right",
         }}
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
         PaperProps={{
-          sx: { borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.12)", mt: 1,padding:0 },
-        }}
-      >
+          sx: {
+            borderRadius: "12px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+            mt: 1,
+            padding: 0,
+          },
+        }}>
         <MenuItem
           onClick={() => {
             setMenuAnchor(null);
             setDeleteDialogOpen(true);
-          }}
-        >
+          }}>
           <ListItemIcon>
-            <DeleteIcon fontSize="small" sx={{ color: "rgba(93, 102, 121, 1)" }} />
+            <DeleteIcon
+              fontSize='small'
+              sx={{ color: "rgba(93, 102, 121, 1)" }}
+            />
           </ListItemIcon>
           <ListItemText>
-            <Typography fontSize="14px" color="rgba(93, 102, 121, 1)">
+            <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
               Xóa lịch sử đặt phòng
             </Typography>
           </ListItemText>
@@ -330,7 +369,12 @@ const BookingCard = ({
       </Menu>
 
       {/* Dialog xóa */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: "16px" } }}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
         <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
           <Box sx={{ position: "relative" }}>
             <Box
@@ -344,51 +388,57 @@ const BookingCard = ({
                 justifyContent: "center",
                 mx: "auto",
                 mb: 2,
-              }}
-            >
-              <img src={remove} alt="" />
+              }}>
+              <img src={remove} alt='' />
             </Box>
-            <IconButton onClick={() => setDeleteDialogOpen(false)} sx={{ position: "absolute", top: -40, left: -30 }}>
+            <IconButton
+              onClick={() => setDeleteDialogOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
-          <Typography fontWeight={600} fontSize="18px" mb={1}>
+          <Typography fontWeight={600} fontSize='18px' mb={1}>
             Xóa lịch sử đặt phòng
           </Typography>
-          <Typography fontSize="14px" color="#666">
-            Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa lịch sử đặt phòng?
+          <Typography fontSize='14px' color='#666'>
+            Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa lịch sử đặt
+            phòng?
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ justifyContent: "center", pb: 4, gap: 2, flexDirection: "column" }}>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
           <Button
             onClick={() => {
               console.log("Xóa booking:", booking.booking_id);
-              setDeleteDialogOpen(false);
+              handleDeleteBooking(booking.booking_id);
             }}
-            variant="contained"
+            variant='contained'
             sx={{
               borderRadius: "24px",
               textTransform: "none",
               bgcolor: "#98b720",
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
-            }}
-          >
+            }}>
             Đồng ý
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
-            variant="outlined"
+            variant='outlined'
             sx={{
               borderRadius: "24px",
               textTransform: "none",
               borderColor: "#ddd",
               color: "#666",
               width: "100%",
-            }}
-          >
+            }}>
             Hủy bỏ
           </Button>
         </DialogActions>
@@ -398,7 +448,13 @@ const BookingCard = ({
 };
 
 // ==================== SORT BUTTON ====================
-const SortButton = ({ selected, onSelect }: { selected: string; onSelect: (v: string) => void }) => {
+const SortButton = ({
+  selected,
+  onSelect,
+}: {
+  selected: string;
+  onSelect: (v: string) => void;
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -410,13 +466,14 @@ const SortButton = ({ selected, onSelect }: { selected: string; onSelect: (v: st
     { label: "Đã hủy", value: "cancelled" },
   ];
 
-  const selectedLabel = sortOptions.find((o) => o.value === selected)?.label || "Sắp xếp";
+  const selectedLabel =
+    sortOptions.find((o) => o.value === selected)?.label || "Sắp xếp";
 
   return (
     <>
       <Button
-        variant="outlined"
-        size="small"
+        variant='outlined'
+        size='small'
         onClick={(e) => setAnchorEl(e.currentTarget)}
         sx={{
           borderColor: "#eee",
@@ -433,12 +490,32 @@ const SortButton = ({ selected, onSelect }: { selected: string; onSelect: (v: st
           "&:hover": { borderColor: "#98b720", bgcolor: "transparent" },
         }}
         startIcon={<SwapVertIcon sx={{ fontSize: "22px !important" }} />}
-        endIcon={open ? <ArrowDropUpIcon sx={{ fontSize: "30px !important", color: "#98b720" }} /> : <ArrowDropDownIcon sx={{ fontSize: "30px !important", color: "#666" }} />}
-      >
+        endIcon={
+          open ? (
+            <ArrowDropUpIcon
+              sx={{ fontSize: "30px !important", color: "#98b720" }}
+            />
+          ) : (
+            <ArrowDropDownIcon
+              sx={{ fontSize: "30px !important", color: "#666" }}
+            />
+          )
+        }>
         {selectedLabel}
       </Button>
 
-      <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)} PaperProps={{ sx: { mt: 1, borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", width: 260 } }}>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={() => setAnchorEl(null)}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            width: 260,
+          },
+        }}>
         {sortOptions.map((opt) => (
           <MenuItem
             key={opt.value}
@@ -446,14 +523,21 @@ const SortButton = ({ selected, onSelect }: { selected: string; onSelect: (v: st
               onSelect(opt.value);
               setAnchorEl(null);
             }}
-            sx={{ height: 48, bgcolor: selected === opt.value ? "#f9f9f9" : "white" }}
-          >
+            sx={{
+              height: 48,
+              bgcolor: selected === opt.value ? "#f9f9f9" : "white",
+            }}>
             <ListItemText>
-              <Typography fontSize="0.9rem" color={selected === opt.value ? "#98b720" : "#666"} fontWeight={selected === opt.value ? 600 : 400}>
+              <Typography
+                fontSize='0.9rem'
+                color={selected === opt.value ? "#98b720" : "#666"}
+                fontWeight={selected === opt.value ? 600 : 400}>
                 {opt.label}
               </Typography>
             </ListItemText>
-            {selected === opt.value && <CheckIcon sx={{ fontSize: 18, color: "#98b720", ml: 1 }} />}
+            {selected === opt.value && (
+              <CheckIcon sx={{ fontSize: 18, color: "#98b720", ml: 1 }} />
+            )}
           </MenuItem>
         ))}
       </Menu>
@@ -462,7 +546,21 @@ const SortButton = ({ selected, onSelect }: { selected: string; onSelect: (v: st
 };
 
 // ==================== REVIEW MODAL (giữ nguyên) ====================
-function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { open: boolean; onClose: () => void; hotelName: string; roomType: string; bookingTime: string }) {
+function ReviewModal({
+  open,
+  onClose,
+  hotelName,
+  roomType,
+  bookingTime,
+  id,
+  hastag,
+}: {
+  open: boolean;
+  onClose: () => void;
+  hotelName: string;
+  roomType: string;
+  bookingTime: string;
+}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -472,12 +570,12 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [fileObjects, setFileObjects] = useState<File[]>([]); // ← Thêm state này
 
-  const tags = [
-    { label: "Đẹp đẽ", value: "roombeautiful" },
-    { label: "Giá hợp lý", value: "good" },
-    { label: "Mùi phòng thơm", value: "nice_smell" },
-    // Thêm bao nhiêu tag cũng được, chỉ cần map đúng value tiếng Anh
-  ];
+  const tags = hastag.map((item) => {
+    return {
+      label: item.name.vi,
+      value: item.id,
+    };
+  });
 
   const handleTagClick = (item: { label: string; value: string }) => {
     setSelectedTags((prev) =>
@@ -505,58 +603,74 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
 
   const handleSubmit = async () => {
     if (!rating || rating === 0 || reviewText.trim() === "") return;
-  
+
     const formData = new FormData();
-  
+
     // 1. rate
     formData.append("rate", rating.toString());
-  
+
     // 2. hashtags → mảng tiếng Anh, không dấu, không khoảng trắng → JSON string
     if (selectedTags.length > 0) {
       formData.append("hashtags", JSON.stringify(selectedTags));
       // Ví dụ: ["roombeautiful", "good", "nice_smell"]
     }
-  
+
     // 3. comment
     formData.append("comment", reviewText.trim());
-  
+
     // 4. files
     fileObjects.forEach((file) => {
       formData.append("files", file);
     });
-  
+
     // Kiểm tra in ra console giống hệt ảnh bạn chụp
     for (const [key, value] of formData.entries()) {
       console.log(key, value);
     }
-  
+
     try {
-      const res = await reviewBooking(id,formData);
-      console.log("AAA res",res)
-     
+      const res = await reviewBooking(id, formData);
+      console.log("AAA res", res);
     } catch (err) {
       console.error(err);
       alert("Lỗi mạng");
     }
   };
 
-  const isSubmitDisabled = !rating || rating === 0 || reviewText.trim().length === 0;
+  const isSubmitDisabled =
+    !rating || rating === 0 || reviewText.trim().length === 0;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobile} PaperProps={{ sx: { borderRadius: isMobile ? 0 : "24px", overflow: "hidden" } }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth='sm'
+      fullWidth
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: { borderRadius: isMobile ? 0 : "24px", overflow: "hidden" },
+      }}>
       <DialogTitle sx={{ pb: 1, position: "relative" }}>
-        <Typography variant="h6" fontWeight={700}>Đánh giá khách sạn</Typography>
-        <Typography variant="body2" color="#666" sx={{ mt: 1 }}>Bạn hài lòng với trải nghiệm của khách sạn chứ</Typography>
-        <IconButton onClick={onClose} sx={{ position: "absolute", right: 8, top: 8, color: "#999" }}>
+        <Typography variant='h6' fontWeight={700}>
+          Đánh giá khách sạn
+        </Typography>
+        <Typography variant='body2' color='#666' sx={{ mt: 1 }}>
+          Bạn hài lòng với trải nghiệm của khách sạn chứ
+        </Typography>
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8, color: "#999" }}>
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
       <DialogContent>
-        <Typography fontWeight={600} mb={2}>Viết đánh giá</Typography>
-        <Box textAlign="center" mb={3}>
+        <Typography fontWeight={600} mb={2}>
+          Viết đánh giá
+        </Typography>
+        <Box textAlign='center' mb={3}>
           <Rating
-            name="hotel-rating"
+            name='hotel-rating'
             value={rating}
             onChange={(e, v) => setRating(v)}
             sx={{
@@ -568,17 +682,21 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
           />
         </Box>
 
-        <Stack direction="row" gap={1} flexWrap="wrap" mb={3}>
+        <Stack direction='row' gap={1} flexWrap='wrap' mb={3}>
           {tags.map((item) => (
             <Chip
               key={item.value}
               label={item.label}
               onClick={() => handleTagClick(item)}
               color={selectedTags.includes(item.value) ? "success" : "default"}
-              variant={selectedTags.includes(item.value) ? "filled" : "outlined"}
+              variant={
+                selectedTags.includes(item.value) ? "filled" : "outlined"
+              }
               sx={{
                 borderRadius: "20px",
-                bgcolor: selectedTags.includes(item.value) ? "#98b720 !important" : "transparent",
+                bgcolor: selectedTags.includes(item.value)
+                  ? "#98b720 !important"
+                  : "transparent",
                 color: selectedTags.includes(item.value) ? "white" : "#666",
                 borderColor: "#ddd",
                 fontWeight: 500,
@@ -590,21 +708,30 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
         <TextField
           multiline
           rows={4}
-          placeholder="Viết suy nghĩ cảm nhận của bạn"
+          placeholder='Viết suy nghĩ cảm nhận của bạn'
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           fullWidth
-          variant="outlined"
+          variant='outlined'
           inputProps={{ maxLength: 1000 }}
           helperText={`${reviewText.length}/1000`}
           sx={{ mb: 3, "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
         />
 
         <Box>
-          <Typography fontWeight={600} mb={2}>Tải ảnh hoặc video</Typography>
-          <Stack direction="row" gap={2} flexWrap="wrap">
-            <label htmlFor="upload-images">
-              <input accept="image/*,video/*" id="upload-images" multiple type="file" style={{ display: "none" }} onChange={handleImageUpload} />
+          <Typography fontWeight={600} mb={2}>
+            Tải ảnh hoặc video
+          </Typography>
+          <Stack direction='row' gap={2} flexWrap='wrap'>
+            <label htmlFor='upload-images'>
+              <input
+                accept='image/*,video/*'
+                id='upload-images'
+                multiple
+                type='file'
+                style={{ display: "none" }}
+                onChange={handleImageUpload}
+              />
               <Box
                 sx={{
                   width: 80,
@@ -617,16 +744,28 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
                   cursor: "pointer",
                   bgcolor: "#fafafa",
                   "&:hover": { borderColor: "#98b720", bgcolor: "#f0f8f0" },
-                }}
-              >
+                }}>
                 <PhotoCamera sx={{ color: "#999", fontSize: 32 }} />
               </Box>
             </label>
 
             {uploadedImages.map((src, i) => (
               <Box key={i} sx={{ position: "relative" }}>
-                <Avatar variant="rounded" src={src} sx={{ width: 80, height: 80, borderRadius: "12px" }} />
-                <IconButton size="small" onClick={() => handleRemoveImage(i)} sx={{ position: "absolute", top: 3, right: 3, bgcolor: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+                <Avatar
+                  variant='rounded'
+                  src={src}
+                  sx={{ width: 80, height: 80, borderRadius: "12px" }}
+                />
+                <IconButton
+                  size='small'
+                  onClick={() => handleRemoveImage(i)}
+                  sx={{
+                    position: "absolute",
+                    top: 3,
+                    right: 3,
+                    bgcolor: "white",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                  }}>
                   <ClearIcon sx={{ color: "#e91e63", fontSize: "12px" }} />
                 </IconButton>
               </Box>
@@ -638,8 +777,8 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
       <Box sx={{ p: 3, pt: 2 }}>
         <Button
           fullWidth
-          variant="contained"
-          size="large"
+          variant='contained'
+          size='large'
           onClick={handleSubmit}
           disabled={isSubmitDisabled}
           sx={{
@@ -651,8 +790,7 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
             bgcolor: "#98b720",
             "&:hover": { bgcolor: "#8ab020" },
             "&.Mui-disabled": { bgcolor: "#ccc", color: "#999" },
-          }}
-        >
+          }}>
           Gửi đánh giá
         </Button>
       </Box>
@@ -664,6 +802,8 @@ function ReviewModal({ open, onClose, hotelName, roomType, bookingTime, id }: { 
 export default function MyBookingsPage({
   setDetailBooking,
   historyBooking = [],
+  getHistoryBooking,
+  hastag,
 }: {
   setDetailBooking: (open: boolean) => void;
   historyBooking?: any[];
@@ -673,8 +813,10 @@ export default function MyBookingsPage({
   const filtered = historyBooking.filter((booking) => {
     if (sortValue === "all") return true;
     const status = getBookingStatus(booking).label;
-    if (sortValue === "waiting_checkin" && status === "Chờ nhận phòng") return true;
-    if (sortValue === "waiting_payment" && status === "Chờ thanh toán") return true;
+    if (sortValue === "waiting_checkin" && status === "Chờ nhận phòng")
+      return true;
+    if (sortValue === "waiting_payment" && status === "Chờ thanh toán")
+      return true;
     if (sortValue === "completed" && status === "Hoàn thành") return true;
     if (sortValue === "cancelled" && status === "Đã hủy") return true;
     return false;
@@ -682,8 +824,12 @@ export default function MyBookingsPage({
 
   return (
     <Box>
-      <Box display="flex" alignItems="center" mb={3} justifyContent="space-between">
-        <Typography variant="h5" fontWeight={600} color="#212529">
+      <Box
+        display='flex'
+        alignItems='center'
+        mb={3}
+        justifyContent='space-between'>
+        <Typography variant='h5' fontWeight={600} color='#212529'>
           Đặt phòng của tôi
         </Typography>
         <SortButton selected={sortValue} onSelect={setSortValue} />
@@ -691,12 +837,18 @@ export default function MyBookingsPage({
 
       <Box>
         {filtered.length === 0 ? (
-          <Typography textAlign="center" color="#999" mt={8} fontSize="1.1rem">
+          <Typography textAlign='center' color='#999' mt={8} fontSize='1.1rem'>
             Bạn chưa có lịch sử đặt phòng
           </Typography>
         ) : (
           filtered.map((booking) => (
-            <BookingCard key={booking.booking_id} booking={booking} setDetailBooking={setDetailBooking} />
+            <BookingCard
+              key={booking.booking_id}
+              booking={booking}
+              setDetailBooking={setDetailBooking}
+              getHistoryBooking={getHistoryBooking}
+              hastag={hastag}
+            />
           ))
         )}
       </Box>

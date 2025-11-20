@@ -1,217 +1,43 @@
-import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import image_room from "../../images/Rectangle 29975.png";
-import tag  from "../../images/Tag.png";
-const ListRoom = ({ title, isDetail }) => {
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    autoplay: true,
-
-    autoplaySpeed: 4000,
-    cssEase: "ease-in-out",
-    prevArrow: <PrevArrow />,
-    nextArrow: <NextArrow />,
-    responsive: [
-      {
-        breakpoint: 1200,
-        settings: { slidesToShow: 3 },
-      },
-      {
-        breakpoint: 900,
-        settings: { slidesToShow: 2 },
-      },
-      {
-        breakpoint: 600,
-        settings: { slidesToShow: 1, centerMode: true, centerPadding: "40px" },
-      },
-    ],
-  };
-  return (
-    <Box>
-      <Box
-        display={"flex"}
-        justifyContent={"space-between"}
-        alignItems={"center"}>
-       {isDetail? <Typography
-          variant='h4'
-          fontWeight={"500"}
-          fontSize={isDetail ? "1.1rem" : "36px"}>
-          {title}
-        </Typography>:
-        <Typography
-            variant='h4'
-            fontWeight='bold'
-            color='#333'
-            sx={{
-              fontSize: { xs: "1.5rem", md: "1.875rem" },
-            }}>
-           {title}
-          </Typography>}
-        {!isDetail && (
-          <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
-            Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
-          </Typography>
-        )}
-      </Box>
-      <Box my={1}>
-        <Slider {...settings}>
-          {[1, 2, 3, 4].map((hotel) => (
-            <Box sx={{ display: "flex", justifyContent: "end" }}>
-              <Box width={"95%"} py={4} pl={0.8} pr={2}>
-                <HotelCard />
-              </Box>
-            </Box>
-          ))}
-        </Slider>
-      </Box>
-    </Box>
-  );
-};
-
-export default ListRoom;
-
 import {
+  Box,
+  IconButton,
+  Typography,
   Card,
   CardMedia,
   CardContent,
-  Chip,
   Stack,
+  Chip,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { ChevronLeft, ChevronRight, Star } from "@mui/icons-material";
 import Slider from "react-slick";
 
-const HotelCard = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+// Ảnh cũ bạn đang dùng (giữ nguyên)
+import image_room from "../../images/Rectangle 29975.png";
+import tag from "../../images/Tag.png";
+import { useNavigate } from "react-router-dom";
 
-  return (
-    <Card
-      elevation={3}
-      sx={{
-        borderRadius: "14px",
-        overflow: "hidden",
-        mx: "auto",
-        bgcolor: "white",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
-        transition: "transform 0.3s, box-shadow 0.3s",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
-        },
-        padding: "10px",
-      }}>
-      {/* Badge "Đăng tin cậy" */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 10,
-          left: 30,
-          zIndex: 2,
-        }}>
-       <img src={tag} alt="" />
-      </Box>
-
-      {/* Ảnh phòng */}
-      <CardMedia
-        component='img'
-        height={isMobile ? "200" : "240"}
-        image={image_room}
-        alt='Hoàng gia Luxury hotel'
-        sx={{
-          objectFit: "cover",
-          borderRadius: "14px",
-        }}
-      />
-
-      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-        <Stack spacing={1}>
-          {/* Tên khách sạn */}
-          <Typography
-            variant='h6'
-            fontWeight='bold'
-            color='#333'
-            sx={{
-              fontSize: { xs: "1rem", sm: "18px" },
-              lineHeight: 1.3,
-            }}>
-            Hoàng gia Luxury hotel
-          </Typography>
-
-          {/* Địa chỉ */}
-          <Typography
-            variant='body2'
-            color='#666'
-            sx={{
-              fontSize: { xs: "0.85rem", sm: "0.9rem" },
-            }}>
-            Cầu Giấy, Hà Nội
-          </Typography>
-
-          {/* Rating */}
-          <Stack direction='row' alignItems='center' spacing={0.5}>
-            <Star sx={{ color: "#ffb300", fontSize: 18 }} />
-            <Typography
-              variant='body2'
-              fontWeight='bold'
-              color='#333'
-              sx={{ fontSize: "0.9rem" }}>
-              4.9
-            </Typography>
-            <Typography
-              variant='caption'
-              color='#999'
-              sx={{ ml: 0.5, fontSize: "0.8rem" }}>
-              (100)
-            </Typography>
-          </Stack>
-
-          {/* Giá */}
-          <Stack
-            direction='row'
-            alignItems='baseline'
-            spacing={0.5}
-            sx={{ mt: 1.5 }}>
-            <Typography
-              variant='caption'
-              color='#999'
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "0.85rem" },
-                fontWeight: 500,
-              }}>
-              Chỉ từ
-            </Typography>
-            <Typography
-              variant='h6'
-              fontWeight='bold'
-              color='#EA6A00'
-              sx={{
-                fontSize: { xs: "1.1rem", sm: "1.3rem" },
-                lineHeight: 1,
-              }}>
-              160.000đ
-            </Typography>
-            <Typography
-              variant='body2'
-              color='#666'
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "0.85rem" },
-                ml: 0.5,
-              }}>
-              / 2 giờ
-            </Typography>
-          </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
+// ==================== HELPER NHỎ ====================
+const parseJson = (str: string) => {
+  try {
+    return JSON.parse(str);
+  } catch {
+    return str;
+  }
 };
+
+const getFirstImage = (imagesStr: string) => {
+  try {
+    const arr = JSON.parse(imagesStr);
+    return Array.isArray(arr) && arr.length > 0 ? arr[0] : image_room;
+  } catch {
+    return image_room;
+  }
+};
+// =====================================================
 
 const PrevArrow = (props: any) => {
   const { onClick } = props;
@@ -254,5 +80,388 @@ const NextArrow = (props: any) => {
       }}>
       <ChevronRight sx={{ color: "#333", fontSize: 28 }} />
     </IconButton>
+  );
+};
+
+// ==================== HOTEL CARD (chỉ nhận props) ====================
+const HotelCard = ({
+  image,
+  hotelName,
+  hotelAddress,
+  rating,
+  price,
+  id,
+}: any) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+
+  return (
+    <Card
+      elevation={3}
+      onClick={() => {
+        navigate(`/room/${id}`);
+      }}
+      sx={{
+        borderRadius: "14px",
+        overflow: "hidden",
+        mx: "auto",
+        bgcolor: "white",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+        transition: "transform 0.3s, box-shadow 0.3s",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
+        },
+        padding: "10px",
+        position: "relative",
+        cursor: "pointer",
+      }}>
+      {/* Badge "Đăng tin cậy" */}
+      <Box sx={{ position: "absolute", top: 10, left: 30, zIndex: 2 }}>
+        <img src={tag} alt='' />
+      </Box>
+
+      {/* Ảnh phòng */}
+      <CardMedia
+        component='img'
+        height={isMobile ? "200" : "240"}
+        image={image || image_room}
+        alt={hotelName}
+        sx={{
+          objectFit: "cover",
+          borderRadius: "14px",
+        }}
+      />
+
+      <CardContent sx={{ p: { xs: 2, sm: 1 } }}>
+        <Stack spacing={1}>
+          {/* Tên khách sạn */}
+          <Typography
+            variant='h6'
+            fontWeight='bold'
+            color='#333'
+            sx={{
+              fontSize: { xs: "1rem", sm: "18px" },
+              lineHeight: 1.3,
+            }}>
+            {hotelName || "Hoàng gia Luxury hotel"}
+          </Typography>
+
+          {/* Địa chỉ */}
+          <Typography
+            variant='body2'
+            color='#666'
+            sx={{
+              fontSize: { xs: "0.85rem", sm: "0.9rem" },
+            }}>
+            {hotelAddress || "Cầu Giấy, Hà Nội"}
+          </Typography>
+
+          {/* Rating */}
+          <Stack direction='row' alignItems='center' spacing={0.5}>
+            <Star sx={{ color: "#ffb300", fontSize: 18 }} />
+            <Typography
+              variant='body2'
+              fontWeight='bold'
+              color='#333'
+              sx={{ fontSize: "0.9rem" }}>
+              {rating || 4.9}
+            </Typography>
+            <Typography
+              variant='caption'
+              color='#999'
+              sx={{ ml: 0.5, fontSize: "0.8rem" }}>
+              (100)
+            </Typography>
+          </Stack>
+
+          {/* Giá */}
+          <Stack
+            direction='row'
+            alignItems='baseline'
+            spacing={0.5}
+            sx={{ mt: 1.5 }}>
+            <Typography variant='caption' color='#999' sx={{ fontWeight: 500 }}>
+              Chỉ từ
+            </Typography>
+            <Typography
+              variant='h6'
+              fontWeight='bold'
+              color='#EA6A00'
+              sx={{
+                fontSize: { xs: "1.1rem", sm: "1.3rem" },
+                lineHeight: 1,
+              }}>
+              {price ? `${price.toLocaleString("vi-VN")}.000đ` : "160.000đ"}
+            </Typography>
+            <Typography variant='body2' color='#666'>
+              / 2 giờ
+            </Typography>
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+};
+
+// ==================== LIST ROOM CHÍNH ====================
+const ListRoom = ({
+  title,
+  isDetail,
+  data,
+  loading,
+}: {
+  title: string;
+  isDetail?: boolean;
+  data: any[];
+}) => {
+  const settings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 4000,
+    cssEase: "ease-in-out",
+    prevArrow: <PrevArrow />,
+    nextArrow: <NextArrow />,
+    responsive: [
+      {
+        breakpoint: 1200,
+        settings: { slidesToShow: 3 },
+      },
+      {
+        breakpoint: 900,
+        settings: { slidesToShow: 2 },
+      },
+      {
+        breakpoint: 600,
+        settings: { slidesToShow: 1, centerMode: true, centerPadding: "40px" },
+      },
+    ],
+  };
+
+  return (
+    <>
+      {loading ? (
+        <ListRoomLoading />
+      ) : (
+        <Box>
+          <Box
+            display={"flex"}
+            justifyContent={"space-between"}
+            alignItems={"center"}>
+            {isDetail ? (
+              <Typography
+                variant='h4'
+                fontWeight={"500"}
+                fontSize={isDetail ? "1.1rem" : "36px"}>
+                {title}
+              </Typography>
+            ) : (
+              <Typography
+                variant='h4'
+                fontWeight='bold'
+                color='#333'
+                sx={{
+                  fontSize: { xs: "1.5rem", md: "1.875rem" },
+                }}>
+                {title}
+              </Typography>
+            )}
+            {!isDetail && (
+              <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
+                Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
+              </Typography>
+            )}
+          </Box>
+
+          <Box>
+            <Slider {...settings}>
+              {data.map((hotel) => {
+                const nameObj = parseJson(hotel.name);
+                const name = nameObj?.vi || nameObj?.en || "Khách sạn";
+
+                const addressObj = parseJson(hotel.address);
+                const address = addressObj?.en || addressObj?.vi || "";
+
+                const firstImage = getFirstImage(hotel.images);
+
+                return (
+                  <Box
+                    key={hotel.id}
+                    sx={{ display: "flex", justifyContent: "end" }}>
+                    <Box width={"95%"} py={4} pl={0.8} pr={2}>
+                      <HotelCard
+                        image={firstImage}
+                        hotelName={name}
+                        hotelAddress={address}
+                        rating={hotel.rating}
+                        price={hotel.price_min}
+                        id={hotel.id}
+                      />
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Slider>
+          </Box>
+        </Box>
+      )}
+    </>
+  );
+};
+
+export default ListRoom;
+
+import { Skeleton } from "@mui/material";
+
+const HotelCardSkeleton = () => {
+  return (
+    <Card
+      elevation={3}
+      sx={{
+        borderRadius: "14px",
+        overflow: "hidden",
+        mx: "auto",
+        bgcolor: "white",
+        boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
+        transition: "transform 0.3s, box-shadow 0.3s",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 16px 32px rgba(0,0,0,0.12)",
+        },
+        padding: "10px",
+        position: "relative",
+      }}>
+      {/* Badge "Đăng tin cậy" – vẫn hiện khi loading */}
+
+      {/* Ảnh loading */}
+      <Skeleton
+        variant='rectangular'
+        height={180}
+        sx={{
+          borderRadius: "14px",
+          bgcolor: "grey.200",
+        }}
+      />
+
+      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+        <Stack spacing={1.5}>
+          {/* Tên khách sạn */}
+          <Skeleton
+            variant='text'
+            width='80%'
+            height={32}
+            sx={{ bgcolor: "grey.200" }}
+          />
+
+          {/* Địa chỉ */}
+          <Skeleton
+            variant='text'
+            width='65%'
+            height={24}
+            sx={{ bgcolor: "grey.200" }}
+          />
+
+          {/* Rating */}
+          <Stack direction='row' alignItems='center' spacing={0.5}>
+            <Skeleton
+              variant='circular'
+              width={18}
+              height={18}
+              sx={{ bgcolor: "grey.200" }}
+            />
+            <Skeleton
+              variant='text'
+              width={40}
+              height={24}
+              sx={{ bgcolor: "grey.200" }}
+            />
+            <Skeleton
+              variant='text'
+              width={50}
+              height={20}
+              sx={{ bgcolor: "grey.200" }}
+            />
+          </Stack>
+
+          {/* Giá */}
+          <Stack
+            direction='row'
+            alignItems='baseline'
+            spacing={0.5}
+            sx={{ mt: 1.5 }}>
+            <Skeleton
+              variant='text'
+              width={60}
+              height={20}
+              sx={{ bgcolor: "grey.200" }}
+            />
+            <Skeleton
+              variant='text'
+              width={90}
+              height={36}
+              sx={{ bgcolor: "grey.200" }}
+            />
+            <Skeleton
+              variant='text'
+              width={60}
+              height={24}
+              sx={{ bgcolor: "grey.200" }}
+            />
+          </Stack>
+        </Stack>
+      </CardContent>
+    </Card>
+  );
+};
+
+// === Dùng trong ListRoom khi đang loading (4 item) ===
+const ListRoomLoading = () => {
+  const dummy = [1, 2, 3, 4];
+
+  return (
+    <Box>
+      {/* Header title loading */}
+      <Box
+        display='flex'
+        justifyContent='space-between'
+        alignItems='center'
+        mb={2}>
+        <Skeleton
+          variant='text'
+          width='35%'
+          height={48}
+          sx={{ bgcolor: "grey.200" }}
+        />
+        <Skeleton
+          variant='text'
+          width={100}
+          height={32}
+          sx={{ bgcolor: "grey.200" }}
+        />
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          overflow: "hidden",
+          justifyContent: "space-between",
+        }}>
+        {dummy.map((i) => (
+          <Box
+            key={i}
+            sx={{ flex: "0 0 calc(25% - 16px)", maxWidth: "calc(25% - 16px)" }}>
+            <Box width='98%' py={4} pl={0.8} pr={2}>
+              <HotelCardSkeleton />
+            </Box>
+          </Box>
+        ))}
+      </Box>
+    </Box>
   );
 };

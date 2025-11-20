@@ -53,14 +53,12 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const DetailRoomView = ({detailHotel,loading}) => {
+const DetailRoomView = ({ detailHotel, loading, recommend }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  
   const [tabValue, setTabValue] = useState(0);
-
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -92,12 +90,12 @@ const DetailRoomView = ({detailHotel,loading}) => {
                 fontWeight={700}
                 fontSize={{ xs: "1.25rem", md: "1.5rem" }}
                 color='#333'>
-               {detailHotel?.hotel?.name?.en}
+                {detailHotel?.hotel?.name?.en}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />
                 <Typography fontSize='0.9rem' color='#666'>
-                {detailHotel?.hotel?.address?.en}
+                  {detailHotel?.hotel?.address?.en}
                 </Typography>
                 <Typography
                   fontSize='0.85rem'
@@ -305,9 +303,21 @@ const DetailRoomView = ({detailHotel,loading}) => {
             )}
           </TabPanel> */}
         </Stack>
-        <RoomList loading={loading} hotel={detailHotel?.hotel || {}} data={detailHotel?.room_types || []} />
-        <HotelDetailInfo info={detailHotel?.hotel||{}} reviews={detailHotel?.reviews||[]} />
-        <ListRoom title={"Ưu đãi độc quyền"} isDetail={true} />
+        <RoomList
+          loading={loading}
+          hotel={detailHotel?.hotel || {}}
+          data={detailHotel?.room_types || []}
+        />
+        <HotelDetailInfo
+          info={detailHotel?.hotel || {}}
+          reviews={detailHotel?.reviews || []}
+        />
+        <ListRoom
+          loading={loading}
+          title={"Ưu đãi độc quyền"}
+          data={recommend}
+          isDetail={true}
+        />
       </Container>
     </Box>
   );

@@ -30,7 +30,14 @@ import PopularDestinations from "./PopularDestinations";
 import FirstTimeExplore from "./FirstTimeExplore";
 import SearchBarWithDropdown from "./SearchBarWithDropdown";
 
-const HomeView = ({location}) => {
+const HomeView = ({
+  location,
+  newHotel,
+  toprated,
+  featured,
+  recommend,
+  loading,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -41,7 +48,6 @@ const HomeView = ({location}) => {
       setBookingType(newType);
     }
   };
-
   return (
     <Box>
       {/* Hero Section */}
@@ -114,9 +120,18 @@ const HomeView = ({location}) => {
           />
         </Box>
         <FirstTimeExplore />
-        <ListRoom title={"Ưu đãi độc quyền"} />
-        <ListRoom title={"Top được bình chọn"} />
-        <ListRoom title={"Khách sạn mới"} />
+        <ListRoom
+          loading={loading}
+          data={featured}
+          title={"Ưu đãi độc quyền"}
+        />
+        <ListRoom loading={loading} data={recommend} title={"Gợi ý cho bạn"} />
+        <ListRoom
+          loading={loading}
+          data={toprated}
+          title={"Top được bình chọn"}
+        />
+        <ListRoom loading={loading} data={newHotel} title={"Khách sạn mới"} />
         <PopularDestinations />
       </Container>
     </Box>
