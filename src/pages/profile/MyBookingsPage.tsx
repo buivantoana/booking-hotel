@@ -104,7 +104,6 @@ const BookingCard = ({
   setDetailBooking,
 }: {
   booking: any;
-  setDetailBooking: (v: boolean) => void;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -232,7 +231,7 @@ const BookingCard = ({
                 </Box>
               </Stack>
               <Typography
-                onClick={() => setDetailBooking(true)}
+                onClick={() => setDetailBooking(booking)}
                 fontSize="14px"
                 sx={{ textDecoration: "underline", cursor: "pointer" }}
                 color="rgba(72, 80, 94, 1)"
@@ -299,10 +298,18 @@ const BookingCard = ({
       {/* Menu MoreVert */}
       <Menu
         anchorEl={menuAnchor}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
         open={Boolean(menuAnchor)}
         onClose={() => setMenuAnchor(null)}
         PaperProps={{
-          sx: { borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.12)", mt: 1 },
+          sx: { borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.12)", mt: 1,padding:0 },
         }}
       >
         <MenuItem
