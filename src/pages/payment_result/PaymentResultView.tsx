@@ -19,10 +19,11 @@ import {
   Info as InfoIcon,
 } from "@mui/icons-material";
 import success from "../../images/Frame 1321317962.png";
+import { useNavigate } from "react-router-dom";
 const PaymentResultView = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const navigate = useNavigate()
   return (
     <Box
       sx={{
@@ -160,6 +161,9 @@ const PaymentResultView = () => {
               mt={2}>
               <Button
                 fullWidth
+                onClick={()=>{
+                  navigate("/")
+                }}
                 variant='text'
                 sx={{
                   color: "#666",
@@ -170,6 +174,9 @@ const PaymentResultView = () => {
                 Về trang chủ
               </Button>
               <Button
+              onClick={()=>{
+                navigate("/profile?type=booking")
+              }}
                 fullWidth
                 variant='contained'
                 sx={{

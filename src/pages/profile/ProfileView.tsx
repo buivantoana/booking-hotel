@@ -49,8 +49,9 @@ import dayjs from "dayjs";
 import { cancelBooking } from "../../service/booking";
 import { toast } from "react-toastify";
 import { useBookingContext } from "../../App";
-import { useNavigate } from "react-router-dom";
-const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -58,6 +59,8 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailBooking, setDetailBooking] = useState(null);
   const navigate = useNavigate()
+
+  const [searchParams,setSearchParams] = useSearchParams();
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
@@ -74,6 +77,21 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
       );
     }
   }, [historyBooking]);
+  useEffect(()=>{
+    const type = searchParams.get("type");
+    if(type){
+      if(type == "booking"){
+        setActiveMenu("Đặt phòng của tôi")
+        searchParams.delete("type");
+      setSearchParams(searchParams, { replace: true });
+      }
+      if(type == "profile"){
+        setActiveMenu("Hồ sơ của tôi")
+        searchParams.delete("type");
+        setSearchParams(searchParams, { replace: true });
+      }
+    }
+  },[searchParams])
   const handleClickItemMenu = (active) => {
     setActiveMenu(active);
   };
@@ -816,6 +834,7 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
                   setDetailBooking={setDetailBooking}
                   getHistoryBooking={getHistoryBooking}
                   hastag={hastag}
+                  loading={loading}
                 />
               )}
             </Grid>

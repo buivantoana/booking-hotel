@@ -804,6 +804,7 @@ export default function MyBookingsPage({
   historyBooking = [],
   getHistoryBooking,
   hastag,
+  loading
 }: {
   setDetailBooking: (open: boolean) => void;
   historyBooking?: any[];
@@ -836,26 +837,67 @@ export default function MyBookingsPage({
       </Box>
 
       <Box>
-        {filtered.length === 0 ? (
-          <Box display={"flex"} flexDirection={"column"} gap={3}mt={8} alignItems={"center"} justifyContent={"center"}>
-          <img src={no_room} alt="" />
-          <Typography textAlign='center' color='#999'  fontSize='1.1rem'>
-            Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi đặc biệt.
-          </Typography>
-          
-          </Box>
-        ) : (
-          filtered.map((booking) => (
-            <BookingCard
-              key={booking.booking_id}
-              booking={booking}
-              setDetailBooking={setDetailBooking}
-              getHistoryBooking={getHistoryBooking}
-              hastag={hastag}
-            />
-          ))
-        )}
+       {loading? <BookingCardSkeleton/>:
+       <>
+       {filtered.length === 0 ? (
+         <Box display={"flex"} flexDirection={"column"} gap={3}mt={8} alignItems={"center"} justifyContent={"center"}>
+         <img src={no_room} alt="" />
+         <Typography textAlign='center' color='#999'  fontSize='1.1rem'>
+           Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi đặc biệt.
+         </Typography>
+         
+         </Box>
+       ) : (
+         filtered.map((booking) => (
+           <BookingCard
+             key={booking.booking_id}
+             booking={booking}
+             setDetailBooking={setDetailBooking}
+             getHistoryBooking={getHistoryBooking}
+             hastag={hastag}
+           />
+         ))
+       )}
+       
+       </>}
       </Box>
     </Box>
   );
 }
+
+
+
+import {  Card,  Skeleton } from "@mui/material";
+
+const BookingCardSkeleton = () => {
+  return (
+    <Card sx={{ display: "flex", p: 2, gap: 2, borderRadius: 2 }}>
+      {/* Ảnh */}
+      <Skeleton variant="rectangular" width={120} height={80} sx={{ borderRadius: 1 }} />
+
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        {/* Header: Mã đặt phòng và trạng thái */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <Skeleton variant="text" width={100} height={24} />
+          <Skeleton variant="rounded" width={80} height={24} />
+        </Box>
+
+        {/* Tên khách sạn và số phòng */}
+        <Skeleton variant="text" width="50%" height={28} />
+        <Skeleton variant="text" width="30%" height={20} sx={{ mb: 1 }} />
+
+        {/* Thời gian */}
+        <Skeleton variant="text" width="70%" height={20} sx={{ mb: 1 }} />
+
+        {/* Ghi chú */}
+        <Skeleton variant="text" width="60%" height={20} />
+
+        {/* Footer: giá và nút */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
+          <Skeleton variant="text" width={80} height={28} />
+          <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: 2 }} />
+        </Box>
+      </Box>
+    </Card>
+  );
+};

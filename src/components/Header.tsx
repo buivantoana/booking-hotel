@@ -83,10 +83,13 @@ const Header = () => {
               ) : (
                 <>
                   <Typography
+                    onClick={()=>{
+                      navigate("/")
+                    }}
                     variant='h5'
                     fontWeight={700}
                     color='#333'
-                    sx={{ fontSize: "1.5rem" }}>
+                    sx={{ fontSize: "1.5rem",cursor:"pointer" }}>
                     Logo
                   </Typography>
                   <Typography
@@ -255,7 +258,7 @@ import { useBookingContext } from "../App";
 function UserDropdownMenuV2({ context }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
+  const navigate = useNavigate()
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -265,6 +268,7 @@ function UserDropdownMenuV2({ context }) {
   };
 
   const handleNavigate = (path: string) => {
+    navigate(path)
     handleClose();
   };
 
@@ -351,7 +355,7 @@ function UserDropdownMenuV2({ context }) {
         {/* Menu Items */}
         <Box sx={{ py: 1 }}>
           <MenuItem
-            onClick={() => handleNavigate("/profile")}
+            onClick={() => handleNavigate("/profile?type=profile")}
             sx={{
               py: 2,
               px: 3,
@@ -369,7 +373,7 @@ function UserDropdownMenuV2({ context }) {
           </MenuItem>
 
           <MenuItem
-            onClick={() => handleNavigate("/my-bookings")}
+            onClick={() => handleNavigate("/profile?type=booking")}
             sx={{
               py: 2,
               px: 3,
