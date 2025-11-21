@@ -7,12 +7,12 @@ type Props = {};
 const ProfileController = (props: Props) => {
   const [historyBooking, setHistoryBooking] = useState([]);
   const [hastag, setHastag] = useState([]);
-  const [loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     getHistoryBooking();
   }, []);
   const getHistoryBooking = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       let hastag = await getHashtags();
       if (hastag?.hashtags?.length) {
@@ -20,13 +20,13 @@ const ProfileController = (props: Props) => {
       }
       let result = await historyBookingContact();
       console.log("AAAA result", result);
-      if (result.length > 0) {
+      if (result) {
         setHistoryBooking(result);
       }
     } catch (error) {
       console.log(error);
     }
-    setLoading(false)
+    setLoading(false);
   };
   return (
     <ProfileView

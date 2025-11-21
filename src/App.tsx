@@ -21,6 +21,12 @@ const reducer = (state: any, action: any) => {
         ...state,
         user: action.payload.user,
       };
+
+    case "UPDATE_USER":
+      return {
+        ...state,
+        user: action.payload.user,
+      };
     case "LOGOUT":
       return {
         ...state,
@@ -41,14 +47,13 @@ const App = () => {
   useEffect(() => {
     if (user) {
       (async () => {
-          dispatch({
-            type: "LOGIN",
-            payload: {
-              ...state,
-              user: { ...JSON.parse(user) },
-            },
-          });
-        
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            ...state,
+            user: { ...JSON.parse(user) },
+          },
+        });
       })();
     }
   }, [user]);

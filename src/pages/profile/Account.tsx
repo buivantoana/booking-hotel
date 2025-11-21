@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -11,18 +11,76 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import Flag from "react-country-flag"; // bạn cần cài thêm: npm i react-country-flag
+import Flag from "react-country-flag";
+import { userUpdate } from "../../service/admin";
+import { toast } from "react-toastify";
 
-const Account = () => {
+const Account = ({ context }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Lấy dữ liệu ban đầu từ context
+  const initialData = {
+    name: context?.state?.user?.name || "",
+    birthday: context?.state?.user?.birthday || "",
+    email: context?.state?.user?.email || "",
+  };
+
+  // State để chỉnh sửa
+  const [formData, setFormData] = useState(initialData);
+
+  // Khi context thay đổi → cập nhật lại form (nếu cần reload từ server)
+  useEffect(() => {
+    setFormData({
+      name: context?.state?.user?.name || "",
+      birthday: context?.state?.user?.birthday || "",
+      email: context?.state?.user?.email || "",
+    });
+  }, [context?.state?.user]);
+
+  // Xử lý thay đổi input
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Xử lý submit (bạn có thể gọi API ở đây)
+  const handleSubmit = async () => {
+    try {
+      // Ví dụ gọi API cập nhật
+      // await context.updateUserProfile(formData);
+
+      let result = await userUpdate(formData);
+      if (result.code == "OK") {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            ...JSON.parse(localStorage.getItem("user")),
+            ...formData,
+          })
+        );
+        context.dispatch({
+          type: "UPDATE_USER",
+          payload: {
+            ...context.state,
+            user: { ...context.state.user, ...formData },
+          },
+        });
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Lỗi cập nhật:", error);
+      alert("Cập nhật thất bại!");
+    }
+  };
+
   return (
-    <Box
-      sx={{
-        backgroundColor: "#f8f9fa",
-      }}>
-      {/* Tiêu đề */}
+    <Box sx={{ backgroundColor: "#f8f9fa" }}>
       <Typography
         variant='h5'
         fontWeight={600}
@@ -37,27 +95,23 @@ const Account = () => {
           backgroundColor: "#fff",
           borderRadius: 3,
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-          p: { xs: 3, sm: 5 },
+          p: { xs: 3, sm: 4 },
         }}>
         <Grid container spacing={3}>
-          {/* Số điện thoại */}
+          {/* Số điện thoại - KHÔNG CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
               Số điện thoại
             </Typography>
             <TextField
               fullWidth
-              value='0123456789'
+              value={context?.state?.user?.phone || ""}
               disabled
               InputProps={{
                 startAdornment: (
                   <InputAdornment position='start'>
                     <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                      }}>
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                       <Flag
                         countryCode='VN'
                         svg
@@ -87,68 +141,90 @@ const Account = () => {
             />
           </Grid>
 
-          {/* Ngày sinh */}
+          {/* Ngày sinh - CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
               Ngày sinh của bạn
             </Typography>
             <TextField
               fullWidth
-              value='01/01/2000'
-              placeholder='dd/mm/yyyy'
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <CalendarTodayIcon sx={{ color: "#adb5bd" }} />
-                  </InputAdornment>
-                ),
-              }}
+              type='date'
+              name='birthday'
+              value={formData.birthday}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
               sx={{
+                mb: 3,
                 "& .MuiOutlinedInput-root": {
-                  color: "#212529",
-                  fontWeight: 500,
                   borderRadius: "16px",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#dee2e6",
+
+                  backgroundColor: "#fff",
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
                 },
               }}
             />
           </Grid>
 
-          {/* Tên của bạn */}
+          {/* Tên - CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
               Tên của bạn
             </Typography>
             <TextField
               fullWidth
-              value='Thangdv'
+              name='name'
+              value={formData.name}
+              onChange={handleChange}
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  color: "#212529",
-                  fontWeight: 500,
                   borderRadius: "16px",
-                },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#dee2e6",
+
+                  backgroundColor: "#fff",
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#98b720",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
                 },
               }}
             />
           </Grid>
 
-          {/* Email */}
+          {/* Email - CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
               Email
             </Typography>
             <TextField
               fullWidth
-              placeholder='Nhập mail của bạn'
+              name='email'
+              type='email'
+              value={formData.email}
+              onChange={handleChange}
+              placeholder='Nhập email của bạn'
               sx={{
                 "& .MuiOutlinedInput-root": {
-                  color: "#6c757d",
                   borderRadius: "16px",
+
+                  backgroundColor: "#fff",
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#98b720",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#98b720",
+                    borderWidth: 1.5,
+                  },
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#dee2e6",
@@ -168,8 +244,9 @@ const Account = () => {
               <Button
                 variant='contained'
                 size='large'
+                onClick={handleSubmit}
                 sx={{
-                  backgroundColor: "#a0d468",
+                  backgroundColor: "rgba(152, 183, 32, 1)",
                   borderRadius: 50,
                   px: 6,
                   py: 1.5,
@@ -177,7 +254,7 @@ const Account = () => {
                   textTransform: "none",
                   boxShadow: "0 4px 15px rgba(160, 212, 104, 0.4)",
                   "&:hover": {
-                    backgroundColor: "#8bc34a",
+                    backgroundColor: "rgba(152, 183, 32, 1)",
                   },
                 }}>
                 Cập nhật

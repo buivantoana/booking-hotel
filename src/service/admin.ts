@@ -84,9 +84,12 @@ export async function verifyOtp(body: any) {
   }
 }
 
-export async function userUpdate(body: any,accessToken) {
+export async function userUpdate(body: any, accessToken) {
   try {
-    const response = await api.put(`/user/update`, body,{
+    if (!accessToken) {
+      accessToken = localStorage.getItem("access_token");
+    }
+    const response = await api.put(`/user/update`, body, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

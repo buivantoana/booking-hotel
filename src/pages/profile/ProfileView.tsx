@@ -51,23 +51,27 @@ import { toast } from "react-toastify";
 import { useBookingContext } from "../../App";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
+const ProfileView = ({
+  historyBooking,
+  getHistoryBooking,
+  hastag,
+  loading,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Hồ sơ của tôi");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailBooking, setDetailBooking] = useState(null);
-  const navigate = useNavigate()
-
-  const [searchParams,setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
     { text: "Đặt phòng của tôi", icon: <RoomIcon />, active: true },
     { text: "Đăng xuất", icon: <LogoutIcon />, active: false },
   ];
-  const context = useBookingContext()
+  const context = useBookingContext();
   useEffect(() => {
     if (detailBooking) {
       setDetailBooking(
@@ -77,22 +81,23 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
       );
     }
   }, [historyBooking]);
-  useEffect(()=>{
+  useEffect(() => {
     const type = searchParams.get("type");
-    if(type){
-      if(type == "booking"){
-        setActiveMenu("Đặt phòng của tôi")
+    if (type) {
+      if (type == "booking") {
+        setActiveMenu("Đặt phòng của tôi");
         searchParams.delete("type");
-      setSearchParams(searchParams, { replace: true });
+        setSearchParams(searchParams, { replace: true });
       }
-      if(type == "profile"){
-        setActiveMenu("Hồ sơ của tôi")
+      if (type == "profile") {
+        setActiveMenu("Hồ sơ của tôi");
         searchParams.delete("type");
         setSearchParams(searchParams, { replace: true });
       }
     }
-  },[searchParams])
+  }, [searchParams]);
   const handleClickItemMenu = (active) => {
+    setDetailBooking(null);
     setActiveMenu(active);
   };
   const Sidebar = () => (
@@ -121,10 +126,10 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
           </Avatar>
           <Stack>
             <Typography fontWeight={600} fontSize='1rem' color='#333'>
-              Thangdv
+              {context?.state?.user?.name}
             </Typography>
             <Typography fontSize='0.8rem' color='#666'>
-              +84 123456789
+              +84 {context?.state?.user?.phone?.split(0)}
             </Typography>
           </Stack>
         </Stack>
@@ -253,16 +258,16 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
       ? payment.status === "success"
         ? "Đã thanh toán"
         : payment.status === "failed"
-          ? "Thanh toán thất bại"
-          : "Chưa thanh toán"
+        ? "Thanh toán thất bại"
+        : "Chưa thanh toán"
       : "Trả tại khách sạn";
 
     const paymentMethodLabel = payment?.method
       ? payment.method === "momo"
         ? "Ví MoMo"
         : payment.method === "vnpay"
-          ? "VNPay"
-          : "Trả tại khách sạn"
+        ? "VNPay"
+        : "Trả tại khách sạn"
       : "Trả tại khách sạn";
 
     const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
@@ -610,7 +615,7 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
                 Số điện thoại
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
-                +84 123456789
+                +84 {context.state?.user?.phone?.split(0)}
               </Typography>
             </Stack>
             <Stack
@@ -621,7 +626,7 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
                 Họ tên
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
-                Thangdv
+                {context.state?.user?.name}
               </Typography>
             </Stack>
           </Stack>
@@ -714,7 +719,7 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
   };
   console.log("AAAA historyBooking", historyBooking);
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
+    <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 6 } }}>
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -776,8 +781,8 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
                   user: {},
                 },
               });
-              navigate("/")
-              setDeleteDialogOpen(true)
+              navigate("/");
+              setDeleteDialogOpen(true);
             }}
             variant='contained'
             sx={{
@@ -826,7 +831,7 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag,loading }) => {
               {detailBooking && (
                 <MainContent setDetailBooking={setDetailBooking} />
               )}
-              {activeMenu == "Hồ sơ của tôi" && <Account />}
+              {activeMenu == "Hồ sơ của tôi" && <Account context={context} />}
               {activeMenu == "Thiết lập tài khoản" && <AccountSettingsPage />}
               {activeMenu == "Đặt phòng của tôi" && !detailBooking && (
                 <MyBookingsPage
