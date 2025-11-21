@@ -415,7 +415,7 @@ const PinCreation = ({phoneNumber}) => {
                 }}
               >
                 <ArrowBackIosNewIcon />
-                Tạo mã PIN của bạn
+               Hi,+84{phoneNumber}
               </Typography>
             </Box>
 

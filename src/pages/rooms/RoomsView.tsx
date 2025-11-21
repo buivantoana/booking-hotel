@@ -139,7 +139,7 @@ const ratings = [
   { label: "≥ 4.5", active: false },
 ];
 
-const RoomsView = ({ dataHotel, loading, setPage, total, page ,getHotelLatLon ,getHotel}) => {
+const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, getHotel }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -150,15 +150,16 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page ,getHotelLatLon ,g
   const [priceRange, setPriceRange] = useState<[number, number]>([
     20000, 10000000,
   ]);
+  const context = useBookingContext()
   const [center, setCenter] = useState({
     lat: 21.0285,
     lng: 105.8542,
   });
-  useEffect(()=>{
-    if(activeMap){
-      getHotelLatLon({lat:center.lat,lng:center.lng})
+  useEffect(() => {
+    if (activeMap) {
+      getHotelLatLon({ lat: center.lat, lng: center.lng })
     }
-  },[center])
+  }, [center])
   const handleAmenityToggle = (index: number) => {
     const newList = [...amenityList];
     newList[index].active = !newList[index].active;
@@ -177,330 +178,331 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page ,getHotelLatLon ,g
   };
 
   return (
-    <Container maxWidth="lg" sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md:activeMap?0: 3 },mb:activeMap?3:0 }}>
-      {activeMap?<FilterMap setActiveMap={setActiveMap}getHotel={getHotel} setCenter={setCenter} center={center}  dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} />:
-      <Stack
-        spacing={3}
-        sx={{}}>
-        {/* ================= HEADER: KẾT QUẢ + SẮP XẾP ================= */}
+    <Container maxWidth="lg" sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: activeMap ? 0 : 3 }, mb: activeMap ? 3 : 0 }}>
+      {activeMap ? <FilterMap setActiveMap={setActiveMap} getHotel={getHotel} setCenter={setCenter} center={center} dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} /> :
+        <Stack
+          spacing={3}
+          sx={{}}>
+          {/* ================= HEADER: KẾT QUẢ + SẮP XẾP ================= */}
 
-        <Grid container justifyContent={"space-between"}>
-          {/* ================= LEFT: FILTERS ================= */}
-          <Grid item xs={12} md={4} lg={3.3}>
-            <Paper
-              elevation={0}
-              sx={{ borderRadius: "16px", p: 3, bgcolor: "white" }}>
-              <Stack spacing={4}>
-                {/* MAP */}
-                <Box
-                  sx={{
-                    position: "relative",
-                    height: 180,
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    background: `url("${map}")`,
-                    backgroundRepeat: "no-repeat",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundSize: "100%",
-
-                  }}>
+          <Grid container justifyContent={"space-between"}>
+            {/* ================= LEFT: FILTERS ================= */}
+            <Grid item xs={12} md={4} lg={3.3}>
+              <Paper
+                elevation={0}
+                sx={{ borderRadius: "16px", p: 3, bgcolor: "white" }}>
+                <Stack spacing={4}>
+                  {/* MAP */}
                   <Box
-                    onClick={() => setActiveMap(true)}
                     sx={{
-                      bgcolor: "white",
+                      position: "relative",
+                      height: 180,
                       borderRadius: "12px",
-                      px: 2,
-                      py: 0.5,
+                      overflow: "hidden",
+                      background: `url("${map}")`,
+                      backgroundRepeat: "no-repeat",
                       display: "flex",
+                      justifyContent: "center",
                       alignItems: "center",
-                      gap: 0.5,
-                      boxShadow: 1,
-                      fontSize: "0.9rem",
-                      fontWeight: 600,
-                      border: "1px solid rgba(152, 183, 32, 1)",
-                      color: "rgba(152, 183, 32, 1)",
-                      height: "40px",
-                      cursor: "pointer"
+                      backgroundSize: "100%",
+
                     }}>
-                    <LocationOnIcon
-                      sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }}
-                    />
-                    Xem trên bản đồ
-                  </Box>
-                </Box>
-
-                {/* KHOẢNG GIÁ */}
-                <Stack>
-                  <Typography
-                    fontWeight={600}
-                    fontSize='1rem'
-                    color='#333'
-                    mb={2}>
-                    Khoảng giá
-                  </Typography>
-                  <Typography fontSize='0.8rem' color='#666' mb={2}>
-                    Giá phòng đã bao gồm mọi khoản phí
-                  </Typography>
-
-                  {/* SLIDER */}
-                  <Box display={"flex"} justifyContent={"center"}>
-                    <Slider
-                      value={priceRange}
-                      onChange={(_, newValue) =>
-                        setPriceRange(newValue as [number, number])
-                      }
-                      valueLabelDisplay='off'
-                      min={0}
-                      max={10000000}
-                      step={10000}
-                      sx={{
-                        color: "#98b720",
-                        width: "90%",
-                        height: 6,
-                        "& .MuiSlider-thumb": {
-                          width: 18,
-                          height: 18,
-                          bgcolor: "white",
-                          border: "3px solid #98b720",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                          "&:hover, &.Mui-focusVisible": {
-                            boxShadow: "0 0 0 8px rgba(152, 183, 32, 0.16)",
-                          },
-                        },
-                        "& .MuiSlider-track": {
-                          bgcolor: "#98b720",
-                          border: "none",
-                        },
-                        "& .MuiSlider-rail": {
-                          bgcolor: "#e0e0e0",
-                          opacity: 1,
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  {/* LABELS & INPUT BOXES */}
-                  <Stack
-                    direction='row'
-                    alignItems='center'
-                    justifyContent='space-evenly'
-                    mt={2}
-                    spacing={1}>
-                    <Typography
-                      fontSize='0.75rem'
-                      color='#666'
-                      whiteSpace='nowrap'>
-                      Giá tối thiểu
-                    </Typography>
                     <Box
+                      onClick={() => setActiveMap(true)}
                       sx={{
-                        width: "100px",
-                        height: 1,
-                        bgcolor: "#e0e0e0",
-                        mx: 1,
-                      }}
-                    />
-                    <Typography
-                      fontSize='0.75rem'
-                      color='#666'
-                      whiteSpace='nowrap'>
-                      Giá tối đa
-                    </Typography>
-                  </Stack>
-
-                  <Stack
-                    direction='row'
-                    alignItems='center'
-                    justifyContent='space-between'
-                    mt={1}
-                    spacing={2}>
-                    <Box
-                      sx={{
-                        flex: 1,
                         bgcolor: "white",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "50px",
+                        borderRadius: "12px",
                         px: 2,
-                        py: 1.5,
-                        textAlign: "center",
+                        py: 0.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        boxShadow: 1,
                         fontSize: "0.9rem",
                         fontWeight: 600,
-                        color: "#98b720",
+                        border: "1px solid rgba(152, 183, 32, 1)",
+                        color: "rgba(152, 183, 32, 1)",
+                        height: "40px",
+                        cursor: "pointer"
                       }}>
-                      {formatPrice(priceRange[0])}
+                      <LocationOnIcon
+                        sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }}
+                      />
+                      Xem trên bản đồ
                     </Box>
+                  </Box>
 
-                    {/* Dấu gạch ngang */}
-                    <Box
-                      sx={{
-                        color: "#666",
-                        fontSize: "1.2rem",
-                        fontWeight: 300,
-                      }}>
-                      —
-                    </Box>
+                  {/* KHOẢNG GIÁ */}
+                  <Stack>
+                    <Typography
+                      fontWeight={600}
+                      fontSize='1rem'
+                      color='#333'
+                      mb={2}>
+                      Khoảng giá
+                    </Typography>
+                    <Typography fontSize='0.8rem' color='#666' mb={2}>
+                      Giá phòng đã bao gồm mọi khoản phí
+                    </Typography>
 
-                    {/* Ô phải */}
-                    <Box
-                      sx={{
-                        flex: 1,
-                        bgcolor: "white",
-                        border: "1px solid #e0e0e0",
-                        borderRadius: "50px",
-                        px: 2,
-                        py: 1.5,
-                        textAlign: "center",
-                        fontSize: "0.9rem",
-                        fontWeight: 600,
-                        color: "#98b720",
-                      }}>
-                      {priceRange[1] >= 10000000
-                        ? "10.000.000đ+"
-                        : formatPrice(priceRange[1])}
-                    </Box>
-                  </Stack>
-                </Stack>
-                <Divider />
-
-                {/* ĐIỂM ĐÁNH GIÁ */}
-                <Stack>
-                  <Typography
-                    fontWeight={600}
-                    fontSize='1rem'
-                    color='#333'
-                    mb={1.5}>
-                    Điểm đánh giá
-                  </Typography>
-                  <Stack direction='row' flexWrap='wrap' gap={1}>
-                    {ratingList.map((rating, i) => (
-                      <Chip
-                        key={i}
-                        icon={
-                          <Box
-                            component='img'
-                            src={rating.active ? starActive : starInactive}
-                            sx={{ width: 16, height: 16 }}
-                          />
+                    {/* SLIDER */}
+                    <Box display={"flex"} justifyContent={"center"}>
+                      <Slider
+                        value={priceRange}
+                        onChange={(_, newValue) =>
+                          setPriceRange(newValue as [number, number])
                         }
-                        label={rating.label}
-                        onClick={() => handleRatingToggle(i)}
+                        valueLabelDisplay='off'
+                        min={0}
+                        max={10000000}
+                        step={10000}
                         sx={{
-                          bgcolor: rating.active ? "#f0f8f0" : "#fff",
-                          color: rating.active
-                            ? "#98b720"
-                            : "rgba(185, 189, 199, 1)",
-                          border: `1px solid ${rating.active ? "#98b720" : "#eee"
-                            }`,
-                          borderRadius: "50px",
-                          fontSize: "0.85rem",
-                          height: 36,
-                          fontWeight: rating.active ? 600 : 400,
-                          cursor: "pointer",
-                          "& .MuiChip-icon": { ml: 1 },
+                          color: "#98b720",
+                          width: "90%",
+                          height: 6,
+                          "& .MuiSlider-thumb": {
+                            width: 18,
+                            height: 18,
+                            bgcolor: "white",
+                            border: "3px solid #98b720",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                            "&:hover, &.Mui-focusVisible": {
+                              boxShadow: "0 0 0 8px rgba(152, 183, 32, 0.16)",
+                            },
+                          },
+                          "& .MuiSlider-track": {
+                            bgcolor: "#98b720",
+                            border: "none",
+                          },
+                          "& .MuiSlider-rail": {
+                            bgcolor: "#e0e0e0",
+                            opacity: 1,
+                          },
                         }}
                       />
-                    ))}
+                    </Box>
+
+                    {/* LABELS & INPUT BOXES */}
+                    <Stack
+                      direction='row'
+                      alignItems='center'
+                      justifyContent='space-evenly'
+                      mt={2}
+                      spacing={1}>
+                      <Typography
+                        fontSize='0.75rem'
+                        color='#666'
+                        whiteSpace='nowrap'>
+                        Giá tối thiểu
+                      </Typography>
+                      <Box
+                        sx={{
+                          width: "100px",
+                          height: 1,
+                          bgcolor: "#e0e0e0",
+                          mx: 1,
+                        }}
+                      />
+                      <Typography
+                        fontSize='0.75rem'
+                        color='#666'
+                        whiteSpace='nowrap'>
+                        Giá tối đa
+                      </Typography>
+                    </Stack>
+
+                    <Stack
+                      direction='row'
+                      alignItems='center'
+                      justifyContent='space-between'
+                      mt={1}
+                      spacing={2}>
+                      <Box
+                        sx={{
+                          flex: 1,
+                          bgcolor: "white",
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "50px",
+                          px: 2,
+                          py: 1.5,
+                          textAlign: "center",
+                          fontSize: "0.9rem",
+                          fontWeight: 600,
+                          color: "#98b720",
+                        }}>
+                        {formatPrice(priceRange[0])}
+                      </Box>
+
+                      {/* Dấu gạch ngang */}
+                      <Box
+                        sx={{
+                          color: "#666",
+                          fontSize: "1.2rem",
+                          fontWeight: 300,
+                        }}>
+                        —
+                      </Box>
+
+                      {/* Ô phải */}
+                      <Box
+                        sx={{
+                          flex: 1,
+                          bgcolor: "white",
+                          border: "1px solid #e0e0e0",
+                          borderRadius: "50px",
+                          px: 2,
+                          py: 1.5,
+                          textAlign: "center",
+                          fontSize: "0.9rem",
+                          fontWeight: 600,
+                          color: "#98b720",
+                        }}>
+                        {priceRange[1] >= 10000000
+                          ? "10.000.000đ+"
+                          : formatPrice(priceRange[1])}
+                      </Box>
+                    </Stack>
                   </Stack>
-                </Stack>
+                  <Divider />
 
-                <Divider />
-
-                {/* TIỆN ÍCH */}
-                <Stack>
-                  <Typography
-                    fontWeight={600}
-                    fontSize='1rem'
-                    color='#333'
-                    mb={1.5}>
-                    Tiện ích khách sạn
-                  </Typography>
-                  <Grid container spacing={1}>
-                    {amenityList.map((item, i) => (
-                      <Grid item xs={"auto"} key={i}>
+                  {/* ĐIỂM ĐÁNH GIÁ */}
+                  <Stack>
+                    <Typography
+                      fontWeight={600}
+                      fontSize='1rem'
+                      color='#333'
+                      mb={1.5}>
+                      Điểm đánh giá
+                    </Typography>
+                    <Stack direction='row' flexWrap='wrap' gap={1}>
+                      {ratingList.map((rating, i) => (
                         <Chip
+                          key={i}
                           icon={
                             <Box
                               component='img'
-                              src={item.active ? item.iconActive : item.icon}
-                              sx={{ width: 20, height: 20 }}
+                              src={rating.active ? starActive : starInactive}
+                              sx={{ width: 16, height: 16 }}
                             />
                           }
-                          label={item.label}
-                          onClick={() => handleAmenityToggle(i)}
+                          label={rating.label}
+                          onClick={() => handleRatingToggle(i)}
                           sx={{
-                            justifyContent: "flex-start",
-                            bgcolor: item.active ? "#f0f8f0" : "white",
-                            color: item.active
+                            bgcolor: rating.active ? "#f0f8f0" : "#fff",
+                            color: rating.active
                               ? "#98b720"
                               : "rgba(185, 189, 199, 1)",
-                            border: `1px solid ${item.active ? "#98b720" : "#eee"
+                            border: `1px solid ${rating.active ? "#98b720" : "#eee"
                               }`,
                             borderRadius: "50px",
-                            fontSize: "0.8rem",
-                            height: 40,
+                            fontSize: "0.85rem",
+                            height: 36,
+                            fontWeight: rating.active ? 600 : 400,
                             cursor: "pointer",
-                            fontWeight: item.active ? 600 : 400,
-                            "& .MuiChip-icon": { ml: 1.5, mr: 0.5 },
-                            "& .MuiChip-label": { px: 1 },
+                            "& .MuiChip-icon": { ml: 1 },
                           }}
                         />
-                      </Grid>
-                    ))}
-                  </Grid>
+                      ))}
+                    </Stack>
+                  </Stack>
+
+                  <Divider />
+
+                  {/* TIỆN ÍCH */}
+                  <Stack>
+                    <Typography
+                      fontWeight={600}
+                      fontSize='1rem'
+                      color='#333'
+                      mb={1.5}>
+                      Tiện ích khách sạn
+                    </Typography>
+                    <Grid container spacing={1}>
+                      {amenityList.map((item, i) => (
+                        <Grid item xs={"auto"} key={i}>
+                          <Chip
+                            icon={
+                              <Box
+                                component='img'
+                                src={item.active ? item.iconActive : item.icon}
+                                sx={{ width: 20, height: 20 }}
+                              />
+                            }
+                            label={item.label}
+                            onClick={() => handleAmenityToggle(i)}
+                            sx={{
+                              justifyContent: "flex-start",
+                              bgcolor: item.active ? "#f0f8f0" : "white",
+                              color: item.active
+                                ? "#98b720"
+                                : "rgba(185, 189, 199, 1)",
+                              border: `1px solid ${item.active ? "#98b720" : "#eee"
+                                }`,
+                              borderRadius: "50px",
+                              fontSize: "0.8rem",
+                              height: 40,
+                              cursor: "pointer",
+                              fontWeight: item.active ? 600 : 400,
+                              "& .MuiChip-icon": { ml: 1.5, mr: 0.5 },
+                              "& .MuiChip-label": { px: 1 },
+                            }}
+                          />
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Stack>
                 </Stack>
-              </Stack>
-            </Paper>
-          </Grid>
+              </Paper>
+            </Grid>
 
-          {/* ================= RIGHT: DANH SÁCH KHÁCH SẠN (DỌC) ================= */}
-          <Grid item xs={12} md={8} lg={8.4}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2,
-                mb: 2,
-              }}>
-              <Stack direction='row' alignItems='center' spacing={1}>
-                <Typography
-                  fontWeight={600}
-                  fontSize={{ xs: "0.95rem", sm: "1rem" }}>
-                  {loading ? (
-                    <CircularProgress
-                      size={14}
-                      sx={{ color: "#98b720", fontSize: "15px" }}
-                    />
-                  ) : (
-                    "100+"
-                  )}{" "}
-                  kết quả tìm kiếm
-                </Typography>
-              </Stack>
+            {/* ================= RIGHT: DANH SÁCH KHÁCH SẠN (DỌC) ================= */}
+            <Grid item xs={12} md={8} lg={8.4}>
+             {Object.keys(context.state.user).length == 0&& <PromotionBanner />}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
+                }}>
+                <Stack direction='row' alignItems='center' spacing={1}>
+                  <Typography
+                    fontWeight={600}
+                    fontSize={{ xs: "0.95rem", sm: "1rem" }}>
+                    {loading ? (
+                      <CircularProgress
+                        size={14}
+                        sx={{ color: "#98b720", fontSize: "15px" }}
+                      />
+                    ) : (
+                      "100+"
+                    )}{" "}
+                    kết quả tìm kiếm
+                  </Typography>
+                </Stack>
 
-              <SortButton />
-            </Box>
-            <ItemHotel dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} />
+                <SortButton />
+              </Box>
+              <ItemHotel dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} />
+            </Grid>
           </Grid>
-        </Grid>
-      </Stack>}
+        </Stack>}
     </Container>
   );
 };
 
 export default RoomsView;
 
-const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage,setCenter,center,setActiveMap ,getHotel})=>{
+const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage, setCenter, center, setActiveMap, getHotel }) => {
   const containerStyle = {
     width: '100%',
     height: '50vh',
-    
+
   };
-  
-  
+
+
   const mapRef = useRef(null);
 
   const [activeHotel, setActiveHotel] = useState(null);
@@ -511,18 +513,18 @@ const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
   // Khi map dừng di chuyển (drag, zoom…)
   const onIdle = () => {
     if (!mapRef.current) return;
-  
+
     const newCenter = mapRef.current.getCenter();
     const lat = newCenter.lat();
     const lng = newCenter.lng();
-  
+
     // kiểm tra nếu giống nhau thì không update
     if (Math.abs(center.lat - lat) < 0.000001 && Math.abs(center.lng - lng) < 0.000001) {
       return;
     }
-  
+
     setCenter({ lat, lng });
-    
+
   };
   const parseField = (value) => {
     try {
@@ -532,18 +534,19 @@ const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
     }
   };
   return <>
-  <Grid justifyContent={"space-between"} container>
-  <Grid item xs={5}>
-    
-    <Typography my={2} onClick={()=>{
-      getHotel()
-      setActiveMap(false)}} fontSize={"20px"} color="#48505E" display={"flex"} sx={{cursor:"pointer"}} alignItems={"center"} gap={1}><ArrowBackIosNewIcon sx={{fontSize:"19px"}} />Xem danh sách khách sạn </Typography>
-    <Box height={"50vh"} className="hidden-add-voice" sx={{overflowY:"scroll"}}>
-    <ItemHotel setActiveHotel={setActiveHotel} dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} isMap={true} />
-      </Box> 
-  </Grid>
-  <Grid item xs={6.8}>
-  <LoadScript googleMapsApiKey="AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc">
+    <Grid justifyContent={"space-between"} container>
+      <Grid item xs={5}>
+
+        <Typography my={2} onClick={() => {
+          getHotel()
+          setActiveMap(false)
+        }} fontSize={"20px"} color="#48505E" display={"flex"} sx={{ cursor: "pointer" }} alignItems={"center"} gap={1}><ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />Xem danh sách khách sạn </Typography>
+        <Box height={"50vh"} className="hidden-add-voice" sx={{ overflowY: "scroll" }}>
+          <ItemHotel setActiveHotel={setActiveHotel} dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} isMap={true} />
+        </Box>
+      </Grid>
+      <Grid item xs={6.8}>
+        <LoadScript googleMapsApiKey="AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc">
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
@@ -635,12 +638,12 @@ const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
             )}
           </GoogleMap>
         </LoadScript>
-  </Grid>
-  </Grid>
+      </Grid>
+    </Grid>
   </>
 }
 
-const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage ,isMap,setActiveHotel }) => {
+const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage, isMap, setActiveHotel }) => {
   const navigate = useNavigate()
   return <>
     {loading ? (
@@ -656,7 +659,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                 borderRadius: "16px",
                 overflow: "hidden",
                 bgcolor: "white",
-                height: { xs: 200, sm: isMap ?160:200 },
+                height: { xs: 200, sm: isMap ? 160 : 200 },
               }}>
               <Grid container>
                 {/* Ảnh + tag */}
@@ -665,7 +668,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                     <Skeleton
                       variant='rectangular'
                       width='100%'
-                      height={isMap ?"80%":'100%'}
+                      height={isMap ? "80%" : '100%'}
                       sx={{ borderRadius: "20px" }}
                     />
                     {/* <Box
@@ -719,7 +722,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
             {dataHotel.map((hotel, i) => (
               <Paper
                 key={i}
-                onClick={()=>isMap?setActiveHotel(hotel):navigate(`/room/${hotel.id}`)}
+                onClick={() => isMap ? setActiveHotel(hotel) : navigate(`/room/${hotel.id}`)}
                 elevation={0}
                 sx={{
                   borderRadius: "16px",
@@ -727,8 +730,8 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                   bgcolor: "white",
                   transition: "0.2s",
                   "&:hover": { boxShadow: 3 },
-                  height: { xs: 200, sm: isMap? "160px": "200px" },
-                  cursor:"pointer"
+                  height: { xs: 200, sm: isMap ? "160px" : "200px" },
+                  cursor: "pointer"
                 }}>
                 <Grid container>
                   {/* Ảnh */}
@@ -736,7 +739,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                     <Box
                       sx={{
                         position: "relative",
-                        height: { xs: 200, sm:isMap? "160px": "200px" },
+                        height: { xs: 200, sm: isMap ? "160px" : "200px" },
                       }}>
                       {hotel?.tag && (
                         <Box
@@ -854,7 +857,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                 </Grid>
               </Paper>
             ))}
-            {!isMap&&<Box display={"flex"} justifyContent={"center"}>
+            {!isMap && <Box display={"flex"} justifyContent={"center"}>
 
               <Pagination page={page} onChange={(e, value) => setPage(value)} sx={{
                 "& .MuiPaginationItem-root": {
@@ -873,7 +876,7 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
           <Box
             display={"flex"}
             justifyContent={"center"}
-            height={isMap?"40vh":"60vh"}
+            height={isMap ? "40vh" : "60vh"}
             alignItems={"center"}>
             <Box
               display={"flex"}
@@ -1016,3 +1019,92 @@ const SortButton = () => {
     </>
   );
 };
+
+import gift from "../../images/image 8.png"
+import { useBookingContext } from "../../App";
+
+
+function PromotionBanner() {
+  const navigate = useNavigate()
+  return (
+    <Box
+      sx={{
+
+        borderRadius: "16px",
+        // ĐÃ SỬA: thêm md và đóng ngoặc đúng
+        my: 2,
+        position: "relative",
+        overflow: "hidden",
+        background: "white"
+      }}
+    >
+      <Container maxWidth="lg">
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={{ xs: 3, md: 6 }}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          {/* Phần trái: quà + text */}
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={3}
+            alignItems="center"
+            textAlign={{ xs: "center", md: "left" }}
+            flex={1}
+          >
+            {/* Icon quà tặng */}
+            <Box
+              sx={{
+                fontSize: { xs: 80, md: 80 },
+                color: "#e91e63",
+               
+               
+              }}
+            >
+              {/* Nếu bạn có hình quà tặng thì dùng, không thì dùng icon */}
+              <img
+                src={gift}
+                alt="Quà tặng"
+                style={{ width: "100%", height: "auto", maxWidth: "120px" }}
+              />
+              {/* Hoặc dùng icon MUI nếu không có ảnh */}
+              {/* <Gift sx={{ fontSize: "inherit" }} /> */}
+            </Box>
+
+            <Box>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                color="#2B2F38"
+                gutterBottom
+                sx={{ lineHeight: 1.3,fontSize:"17px" }}
+              >
+                Nhận ưu đãi đặc biệt - khi đăng ký tài khoản ngay !
+              </Typography>
+              <Typography fontSize={"12px"} color="#5D6679">
+                Hãy đăng ký ngay tài khoản để nhận ưu đãi đặc biệt và trải nghiệm tốt nhất từ chúng tôi
+              </Typography>
+            </Box>
+          </Stack>
+
+          {/* Nút Đăng ký ngay */}
+          <Button
+            onClick={() => { navigate("/register") }}
+            variant="contained"
+            sx={{
+              bgcolor: "#98b720",
+              color: "white",
+              borderRadius: "16px",
+              px: 3,
+              py: 1.2,
+              textTransform: "none",
+            }}
+          >
+            Đăng ký ngay
+          </Button>
+        </Stack>
+      </Container>
+    </Box>
+  );
+}

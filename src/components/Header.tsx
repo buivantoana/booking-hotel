@@ -15,11 +15,12 @@ import {
   Divider,
   Container,
   Button,
+  Chip,
 } from "@mui/material";
-import { Menu as MenuIcon, Person as PersonIcon } from "@mui/icons-material";
+import { Delete, Menu as MenuIcon, MoreVert, Person as PersonIcon } from "@mui/icons-material";
 import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import DehazeIcon from '@mui/icons-material/Dehaze';
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -28,6 +29,7 @@ const Header = () => {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [locationAddress, setLocationAddress] = useState([]);
   const context: any = useBookingContext();
   const navigate = useNavigate()
@@ -106,42 +108,106 @@ const Header = () => {
             <Box>
               {Object.keys(context.state.user).length > 0 ?
                 <UserDropdownMenuV2 context={context} /> :
-                <Box>
-                  <Button
-                onClick={()=>{navigate("/login")}}
-                variant="outlined"
-                sx={{
-                  border:"none",
-                  color: "#5D6679",
-                  borderRadius: "16px",
-                  px: 3,
-                  py: 1.2,
-                  textTransform: "none",
-                }}
-              >
-                 Đăng nhập
-             
-              </Button>
-                  <Button
-                onClick={()=>{navigate("/register")}}
-                variant="contained"
-                sx={{
-                  bgcolor: "#98b720",
-                  color: "white",
-                  borderRadius: "16px",
-                  px: 3,
-                  py: 1.2,
-                  textTransform: "none",
-                }}
-              >
-                Đăng ký
-              </Button>
-                </Box>
-              }
-            </Box>
 
-            {/* MOBILE MENU */}
-            {/* <Menu
+                <>
+                  {location.pathname == "/" ?
+                    <Box>
+                      <Button
+                        onClick={() => { navigate("/login") }}
+                        variant="outlined"
+                        sx={{
+                          border: "none",
+                          color: "#5D6679",
+                          borderRadius: "16px",
+                          px: 3,
+                          py: 1.2,
+                          textTransform: "none",
+                        }}
+                      >
+                        Đăng nhập
+
+                      </Button>
+                      <Button
+                        onClick={() => { navigate("/register") }}
+                        variant="contained"
+                        sx={{
+                          bgcolor: "#98b720",
+                          color: "white",
+                          borderRadius: "16px",
+                          px: 3,
+                          py: 1.2,
+                          textTransform: "none",
+                        }}
+                      >
+                        Đăng ký
+                      </Button>
+                    </Box> : <>
+                      
+
+                        <IconButton
+                          onClick={(e) => setMenuAnchor(e.currentTarget)}
+                          size='small'>
+                          <DehazeIcon sx={{ color: "rgba(93, 102, 121, 1)" }} />
+                        </IconButton>
+
+                        <Menu
+                          anchorEl={menuAnchor}
+                          anchorOrigin={{
+                            vertical: "bottom",
+                            horizontal: "right",
+                          }}
+                          transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                          }}
+                          open={Boolean(menuAnchor)}
+                          onClose={() => setMenuAnchor(null)}
+                          PaperProps={{
+                            sx: {
+                              borderRadius: "12px",
+                              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                              mt: 1,
+                              padding: 0,
+                            },
+                          }}>
+                          <MenuItem
+                          sx={{width:"150px"}}
+                            >
+                              
+                            <ListItemText onClick={() => {
+                              
+                              setMenuAnchor(null);
+                              navigate("/login")
+                            }}>
+                              <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
+                              Đăng nhập
+                              </Typography>
+                            </ListItemText>
+                           
+                          </MenuItem>
+                          <MenuItem
+                            >
+                              
+                            
+                            <ListItemText onClick={() => {
+                              
+                              setMenuAnchor(null);
+                              navigate("/register")
+                            }}>
+                              <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
+                              Đăng ký
+                              </Typography>
+                            </ListItemText>
+                          </MenuItem>
+                        </Menu>
+
+                      </>}
+                    </>
+                  }
+                </Box>
+
+              {/* MOBILE MENU */}
+              {/* <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}

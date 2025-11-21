@@ -30,7 +30,11 @@ import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import vn from "../../images/VN - Vietnam.png";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useBookingContext } from "../../App";
+import { Login, checkUser } from "../../service/admin";
+import { toast } from "react-toastify";
+import { MuiOtpInput } from "mui-one-time-password-input";
 interface Room {
   id: number;
   name: string;
@@ -62,7 +66,7 @@ const RoomCard = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const context = useBookingContext()
   const sliderRef = useRef<any>(null);
   const settings = {
     dots: true,
@@ -310,9 +314,11 @@ const RoomCard = ({
           {!isSoldOut && (
             <Button
               variant='contained'
-              onClick={() => {
+              onClick={Object.keys(context.state.user).length > 0?() => {
                 setSelectedRoom(room)
                 setOpenDetail(true)
+              }:()=>{
+                setOpenModal(true)
               }}
               sx={{
                 bgcolor: "#98b720",
@@ -345,9 +351,14 @@ const RoomCard = ({
 const RoomList = ({ loading, data,hotel }) => {
 
   const [openModal, setOpenModal] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("123456789");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [openDetail, setOpenDetail] = useState(false)
+  const [touched, setTouched] = useState(false);
+  const [password,setPassword] = useState(false)
+  const isValidPhone = (phoneNumber) => {
+    return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
+  };
   console.log("AAA data", data)
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
@@ -374,6 +385,7 @@ const RoomList = ({ loading, data,hotel }) => {
               p: 4,
               overflow: "auto",
             }}>
+             {password?<PinCreation setOpenModal={setOpenModal} phoneNumber={phoneNumber}/>: <>
             <Stack
               direction='row'
               justifyContent='space-between'
@@ -392,63 +404,95 @@ const RoomList = ({ loading, data,hotel }) => {
               Số điện thoại
             </Typography>
             <TextField
-              fullWidth
-              placeholder='Nhập số điện thoại'
-              variant='outlined'
-              value={phoneNumber}
-              onChange={(e) =>
-                setPhoneNumber(e.target.value.replace(/\D/g, ""))
-              }
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position='start'>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 0.5,
-                      }}>
+                fullWidth
+                placeholder="Nhập số điện thoại"
+                variant="outlined"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onBlur={() => setTouched(true)}   // chỉ validate khi blur
+                error={touched && !isValidPhone(phoneNumber)}
+                helperText={
+                  touched && !isValidPhone(phoneNumber)
+                    ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
+                    : ""
+                }
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "& fieldset": {
+                      borderColor: "#e0e0e0",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#98b720",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#98b720",
+                      borderWidth: 1.5,
+                    },
+                  },
+                  "& input": {
+                    py: 1.5,
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
                       <img
                         src={vn}
-                        alt='VN'
+                        alt="vn"
                         style={{
-                          width: 32,
-                          borderRadius: 3,
+                          width: 28,
+                          height: 20,
+                          borderRadius: 4,
                           objectFit: "cover",
+                          marginRight: 8,
                         }}
                       />
-                      <Typography variant='body2' color='text.primary'>
-                        +84
-                      </Typography>
-                    </Box>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                mb: 3,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-                  height: "60px",
-                  backgroundColor: "#fff",
-                  "& fieldset": {
-                    borderColor: "#e0e0e0",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#bdbdbd",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#ff7a00",
-                    borderWidth: 1.5,
-                  },
-                },
-                "& input": {
-                  py: 1.5,
-                },
-              }}
-            />
+                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>+84</Typography>
+                    </InputAdornment>
+                  ),
+                  endAdornment:
+                    touched && !isValidPhone(phoneNumber) ? (
+                      <InputAdornment position="end">
+                        <Box
+                          sx={{
+                            cursor: "pointer",
+                            fontSize: 22,
+                            color: "#999",
+                          }}
+                          onClick={() => {
+                            setPhoneNumber("");
+                            setTouched(false); // reset error khi xóa
+                          }}
+                        >
+                          ✕
+                        </Box>
+                      </InputAdornment>
+                    ) : null,
+                }}
+              />
             <Button
               fullWidth
+              onClick={async () => {
+                try {
+                  let result = await checkUser({
+                    "type": "phone",
+                    "value": "0"+phoneNumber
+                })
+                if(result.code == "OK"){
+                  setPassword(true)
+                }else{
+                  toast.error(result.message)
+                }
+                } catch (error) {
+                  console.log(error)
+                }
+              }}
               variant='outlined'
+              disabled={!phoneNumber || !isValidPhone(phoneNumber)}
               sx={{
                 mt: 2,
                 borderColor: "#98b720",
@@ -471,6 +515,7 @@ const RoomList = ({ loading, data,hotel }) => {
                 Đăng ký ngay
               </Typography>
             </Typography>
+              </>}
           </Box>
         </Modal>
         <RoomDetailModal open={openDetail} hotel={hotel} onClose={() => setOpenDetail(false)} room={selectedRoom} />
@@ -795,3 +840,209 @@ const RoomDetailModal = ({ open, onClose, room,hotel }) => {
 };
 
 
+
+const PinCreation = ({phoneNumber,setOpenModal}) => {
+  const [pin, setPin] = useState("");
+  const [showPin, setShowPin] = useState(false);
+  const navigate = useNavigate()
+  const context = useBookingContext()
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    if (pin.length === 6 ) {
+      let result = await Login({
+        "platform": "ios",
+        "type": "phone",
+        "value": "0"+phoneNumber,
+        "password": pin
+    })
+    if(result.access_token){
+      localStorage.setItem("access_token",result.access_token)
+      localStorage.setItem("refresh_token",result.refresh_token)
+      localStorage.setItem("user",JSON.stringify(result.user))
+      context.dispatch({
+        type: "LOGIN",
+        payload: {
+          ...context.state,
+          user: { ...result.user },
+        },
+      });
+
+      toast.success("Login success")
+      setOpenModal(false)
+    }else{
+      toast.error(result.message)
+    }
+     
+    }
+  };
+
+  const toggleShowPin = () => setShowPin(!showPin);
+
+  return (
+  
+          <Box
+            sx={{
+              
+              display: "flex",
+              flexDirection: "column",
+              width: { xs: "100%", sm: "400px", md: "486px" },
+              
+            }}
+          >
+            {/* TITLE */}
+
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: { xs: "26px", md: "30px" },
+                  fontWeight: 700,
+                  mb: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <ArrowBackIosNewIcon />
+                Hi,+84{phoneNumber}
+              </Typography>
+            </Box>
+
+            {/* DESCRIPTION */}
+
+            {/* PIN INPUT FORM */}
+            <Box component="form" onSubmit={handleSubmit}>
+              {/* NHẬP MÃ PIN */}
+              <Box display={"flex"} mb={2} justifyContent={"space-between"}>
+                <Typography fontSize={14} color="#5D6679" fontWeight={500} mb={1.5}>
+                  Mã PIN của sẽ được dùng để đăng nhập
+                </Typography>
+                <Typography
+                  color="#5D6679"
+                  onClick={toggleShowPin}
+                  fontSize={14}
+                  sx={{
+
+                    cursor: "pointer",
+                    mb: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  {showPin ? "Ẩn" : "Hiện"}
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  mb: 3,
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <MuiOtpInput
+                  value={pin}
+                  onChange={setPin}
+                  length={6}
+                  TextFieldsProps={{
+                    type: showPin ? "text" : "password",
+                    inputProps: { maxLength: 1 },
+                  }}
+                  sx={{
+                    gap: 1.5,
+                    width: "100%",
+                    justifyContent: "space-between",
+                    "& .MuiOtpInput-TextField": {
+                      "& .MuiOutlinedInput-root": {
+                        width: { xs: 50, sm: 60 },
+                        height: { xs: 50, sm: 60 },
+                        borderRadius: "16px",
+                        backgroundColor: "#fff",
+                        "& fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#7cb400",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                      },
+                      "& input": {
+                        textAlign: "center",
+                        fontSize: { xs: "20px", sm: "24px" },
+                        fontWeight: 700,
+                        color: "#9AC700",
+                        "&::placeholder": {
+                          color: "#9AC700",
+                          opacity: 0.6,
+                        },
+                      },
+                    },
+                  }}
+                />
+
+
+              </Box>
+
+              <Typography
+                variant="body2"
+                sx={{
+                  mb: 4,
+                  color: "#FF7A00",
+                  fontSize: "14px",
+                  fontWeight: 500,
+
+                }}
+              >
+                <Link
+                  href="#"
+                  sx={{
+                    cursor: "pointer",
+                    color: "#FF7A00",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Quên mã PIN?
+                </Link>
+              </Typography>
+
+            
+
+
+              <Button
+                type="submit"
+                fullWidth
+                disabled={pin.length !== 6 }
+                sx={{
+                  py: 1.6,
+                  borderRadius: "30px",
+                  backgroundColor:
+                    pin.length === 6 
+                      ? "#9AC700"
+                      : "#e0e0e0",
+                  color:
+                    pin.length === 6  ? "#fff" : "#888",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "18px",
+                  height: "56px",
+                  "&:hover": {
+                    backgroundColor:
+                      pin.length === 6 
+                        ? "#7cb400"
+                        : "#e0e0e0",
+                  },
+                }}
+              >
+                Tiếp tục
+              </Button>
+            </Box>
+          </Box>
+   
+  );
+};
