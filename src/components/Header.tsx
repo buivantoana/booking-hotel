@@ -101,7 +101,7 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {location.pathname == "/rooms" && (
+            {(location.pathname == "/rooms" || location.pathname.includes("/room"))&& (
               <SearchBarWithDropdownHeader locationAddress={locationAddress} />
             )}
             {/* RIGHT: AVATAR */}
