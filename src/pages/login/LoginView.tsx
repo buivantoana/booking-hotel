@@ -20,41 +20,54 @@ import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
 import vn from "../../images/VN - Vietnam.png";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import { Login, checkUser } from "../../service/admin";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useBookingContext } from "../../App";
 
 const LoginView = () => {
   const theme = useTheme();
-  const [currentStep, setCurrentStep] = useState("pin"); // 'register' or 'otp'
-  const [phoneNumber, setPhoneNumber] = useState("123456789");
-  const [name, setName] = useState("");
-  const [birthDate, setBirthDate] = useState("");
-  const [otp, setOtp] = useState("2222");
-  const [timer, setTimer] = useState(55);
-  const [isResendEnabled, setIsResendEnabled] = useState(false);
+  const [currentStep, setCurrentStep] = useState("register"); // 'register' or 'pin'
+  const [phoneNumber, setPhoneNumber] = useState("");
 
-  // Timer countdown
-  useEffect(() => {
-    if (timer > 0 && currentStep === "otp") {
-      const countdown = setTimeout(() => setTimer(timer - 1), 1000);
-      return () => clearTimeout(countdown);
-    } else if (timer === 0) {
-      setIsResendEnabled(true);
-    }
-  }, [timer, currentStep]);
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (phoneNumber && name && birthDate) {
-      setCurrentStep("otp");
-      setTimer(55);
-      setIsResendEnabled(false);
+
+
+  return (
+    <>
+      {currentStep === "register" && <RegistrationForm setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
+
+      {currentStep === "pin" && <PinCreation phoneNumber={phoneNumber} />}
+    </>)
+};
+
+export default LoginView;
+const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
+ 
+  const [touched, setTouched] = useState(false);
+
+  const handleRegister = async () => {
+    try {
+      let result = await checkUser({
+        "type": "phone",
+        "value": "0"+phoneNumber
+    })
+    if(result.code == "OK"){
+      setCurrentStep("pin")
+    }else{
+      toast.error(result.message)
     }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  const isValidPhone = (phoneNumber) => {
+    return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
-
-  
-  const RegistrationForm = () => (
+  return (
     <Container
-      maxWidth='xl'
-      sx={{ height: "100vh", display: "flex", alignItems: "center" }}>
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 5 }}>
       <Grid
         container
         sx={{
@@ -69,7 +82,7 @@ const LoginView = () => {
           sx={{
             display: { xs: "none", md: "flex" },
             justifyContent: "center",
-            alignItems: "center",
+            alignItems: "start",
           }}>
           <Box
             component='img'
@@ -84,64 +97,44 @@ const LoginView = () => {
         </Grid>
 
         {/* RIGHT FORM */}
-        <Grid item xs={12} md={6}>
+        <Grid item sx={{ display: "flex", justifyContent: "end" }} xs={12} md={6}>
           <Box
             sx={{
-              px: { xs: 3, sm: 4, md: 8 },
+              px: { xs: 3, sm: 4, md: 0 },
               display: "flex",
               flexDirection: "column",
               width: { xs: "100%", sm: "400px", md: "486px" },
-              mx: "auto",
+
             }}>
             <Typography
               sx={{ fontSize: { xs: "28px", md: "32px" } }}
               fontWeight={700}
               mb={1}>
-             Hotel Booking xin chào!
+              Hotel Booking xin chào!
             </Typography>
 
             <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
-            Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
+              Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
             </Typography>
 
-            <Box component='form' onSubmit={handleRegister}>
+            <Box  >
               {/* SỐ ĐIỆN THOẠI */}
               <Typography fontSize={14} fontWeight={500} mb={0.5}>
                 Số điện thoại
               </Typography>
               <TextField
                 fullWidth
-                placeholder='Nhập số điện thoại'
-                variant='outlined'
+                placeholder="Nhập số điện thoại"
+                variant="outlined"
                 value={phoneNumber}
-                onChange={(e) =>
-                  setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onBlur={() => setTouched(true)}   // chỉ validate khi blur
+                error={touched && !isValidPhone(phoneNumber)}
+                helperText={
+                  touched && !isValidPhone(phoneNumber)
+                    ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
+                    : ""
                 }
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position='start'>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                        }}>
-                        <img
-                          src={vn}
-                          alt='VN'
-                          style={{
-                            width: 32,
-                            borderRadius: 3,
-                            objectFit: "cover",
-                          }}
-                        />
-                        <Typography variant='body2' color='text.primary'>
-                          +84
-                        </Typography>
-                      </Box>
-                    </InputAdornment>
-                  ),
-                }}
                 sx={{
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
@@ -152,10 +145,10 @@ const LoginView = () => {
                       borderColor: "#e0e0e0",
                     },
                     "&:hover fieldset": {
-                      borderColor: "#bdbdbd",
+                      borderColor: "#98b720",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#ff7a00",
+                      borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
                   },
@@ -163,43 +156,81 @@ const LoginView = () => {
                     py: 1.5,
                   },
                 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <img
+                        src={vn}
+                        alt="vn"
+                        style={{
+                          width: 28,
+                          height: 20,
+                          borderRadius: 4,
+                          objectFit: "cover",
+                          marginRight: 8,
+                        }}
+                      />
+                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>+84</Typography>
+                    </InputAdornment>
+                  ),
+                  endAdornment:
+                    touched && !isValidPhone(phoneNumber) ? (
+                      <InputAdornment position="end">
+                        <Box
+                          sx={{
+                            cursor: "pointer",
+                            fontSize: 22,
+                            color: "#999",
+                          }}
+                          onClick={() => {
+                            setPhoneNumber("");
+                            setTouched(false); // reset error khi xóa
+                          }}
+                        >
+                          ✕
+                        </Box>
+                      </InputAdornment>
+                    ) : null,
+                }}
               />
 
+
+
               {/* TÊN */}
-             
+
 
               {/* NGÀY SINH */}
-             
+
 
               {/* AGREEMENT */}
-              
+
 
               {/* REGISTER BUTTON */}
               <Button
-                type='submit'
+               onClick={handleRegister}
                 variant='contained'
                 fullWidth
-                disabled={!phoneNumber || !name || !birthDate}
+                disabled={!phoneNumber || !isValidPhone(phoneNumber)}
                 sx={{
                   mb: 3,
                   py: 1.5,
                   borderRadius: "16px",
                   backgroundColor:
-                    !phoneNumber || !name || !birthDate ? "#e0e0e0" : "#ff7a00",
-                  color: !phoneNumber || !name || !birthDate ? "#888" : "#fff",
+                    !phoneNumber ? "#e0e0e0" : "#98b720",
+                  color: !phoneNumber ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
                     backgroundColor:
-                      !phoneNumber || !name || !birthDate
+                      !phoneNumber
                         ? "#e0e0e0"
-                        : "#e66a00",
+                        : "#98b720",
                   },
                   boxShadow: "none",
                 }}>
-               Đăng nhập
+                Đăng nhập
               </Button>
 
               <Typography
@@ -266,7 +297,7 @@ const LoginView = () => {
 
               {/* LOGIN LINK */}
               <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
-              Bạn chưa có tài khoản Booking Hotel?
+                Bạn chưa có tài khoản Booking Hotel?
                 <Link
                   href='#'
                   sx={{
@@ -283,46 +314,51 @@ const LoginView = () => {
         </Grid>
       </Grid>
     </Container>
-  );
-
-  return (
-  <>
-    {currentStep === "register" && <RegistrationForm />}
-    
-    {currentStep === "pin" && <PinCreation />}
-  </>)
+  )
 };
 
-export default LoginView;
-
-// PIN Creation Component
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import IconButton from '@mui/material/IconButton';
-
-// ... trong PinCreation component
-
-const PinCreation = () => {
+const PinCreation = ({phoneNumber}) => {
   const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
   const [showPin, setShowPin] = useState(false);
-  const [showConfirmPin, setShowConfirmPin] = useState(false);
-
-  const handleSubmit = (e) => {
+  const navigate = useNavigate()
+  const context = useBookingContext()
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    if (pin.length === 6 && pin === confirmPin) {
-      console.log("PIN created:", pin);
-      // Handle success
+    if (pin.length === 6 ) {
+      let result = await Login({
+        "platform": "ios",
+        "type": "phone",
+        "value": "0"+phoneNumber,
+        "password": pin
+    })
+    if(result.access_token){
+      localStorage.setItem("access_token",result.access_token)
+      localStorage.setItem("refresh_token",result.refresh_token)
+      localStorage.setItem("user",JSON.stringify(result.user))
+      context.dispatch({
+        type: "LOGIN",
+        payload: {
+          ...context.state,
+          user: { ...result.user },
+        },
+      });
+      toast.success("Login success")
+      setTimeout(()=>{
+        navigate("/")
+      },300)
+    }else{
+      toast.error(result.message)
+    }
+     
     }
   };
 
   const toggleShowPin = () => setShowPin(!showPin);
-  const toggleShowConfirmPin = () => setShowConfirmPin(!showConfirmPin);
 
   return (
     <Container
-      maxWidth="xl"
-      sx={{ height: "100vh", display: "flex", alignItems: "center" }}
+      maxWidth="lg"
+      sx={{ display: "flex", alignItems: "center",py:8 }}
     >
       <Grid
         container
@@ -355,60 +391,60 @@ const PinCreation = () => {
         </Grid>
 
         {/* RIGHT PIN FORM */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
           <Box
             sx={{
-              px: { xs: 3, sm: 4, md: 8 },
+              
               display: "flex",
               flexDirection: "column",
               width: { xs: "100%", sm: "400px", md: "486px" },
-              mx: "auto",
+              
             }}
           >
             {/* TITLE */}
 
             <Box>
-            <Typography
-              sx={{
-                fontSize: { xs: "26px", md: "30px" },
-                fontWeight: 700,
-                mb: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              <ArrowBackIosNewIcon />
-              Tạo mã PIN của bạn
-            </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: "26px", md: "30px" },
+                  fontWeight: 700,
+                  mb: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <ArrowBackIosNewIcon />
+                Tạo mã PIN của bạn
+              </Typography>
             </Box>
 
             {/* DESCRIPTION */}
-           
+
             {/* PIN INPUT FORM */}
             <Box component="form" onSubmit={handleSubmit}>
               {/* NHẬP MÃ PIN */}
               <Box display={"flex"} mb={2} justifyContent={"space-between"}>
-              <Typography fontSize={14} color="#5D6679" fontWeight={500} mb={1.5}>
-              Mã PIN của sẽ được dùng để đăng nhập
-              </Typography>
-              <Typography
-              color="#5D6679"
-               onClick={toggleShowPin}
-               fontSize={14}
-              sx={{
-               
-                cursor:"pointer",
-                mb: 1,
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
-              {showPin ? "Ẩn" : "Hiện"}
-            </Typography>
+                <Typography fontSize={14} color="#5D6679" fontWeight={500} mb={1.5}>
+                  Mã PIN của sẽ được dùng để đăng nhập
+                </Typography>
+                <Typography
+                  color="#5D6679"
+                  onClick={toggleShowPin}
+                  fontSize={14}
+                  sx={{
+
+                    cursor: "pointer",
+                    mb: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  {showPin ? "Ẩn" : "Hiện"}
+                </Typography>
               </Box>
-              
+
               <Box
                 sx={{
                   mb: 3,
@@ -428,8 +464,8 @@ const PinCreation = () => {
                   }}
                   sx={{
                     gap: 1.5,
-                    width:"100%",
-                    justifyContent:"space-between",
+                    width: "100%",
+                    justifyContent: "space-between",
                     "& .MuiOtpInput-TextField": {
                       "& .MuiOutlinedInput-root": {
                         width: { xs: 50, sm: 60 },
@@ -461,8 +497,8 @@ const PinCreation = () => {
                     },
                   }}
                 />
-             
-               
+
+
               </Box>
 
               <Typography
@@ -472,7 +508,7 @@ const PinCreation = () => {
                   color: "#FF7A00",
                   fontSize: "14px",
                   fontWeight: 500,
-                  
+
                 }}
               >
                 <Link
@@ -487,41 +523,29 @@ const PinCreation = () => {
                 </Link>
               </Typography>
 
-              {/* ERROR MESSAGE */}
-              {confirmPin && pin !== confirmPin && (
-                <Typography
-                  sx={{
-                    color: "#f44336",
-                    fontSize: "14px",
-                    mb: 2,
-                    fontWeight: 500,
-                  }}
-                >
-                  Mã PIN không khớp. Vui lòng nhập lại.
-                </Typography>
-              )}
+            
 
-             
+
               <Button
                 type="submit"
                 fullWidth
-                disabled={pin.length !== 6 || pin !== confirmPin}
+                disabled={pin.length !== 6 }
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
                   backgroundColor:
-                    pin.length === 6 && pin === confirmPin
+                    pin.length === 6 
                       ? "#9AC700"
                       : "#e0e0e0",
                   color:
-                    pin.length === 6 && pin === confirmPin ? "#fff" : "#888",
+                    pin.length === 6  ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
                     backgroundColor:
-                      pin.length === 6 && pin === confirmPin
+                      pin.length === 6 
                         ? "#7cb400"
                         : "#e0e0e0",
                   },

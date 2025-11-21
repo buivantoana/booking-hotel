@@ -35,7 +35,7 @@ import SwapVertIcon from "@mui/icons-material/SwapVert";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import CheckIcon from "@mui/icons-material/Check";
-
+import no_room from "../../images/No Navigation.svg";
 import building from "../../images/building.png";
 import remove from "../../images/delete.png";
 import { format } from "date-fns";
@@ -837,9 +837,13 @@ export default function MyBookingsPage({
 
       <Box>
         {filtered.length === 0 ? (
-          <Typography textAlign='center' color='#999' mt={8} fontSize='1.1rem'>
-            Bạn chưa có lịch sử đặt phòng
+          <Box display={"flex"} flexDirection={"column"} gap={3}mt={8} alignItems={"center"} justifyContent={"center"}>
+          <img src={no_room} alt="" />
+          <Typography textAlign='center' color='#999'  fontSize='1.1rem'>
+            Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi đặc biệt.
           </Typography>
+          
+          </Box>
         ) : (
           filtered.map((booking) => (
             <BookingCard

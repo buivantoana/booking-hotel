@@ -48,6 +48,8 @@ import MyBookingsPage from "./MyBookingsPage";
 import dayjs from "dayjs";
 import { cancelBooking } from "../../service/booking";
 import { toast } from "react-toastify";
+import { useBookingContext } from "../../App";
+import { useNavigate } from "react-router-dom";
 const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -55,12 +57,14 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
   const [activeMenu, setActiveMenu] = useState("Hồ sơ của tôi");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailBooking, setDetailBooking] = useState(null);
+  const navigate = useNavigate()
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
     { text: "Đặt phòng của tôi", icon: <RoomIcon />, active: true },
     { text: "Đăng xuất", icon: <LogoutIcon />, active: false },
   ];
+  const context = useBookingContext()
   useEffect(() => {
     if (detailBooking) {
       setDetailBooking(
@@ -231,16 +235,16 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
       ? payment.status === "success"
         ? "Đã thanh toán"
         : payment.status === "failed"
-        ? "Thanh toán thất bại"
-        : "Chưa thanh toán"
+          ? "Thanh toán thất bại"
+          : "Chưa thanh toán"
       : "Trả tại khách sạn";
 
     const paymentMethodLabel = payment?.method
       ? payment.method === "momo"
         ? "Ví MoMo"
         : payment.method === "vnpay"
-        ? "VNPay"
-        : "Trả tại khách sạn"
+          ? "VNPay"
+          : "Trả tại khách sạn"
       : "Trả tại khách sạn";
 
     const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
@@ -742,7 +746,21 @@ const ProfileView = ({ historyBooking, getHistoryBooking, hastag }) => {
             flexDirection: "column",
           }}>
           <Button
-            onClick={() => setDeleteDialogOpen(true)}
+            onClick={() => {
+              localStorage.removeItem("user");
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+
+              context.dispatch({
+                type: "LOGOUT",
+                payload: {
+                  ...context.state,
+                  user: {},
+                },
+              });
+              navigate("/")
+              setDeleteDialogOpen(true)
+            }}
             variant='contained'
             sx={{
               borderRadius: "24px",

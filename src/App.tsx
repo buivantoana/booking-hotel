@@ -21,26 +21,6 @@ const reducer = (state: any, action: any) => {
         ...state,
         user: action.payload.user,
       };
-    case "HISTORY":
-      return {
-        ...state,
-        history: action.payload.history,
-      };
-    case "PAYMENT":
-      return {
-        ...state,
-        user: action.payload.user,
-      };
-    case "TTS_TEXT":
-      return {
-        ...state,
-        tts_text: action.payload.tts_text,
-      };
-    case "TTS_STORY":
-      return {
-        ...state,
-        tts_story: action.payload.tts_story,
-      };
     case "LOGOUT":
       return {
         ...state,
@@ -58,28 +38,20 @@ const App = () => {
     tts_story: "",
   });
   let user = localStorage.getItem("user");
-
-  // useEffect(() => {
-  //   if (user) {
-  //     (async () => {
-  //       let infor = await getInfo({
-  //         user_id: JSON.parse(user).phone
-  //           ? JSON.parse(user).phone
-  //           : JSON.parse(user).user_id,
-  //       });
-  //       if (infor.code == 0) {
-  //         console.log("AAAA USER====", { ...JSON.parse(user), ...infor.data });
-  //         dispatch({
-  //           type: "LOGIN",
-  //           payload: {
-  //             ...state,
-  //             user: { ...JSON.parse(user), ...infor.data },
-  //           },
-  //         });
-  //       }
-  //     })();
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (user) {
+      (async () => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              ...state,
+              user: { ...JSON.parse(user) },
+            },
+          });
+        
+      })();
+    }
+  }, [user]);
   // console.log("AAAA state ====", state);
   return (
     <div>
@@ -98,5 +70,5 @@ const App = () => {
     </div>
   );
 };
-export const useCoursesContext = () => useContext(coursesContext);
+export const useBookingContext = () => useContext(coursesContext);
 export default App;

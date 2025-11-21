@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import HomeView from "./HomeView";
 import { getLocation, searchHotel } from "../../service/hotel";
-
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Close } from "@mui/icons-material";
+import success from "../../images/Capa_1.png"
+import { useLocation, useSearchParams } from "react-router-dom";
 type Props = {};
 
 const HomeController = (props: Props) => {
@@ -11,7 +14,17 @@ const HomeController = (props: Props) => {
   const [toprated, setToprated] = useState([]);
   const [recommend, setRecommend] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [registerSuccessOpen, setRegisterSuccessOpen] = useState(false);
+  const [searchParams,setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("msg") === "success") {
 
+      setRegisterSuccessOpen(true)
+      searchParams.delete("msg");
+      searchParams.delete("from");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams]);
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -45,6 +58,7 @@ const HomeController = (props: Props) => {
     })();
   }, []);
   return (
+    <>
     <HomeView
       newHotel={newHotel}
       toprated={toprated}
@@ -52,7 +66,70 @@ const HomeController = (props: Props) => {
       recommend={recommend}
       location={location}
       loading={loading}
-    />
+    
+      />
+       <Dialog
+        open={registerSuccessOpen}
+        onClose={() => setRegisterSuccessOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={success} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setRegisterSuccessOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='18px' mb={1}>
+          Tạo tài khoản thành công
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+          Bạn có thể đùng mã PIN mới để đăng nhập tài khoản
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={() => {
+              setRegisterSuccessOpen(false)
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            Đồng ý
+          </Button>
+         
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

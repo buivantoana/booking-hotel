@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useCoursesContext } from "../App";
+import { useBookingContext } from "../App";
 import RegisterController from "../pages/register/RegisterController";
 import LoginController from "../pages/login/LoginController";
 import HomeController from "../pages/home/HomeController";
@@ -9,22 +9,24 @@ import CheckOutController from "../pages/check_out/CheckOutController";
 import PaymentResultController from "../pages/payment_result/PaymentResultController";
 import ProfileController from "../pages/profile/ProfileController";
 import LayoutWebsite from "../components/layouts/LayoutWebsite";
+import PrivateRouter from "../components/PrivateRouter";
+import GuestRoute from "../components/GuestRoute";
 
 const Router = () => {
-  const context: any = useCoursesContext();
+  const context: any = useBookingContext();
   return (
     <>
       <Routes>
         <Route path='/' element={<LayoutWebsite />}>
-          <Route path='/register' element={<RegisterController />} />
+          <Route path='/register' element={<GuestRoute ><RegisterController /></GuestRoute>} />
           <Route path='/rooms' element={<RoomsController />} />
-          <Route path='/login' element={<LoginController />} />
-          <Route path='/profile' element={<ProfileController />} />
-          <Route path='/check-out' element={<CheckOutController />} />
+          <Route path='/login' element={<GuestRoute ><LoginController /></GuestRoute>} />
+          <Route path='/profile' element={ <PrivateRouter user={context.state.user}><ProfileController /></PrivateRouter>} />
+          <Route path='/check-out' element={<PrivateRouter user={context.state.user}><CheckOutController /></PrivateRouter>} />
           <Route path='' element={<HomeController />} />
           <Route path='/room/:id' element={<DetailRoomController />} />
         </Route>
-        <Route path='/payment-result' element={<PaymentResultController />} />
+        <Route path='/payment-result' element={<PrivateRouter user={context.state.user}><PaymentResultController /></PrivateRouter>} />
       </Routes>
     </>
   );

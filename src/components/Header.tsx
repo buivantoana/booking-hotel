@@ -14,10 +14,11 @@ import {
   MenuItem,
   Divider,
   Container,
+  Button,
 } from "@mui/material";
 import { Menu as MenuIcon, Person as PersonIcon } from "@mui/icons-material";
 import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Header = () => {
   const theme = useTheme();
@@ -28,7 +29,8 @@ const Header = () => {
     setAnchorEl(event.currentTarget);
   };
   const [locationAddress, setLocationAddress] = useState([]);
-
+  const context: any = useBookingContext();
+  const navigate = useNavigate()
   useEffect(() => {
     (async () => {
       try {
@@ -102,7 +104,40 @@ const Header = () => {
             )}
             {/* RIGHT: AVATAR */}
             <Box>
-              <UserDropdownMenuV2 />
+              {Object.keys(context.state.user).length > 0 ?
+                <UserDropdownMenuV2 context={context} /> :
+                <Box>
+                  <Button
+                onClick={()=>{navigate("/login")}}
+                variant="outlined"
+                sx={{
+                  border:"none",
+                  color: "#5D6679",
+                  borderRadius: "16px",
+                  px: 3,
+                  py: 1.2,
+                  textTransform: "none",
+                }}
+              >
+                 Đăng nhập
+             
+              </Button>
+                  <Button
+                onClick={()=>{navigate("/register")}}
+                variant="contained"
+                sx={{
+                  bgcolor: "#98b720",
+                  color: "white",
+                  borderRadius: "16px",
+                  px: 3,
+                  py: 1.2,
+                  textTransform: "none",
+                }}
+              >
+                Đăng ký
+              </Button>
+                </Box>
+              }
             </Box>
 
             {/* MOBILE MENU */}
@@ -149,8 +184,9 @@ import {
   Logout as LogoutIcon,
 } from "@mui/icons-material";
 import { getLocation } from "../service/hotel";
+import { useBookingContext } from "../App";
 
-function UserDropdownMenuV2() {
+function UserDropdownMenuV2({ context }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -168,8 +204,17 @@ function UserDropdownMenuV2() {
 
   const handleLogout = () => {
     // TODO: xử lý logout thật
-    alert("Đã đăng xuất!");
+    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
 
+    context.dispatch({
+      type: "LOGOUT",
+      payload: {
+        ...context.state,
+        user: {},
+      },
+    });
     handleClose();
   };
 
