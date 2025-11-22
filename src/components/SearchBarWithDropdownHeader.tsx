@@ -34,7 +34,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
-
 // === DROPDOWN CHỌN LOẠI (giống ảnh) ===
 const BookingTypeDropdown: React.FC<{
   open: boolean;
@@ -50,7 +49,11 @@ const BookingTypeDropdown: React.FC<{
   ];
 
   return (
-    <Popper open={open} anchorEl={anchorEl} placement="bottom-start" sx={{ zIndex: 100 }}>
+    <Popper
+      open={open}
+      anchorEl={anchorEl}
+      placement='bottom-start'
+      sx={{ zIndex: 100 }}>
       <ClickAwayListener onClickAway={onClose}>
         <Paper
           elevation={3}
@@ -61,8 +64,7 @@ const BookingTypeDropdown: React.FC<{
             width: 180,
             bgcolor: "white",
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          }}
-        >
+          }}>
           <List disablePadding>
             {options.map((opt) => (
               <ListItemButton
@@ -78,9 +80,12 @@ const BookingTypeDropdown: React.FC<{
                   gap: 1.5,
                   bgcolor: "transparent",
                   "&:hover": { bgcolor: "#f9f9f9" },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 32, color: value === opt.value ? "#98b720" : "#888" }}>
+                }}>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 32,
+                    color: value === opt.value ? "#98b720" : "#888",
+                  }}>
                   {opt.icon}
                 </ListItemIcon>
                 <ListItemText
@@ -178,9 +183,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const endTime = checkIn
     ? checkIn
-      .hour(parseInt(time.split(":")[0]))
-      .minute(0)
-      .add(duration, "hour")
+        .hour(parseInt(time.split(":")[0]))
+        .minute(0)
+        .add(duration, "hour")
     : null;
 
   return (
@@ -201,8 +206,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                  ? 680
-                  : 380,
+                ? 680
+                : 380,
           },
           bgcolor: "white",
         }}>
@@ -222,7 +227,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -387,7 +392,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         onClick={() =>
                           setDuration(
                             durations[
-                            Math.min(durations.length - 1, durationIndex + 1)
+                              Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -425,7 +430,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -459,8 +464,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                  ? "#f0f8f0"
+                                  : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
                               "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
@@ -477,7 +482,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
                       value={checkIn}
-                      onChange={() => { }}
+                      onChange={() => {}}
                       disablePast
                       sx={{
                         width: "100%",
@@ -511,8 +516,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                      ? "#f0f8f0"
-                                      : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
                                 "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
@@ -589,33 +594,39 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     const checkOutParam = searchParams.get("checkOut");
 
     setBookingType(typeParam);
-    setSearchValue(locationAddress?.find((item) => item.id == locationParam)?.name?.vi || "");
+    setSearchValue(
+      locationAddress?.find((item) => item.id == locationParam)?.name?.vi || ""
+    );
     setCheckInTime(checkInTimeParam);
     setCheckInDuration(Number(durationParam));
 
     // Chuyển string → Dayjs
     setCheckIn(checkInParam ? dayjs(checkInParam) : null);
     setCheckOut(checkOutParam ? dayjs(checkOutParam) : null);
-
   }, [location.pathname, searchParams, locationAddress]);
   const inputRef = useRef<HTMLInputElement>(null);
   const typeRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-
-  const filteredLocations = locationAddress.filter(loc =>
+  console.log("AAAAA value ", searchValue);
+  const filteredLocations = locationAddress.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   const formatDateDisplay = () => {
     if (!checkIn) return "10:00 - 12:00, 4/11";
     if (bookingType === "hourly") {
-      const endHour = (parseInt(checkInTime.split(":")[0]) + checkInDuration) % 24;
-      return `${checkInTime} - ${endHour.toString().padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
+      const endHour =
+        (parseInt(checkInTime.split(":")[0]) + checkInDuration) % 24;
+      return `${checkInTime} - ${endHour
+        .toString()
+        .padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
     }
-    return checkIn.format("D/M") + (checkOut ? ` - ${checkOut.format("D/M")}` : "");
+    return (
+      checkIn.format("D/M") + (checkOut ? ` - ${checkOut.format("D/M")}` : "")
+    );
   };
 
   const getTypeLabel = () => {
@@ -624,40 +635,47 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     return "Qua ngày";
   };
   const selectedLocation = locationAddress.find(
-    loc => loc.name.vi === searchValue
+    (loc) => loc.name.vi === searchValue
   );
   const isLocationSelected = !!selectedLocation;
   const handleSearch = () => {
     const searchParams = {
-      location: locationAddress.find((item)=>item.name.vi == searchValue)?.id,
+      location: locationAddress.find((item) => item.name.vi == searchValue)?.id,
       type: bookingType,
       checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
       checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
       checkInTime: checkInTime || "",
       duration: checkInDuration || "",
     };
-    localStorage.setItem("booking",JSON.stringify({
-      location: locationAddress.find((item)=>item.name.vi == searchValue)?.id,
-      type: bookingType,
-      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-      checkInTime: checkInTime || "",
-      duration: checkInDuration || "",
-    }))
+    localStorage.setItem(
+      "booking",
+      JSON.stringify({
+        location: locationAddress.find((item) => item.name.vi == searchValue)
+          ?.id,
+        type: bookingType,
+        checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+        checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+        checkInTime: checkInTime || "",
+        duration: checkInDuration || "",
+      })
+    );
     const queryString = new URLSearchParams(searchParams).toString();
-    
-    setTimeout(()=>{
+
+    setTimeout(() => {
       navigate(`/rooms?${queryString}`);
-    },300)
+    }, 300);
   };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <ClickAwayListener onClickAway={(e: any) => {
-        if (typeRef.current && !typeRef.current.contains(e.target)) setTypeDropdownOpen(false);
-        if (dateRef.current && !dateRef.current.contains(e.target)) setPickerOpen(false);
-      }}>
-        <Box width="70%"  >
-          <Container maxWidth="md">
+      <ClickAwayListener
+        onClickAway={(e: any) => {
+          if (typeRef.current && !typeRef.current.contains(e.target))
+            setTypeDropdownOpen(false);
+          if (dateRef.current && !dateRef.current.contains(e.target))
+            setPickerOpen(false);
+        }}>
+        <Box width='70%'>
+          <Container maxWidth='md'>
             {/* === THANH TÌM KIẾM === */}
             <Paper
               elevation={0}
@@ -667,48 +685,92 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 bgcolor: "white",
                 border: "1px solid #ddd",
                 p: 1,
-
-              }}
-            >
-              <Stack direction="row" alignItems="stretch">
+              }}>
+              <Stack direction='row' alignItems='stretch'>
                 {/* Địa điểm */}
                 <Box sx={{ flex: "300px 0 0", position: "relative" }}>
                   <TextField
                     fullWidth
-                    placeholder="Bạn muốn đi đâu?"
-                    variant="outlined"
+                    placeholder='Bạn muốn đi đâu?'
+                    variant='outlined'
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     inputRef={inputRef}
                     InputProps={{
-                      startAdornment: <LocationOn sx={{ color: "#98b720", mr: 1, fontSize: 20 }} />,
+                      startAdornment: (
+                        <LocationOn
+                          sx={{ color: "#98b720", mr: 1, fontSize: 20 }}
+                        />
+                      ),
                     }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         height: 40,
                         borderRadius: "50px 0 0 50px",
                         "& fieldset": { border: "none" },
-                        fontSize:"14px"
+                        fontSize: "14px",
                       },
                     }}
                   />
-                  <Popper open={searchValue &&
-                    filteredLocations.length > 0 &&
-                    !isLocationSelected} anchorEl={inputRef.current} placement="bottom-start" sx={{ zIndex: 20, padding: "0px !important" }}>
-                    <Paper elevation={3} sx={{ mt: 1, borderRadius: "16px", maxHeight: 300, overflow: "auto" }}>
-                      <List disablePadding>
-                        {filteredLocations.map((loc, i) => (
-                          <ListItemButton
-                            key={i}
-                            onClick={() => setSearchValue(loc.name.vi)}
-                            sx={{ py: 1.5, borderBottom: i < filteredLocations.length - 1 ? "1px solid #eee" : "none" }}
-                          >
-                            <ListItemIcon sx={{ minWidth: 36 }}><LocationOn sx={{ fontSize: 18, color: "#999" }} /></ListItemIcon>
-                            <ListItemText primary={loc.name.vi} primaryTypographyProps={{ fontSize: "0.95rem", color: "#333", fontWeight: 500 }} />
-                          </ListItemButton>
-                        ))}
-                      </List>
-                    </Paper>
+                  <Popper
+                    open={searchValue && !isLocationSelected}
+                    anchorEl={inputRef.current}
+                    placement='bottom-start'
+                    sx={{ zIndex: 20, padding: "0px !important" }}>
+                    {filteredLocations.length == 0 ? (
+                      <Paper
+                        elevation={3}
+                        className='hidden-add-voice'
+                        sx={{
+                          mt: 1,
+                          borderRadius: "16px",
+                          overflow: "hidden",
+                          maxHeight: 300,
+                          overflowY: "auto",
+                        }}>
+                        <Typography color='rgba(152, 159, 173, 1)'>
+                          Không tìm thấy dữ liệu
+                        </Typography>
+                      </Paper>
+                    ) : (
+                      <Paper
+                        elevation={3}
+                        sx={{
+                          mt: 1,
+                          borderRadius: "16px",
+                          maxHeight: 300,
+                          overflow: "auto",
+                        }}>
+                        <List disablePadding>
+                          {filteredLocations.map((loc, i) => (
+                            <ListItemButton
+                              key={i}
+                              onClick={() => setSearchValue(loc.name.vi)}
+                              sx={{
+                                py: 1.5,
+                                borderBottom:
+                                  i < filteredLocations.length - 1
+                                    ? "1px solid #eee"
+                                    : "none",
+                              }}>
+                              <ListItemIcon sx={{ minWidth: 36 }}>
+                                <LocationOn
+                                  sx={{ fontSize: 18, color: "#999" }}
+                                />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={loc.name.vi}
+                                primaryTypographyProps={{
+                                  fontSize: "0.95rem",
+                                  color: "#333",
+                                  fontWeight: 500,
+                                }}
+                              />
+                            </ListItemButton>
+                          ))}
+                        </List>
+                      </Paper>
+                    )}
                   </Popper>
                 </Box>
 
@@ -716,8 +778,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 <Box
                   ref={typeRef}
                   sx={{ cursor: "pointer", flex: "0 0 200px" }}
-                  onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}
-                >
+                  onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}>
                   <Box
                     sx={{
                       height: 40,
@@ -729,15 +790,32 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       bgcolor: typeDropdownOpen ? "#f9f9f9" : "transparent",
                       borderLeft: "1px solid #eee",
                       borderRight: "1px solid #eee",
-                    }}
-                  >
-                    {bookingType === "hourly" ? <AccessTime sx={{ color: "#98b720", fontSize: 18 }} /> :
-                      bookingType === "overnight" ? <Nightlight sx={{ color: "#98b720", fontSize: 18 }} /> :
-                        <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />}
-                    <Typography sx={{ fontWeight: 500, color: "#333", fontSize: "0.9rem" }}>
+                    }}>
+                    {bookingType === "hourly" ? (
+                      <AccessTime sx={{ color: "#98b720", fontSize: 18 }} />
+                    ) : bookingType === "overnight" ? (
+                      <Nightlight sx={{ color: "#98b720", fontSize: 18 }} />
+                    ) : (
+                      <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                    )}
+                    <Typography
+                      sx={{
+                        fontWeight: 500,
+                        color: "#333",
+                        fontSize: "0.9rem",
+                      }}>
                       {getTypeLabel()}
                     </Typography>
-                    <KeyboardArrowDown sx={{ fontSize: 16, color: "#666", transition: "0.2s", transform: typeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }} />
+                    <KeyboardArrowDown
+                      sx={{
+                        fontSize: 16,
+                        color: "#666",
+                        transition: "0.2s",
+                        transform: typeDropdownOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                      }}
+                    />
                   </Box>
                 </Box>
 
@@ -745,8 +823,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 <Box
                   ref={dateRef}
                   sx={{ flex: 1, cursor: "pointer" }}
-                  onClick={() => setPickerOpen(true)}
-                >
+                  onClick={() => setPickerOpen(true)}>
                   <Box
                     sx={{
                       height: 40,
@@ -754,9 +831,14 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       display: "flex",
                       alignItems: "center",
                       bgcolor: pickerOpen ? "#f9f9f9" : "transparent",
-                    }}
-                  >
-                    <Typography sx={{ flex: 1, color: "#333", fontWeight: 500, fontSize: "0.9rem" }}>
+                    }}>
+                    <Typography
+                      sx={{
+                        flex: 1,
+                        color: "#333",
+                        fontWeight: 500,
+                        fontSize: "0.9rem",
+                      }}>
                       {formatDateDisplay()}
                     </Typography>
                   </Box>
@@ -764,9 +846,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
 
                 {/* Tìm kiếm */}
                 <Button
-                  variant="contained"
+                  variant='contained'
                   onClick={handleSearch}
-                  size="large"
+                  size='large'
                   sx={{
                     bgcolor: "#98b720",
                     color: "white",
@@ -775,8 +857,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                     minWidth: "auto",
                     height: 40,
                     "&:hover": { bgcolor: "#7a8f1a" },
-                  }}
-                >
+                  }}>
                   <Search sx={{ fontSize: 22 }} />
                 </Button>
               </Stack>
@@ -810,7 +891,6 @@ export default function SearchBarWithDropdown({ locationAddress }) {
             />
 
             {/* === KẾT QUẢ TÌM KIẾM === */}
-
           </Container>
         </Box>
       </ClickAwayListener>

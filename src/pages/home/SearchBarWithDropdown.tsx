@@ -90,7 +90,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const hourIndex = hours.indexOf(time);
   const durationIndex = durations.indexOf(duration);
-  
 
   const handleApply = () => {
     if (bookingType === "hourly" && checkIn) {
@@ -526,10 +525,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 };
 
 // === MAIN COMPONENT ===
-const SearchBarWithDropdown = ({location}) => {
+const SearchBarWithDropdown = ({ location }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [bookingType, setBookingType] = useState<
     "hourly" | "overnight" | "daily"
   >("hourly");
@@ -547,8 +546,8 @@ const SearchBarWithDropdown = ({location}) => {
 
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
   const filteredLocations = location.filter((loc) =>
-  loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
-);
+    loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   const handleLocationClick = (loc: string) => {
     setSearchValue(loc);
@@ -581,26 +580,29 @@ const SearchBarWithDropdown = ({location}) => {
 
   const handleSearch = () => {
     const searchParams = {
-      location: location.find((item)=>item.name.vi == searchValue)?.id,
+      location: location.find((item) => item.name.vi == searchValue)?.id,
       type: bookingType,
       checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
       checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
       checkInTime: checkInTime || "",
       duration: checkInDuration || "",
     };
-    localStorage.setItem("booking",JSON.stringify({
-      location: location.find((item)=>item.name.vi == searchValue)?.id,
-      type: bookingType,
-      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-      checkInTime: checkInTime || "",
-      duration: checkInDuration || "",
-    }))
+    localStorage.setItem(
+      "booking",
+      JSON.stringify({
+        location: location.find((item) => item.name.vi == searchValue)?.id,
+        type: bookingType,
+        checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+        checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+        checkInTime: checkInTime || "",
+        duration: checkInDuration || "",
+      })
+    );
     const queryString = new URLSearchParams(searchParams).toString();
-    
-    setTimeout(()=>{
+
+    setTimeout(() => {
       navigate(`/rooms?${queryString}`);
-    },300)
+    }, 300);
   };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -612,7 +614,7 @@ const SearchBarWithDropdown = ({location}) => {
           justifyContent='center'
           bottom='-80px'
           zIndex={10}>
-          <Container maxWidth="lg" >
+          <Container maxWidth='lg'>
             {/* Toggle */}
             <Stack direction='row' justifyContent='center' sx={{ mb: "-40px" }}>
               <ToggleButtonGroup
@@ -656,7 +658,7 @@ const SearchBarWithDropdown = ({location}) => {
                       },
                     }}>
                     {x.i}
-                    <Box component='span' sx={{ ml: 1,textTransform:"none" }}>
+                    <Box component='span' sx={{ ml: 1, textTransform: "none" }}>
                       {x.l}
                     </Box>
                   </ToggleButton>
@@ -718,59 +720,76 @@ const SearchBarWithDropdown = ({location}) => {
                     }}
                   />
                   <Popper
-                    open={dropdownOpen && filteredLocations.length > 0}
+                    open={dropdownOpen}
                     anchorEl={inputRef.current}
                     placement='bottom-start'
                     sx={{ zIndex: 20, width: "18%" }}>
-                    <Paper
-                      elevation={3}
-                      className='hidden-add-voice'
-                      sx={{
-                        mt: 1,
-                        borderRadius: "16px",
-                        overflow: "hidden",
-                        maxHeight: 300,
-                        overflowY: "auto",
-                      }}>
-                      <Box p={2} bgcolor='#f9f9f9'>
-                        <Typography
-                          variant='subtitle2'
-                          color='#666'
-                          fontWeight={600}>
-                          Địa chỉ
+                    {filteredLocations.length == 0 ? (
+                      <Paper
+                        elevation={3}
+                        className='hidden-add-voice'
+                        sx={{
+                          mt: 1,
+                          borderRadius: "16px",
+                          overflow: "hidden",
+                          maxHeight: 300,
+                          overflowY: "auto",
+                        }}>
+                        <Typography color='rgba(152, 159, 173, 1)'>
+                          Không tìm thấy dữ liệu
                         </Typography>
-                      </Box>
-                      <List disablePadding>
-                        {filteredLocations.map((loc, i) => (
-                          <ListItemButton
-                            key={i}
-                            onClick={() => handleLocationClick(loc.name.vi)}
-                            sx={{
-                              px: 2,
-                              py: 1.5,
-                              borderBottom:
-                                i < filteredLocations.length - 1
-                                  ? "1px solid #eee"
-                                  : "none",
-                              "&:hover": { bgcolor: "#f0f8f0" },
-                            }}>
-                            <ListItemIcon sx={{ minWidth: 36 }}>
-                              <LocationOn
-                                sx={{ fontSize: 18, color: "#999" }}
+                      </Paper>
+                    ) : (
+                      <Paper
+                        elevation={3}
+                        className='hidden-add-voice'
+                        sx={{
+                          mt: 1,
+                          borderRadius: "16px",
+                          overflow: "hidden",
+                          maxHeight: 300,
+                          overflowY: "auto",
+                        }}>
+                        <Box p={2} bgcolor='#f9f9f9'>
+                          <Typography
+                            variant='subtitle2'
+                            color='#666'
+                            fontWeight={600}>
+                            Địa chỉ
+                          </Typography>
+                        </Box>
+                        <List disablePadding>
+                          {filteredLocations.map((loc, i) => (
+                            <ListItemButton
+                              key={i}
+                              onClick={() => handleLocationClick(loc.name.vi)}
+                              sx={{
+                                px: 2,
+                                py: 1.5,
+                                borderBottom:
+                                  i < filteredLocations.length - 1
+                                    ? "1px solid #eee"
+                                    : "none",
+                                "&:hover": { bgcolor: "#f0f8f0" },
+                              }}>
+                              <ListItemIcon sx={{ minWidth: 36 }}>
+                                <LocationOn
+                                  sx={{ fontSize: 18, color: "#999" }}
+                                />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={loc.name.vi}
+                                primaryTypographyProps={{
+                                  fontSize: "0.95rem",
+                                  color: "#333",
+                                  fontWeight: 500,
+                                }}
                               />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={loc.name.vi}
-                              primaryTypographyProps={{
-                                fontSize: "0.95rem",
-                                color: "#333",
-                                fontWeight: 500,
-                              }}
-                            />
-                          </ListItemButton>
-                        ))}
-                      </List>
-                    </Paper>
+                            </ListItemButton>
+                          ))}
+                        </List>
+                      </Paper>
+                    )}
                   </Popper>
                 </Box>
 

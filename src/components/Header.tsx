@@ -17,10 +17,15 @@ import {
   Button,
   Chip,
 } from "@mui/material";
-import { Delete, Menu as MenuIcon, MoreVert, Person as PersonIcon } from "@mui/icons-material";
+import {
+  Delete,
+  Menu as MenuIcon,
+  MoreVert,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
 import { useLocation, useNavigate } from "react-router-dom";
-import DehazeIcon from '@mui/icons-material/Dehaze';
+import DehazeIcon from "@mui/icons-material/Dehaze";
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -32,7 +37,7 @@ const Header = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [locationAddress, setLocationAddress] = useState([]);
   const context: any = useBookingContext();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   useEffect(() => {
     (async () => {
       try {
@@ -47,7 +52,7 @@ const Header = () => {
         console.log(error);
       }
     })();
-  }, []);
+  }, [location.pathname]);
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -83,13 +88,13 @@ const Header = () => {
               ) : (
                 <>
                   <Typography
-                    onClick={()=>{
-                      navigate("/")
+                    onClick={() => {
+                      navigate("/");
                     }}
                     variant='h5'
                     fontWeight={700}
                     color='#333'
-                    sx={{ fontSize: "1.5rem",cursor:"pointer" }}>
+                    sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
                     Logo
                   </Typography>
                   <Typography
@@ -104,20 +109,25 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {(location.pathname == "/rooms" || location.pathname.includes("/room"))&& (
+            {(location.pathname == "/rooms" ||
+              location.pathname.includes("/room")) && (
               <SearchBarWithDropdownHeader locationAddress={locationAddress} />
             )}
             {/* RIGHT: AVATAR */}
             <Box>
-              {Object.keys(context.state.user).length > 0 ?
-                <UserDropdownMenuV2 context={context} /> :
-
+              {Object.keys(context.state.user).length > 0 ? (
+                <UserDropdownMenuV2 context={context} />
+              ) : (
                 <>
-                  {location.pathname == "/" ?
+                  {location.pathname == "/" ||
+                  location.pathname == "/login" ||
+                  location.pathname == "/register" ? (
                     <Box>
                       <Button
-                        onClick={() => { navigate("/login") }}
-                        variant="outlined"
+                        onClick={() => {
+                          navigate("/login");
+                        }}
+                        variant='outlined'
                         sx={{
                           border: "none",
                           color: "#5D6679",
@@ -125,14 +135,14 @@ const Header = () => {
                           px: 3,
                           py: 1.2,
                           textTransform: "none",
-                        }}
-                      >
+                        }}>
                         Đăng nhập
-
                       </Button>
                       <Button
-                        onClick={() => { navigate("/register") }}
-                        variant="contained"
+                        onClick={() => {
+                          navigate("/register");
+                        }}
+                        variant='contained'
                         sx={{
                           bgcolor: "#98b720",
                           color: "white",
@@ -140,77 +150,73 @@ const Header = () => {
                           px: 3,
                           py: 1.2,
                           textTransform: "none",
-                        }}
-                      >
+                        }}>
                         Đăng ký
                       </Button>
-                    </Box> : <>
-                      
+                    </Box>
+                  ) : (
+                    <>
+                      <IconButton
+                        onClick={(e) => setMenuAnchor(e.currentTarget)}
+                        size='small'>
+                        <DehazeIcon sx={{ color: "rgba(93, 102, 121, 1)" }} />
+                      </IconButton>
 
-                        <IconButton
-                          onClick={(e) => setMenuAnchor(e.currentTarget)}
-                          size='small'>
-                          <DehazeIcon sx={{ color: "rgba(93, 102, 121, 1)" }} />
-                        </IconButton>
-
-                        <Menu
-                          anchorEl={menuAnchor}
-                          anchorOrigin={{
-                            vertical: "bottom",
-                            horizontal: "right",
-                          }}
-                          transformOrigin={{
-                            vertical: "top",
-                            horizontal: "right",
-                          }}
-                          open={Boolean(menuAnchor)}
-                          onClose={() => setMenuAnchor(null)}
-                          PaperProps={{
-                            sx: {
-                              borderRadius: "12px",
-                              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
-                              mt: 1,
-                              padding: 0,
-                            },
-                          }}>
-                          <MenuItem
-                          sx={{width:"150px"}}
-                            >
-                              
-                            <ListItemText onClick={() => {
-                              
+                      <Menu
+                        anchorEl={menuAnchor}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "right",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "right",
+                        }}
+                        open={Boolean(menuAnchor)}
+                        onClose={() => setMenuAnchor(null)}
+                        PaperProps={{
+                          sx: {
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+                            mt: 1,
+                            padding: 0,
+                          },
+                        }}>
+                        <MenuItem sx={{ width: "150px" }}>
+                          <ListItemText
+                            onClick={() => {
                               setMenuAnchor(null);
-                              navigate("/login")
+                              navigate("/login");
                             }}>
-                              <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
+                            <Typography
+                              fontSize='14px'
+                              color='rgba(93, 102, 121, 1)'>
                               Đăng nhập
-                              </Typography>
-                            </ListItemText>
-                           
-                          </MenuItem>
-                          <MenuItem
-                            >
-                              
-                            
-                            <ListItemText onClick={() => {
-                              
+                            </Typography>
+                          </ListItemText>
+                        </MenuItem>
+                        <MenuItem>
+                          <ListItemText
+                            onClick={() => {
                               setMenuAnchor(null);
-                              navigate("/register")
+                              navigate("/register");
                             }}>
-                              <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
+                            <Typography
+                              fontSize='14px'
+                              color='rgba(93, 102, 121, 1)'>
                               Đăng ký
-                              </Typography>
-                            </ListItemText>
-                          </MenuItem>
-                        </Menu>
-
-                      </>}
+                            </Typography>
+                          </ListItemText>
+                        </MenuItem>
+                      </Menu>
                     </>
-                  }
-                </Box>
+                  )}
+                </>
+              )}
+            </Box>
 
-              {/* MOBILE MENU */}
-              {/* <Menu
+            {/* MOBILE MENU */}
+            {/* <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
@@ -258,7 +264,7 @@ import { useBookingContext } from "../App";
 function UserDropdownMenuV2({ context }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -268,7 +274,7 @@ function UserDropdownMenuV2({ context }) {
   };
 
   const handleNavigate = (path: string) => {
-    navigate(path)
+    navigate(path);
     handleClose();
   };
 
