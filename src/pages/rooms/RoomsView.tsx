@@ -139,7 +139,7 @@ const ratings = [
   { label: "≥ 4.5", active: false },
 ];
 
-const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, getHotel }) => {
+const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, getHotel,totalAll }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -477,7 +477,7 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                         sx={{ color: "#98b720", fontSize: "15px" }}
                       />
                     ) : (
-                      <>{dataHotel.length}</>
+                      <>{totalAll}</>
                     )}{" "}
                     kết quả tìm kiếm
                   </Typography>

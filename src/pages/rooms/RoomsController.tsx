@@ -14,6 +14,7 @@ const RoomsController = (props: Props) => {
   const [searchParams] = useSearchParams();
   const [page,setPage] = useState(1);
   const [total,setTotal] = useState(1);
+  const [totalAll,setTotalAll] = useState(1);
   const [loading, setLoading] = useState(true);
   const limit = 2
   useEffect(() => {
@@ -52,6 +53,7 @@ const RoomsController = (props: Props) => {
       if(result?.hotels?.length>0){
         setDataHotel(result?.hotels);
         setTotal(result?.total_pages)
+        setTotalAll(result?.total)
       }
     } catch (error) {
       console.log(error)
@@ -71,7 +73,7 @@ const RoomsController = (props: Props) => {
     setLoading(false)
   }
   console.log("AAAAA page",page)
-  return <RoomsView dataHotel={dataHotel} getHotel={getHotel} loading={loading} total={total} setPage={setPage} page={page} getHotelLatLon={getHotelLatLon} setLoading={setLoading} />;
+  return <RoomsView dataHotel={dataHotel} totalAll={totalAll} getHotel={getHotel} loading={loading} total={total} setPage={setPage} page={page} getHotelLatLon={getHotelLatLon} setLoading={setLoading} />;
 };
 
 export default RoomsController;
