@@ -9,6 +9,7 @@ import {
   InputAdornment,
   Link,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import AppleIcon from "@mui/icons-material/Apple";
@@ -45,10 +46,11 @@ const LoginView = () => {
 
 export default LoginView;
 const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
- 
+  const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
 
   const handleRegister = async () => {
+    setLoading(true)
     try {
       let result = await checkUser({
         "type": "phone",
@@ -62,6 +64,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
     } catch (error) {
       console.log(error)
     }
+    setLoading(false)
   }
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
@@ -240,7 +243,14 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                   },
                   boxShadow: "none",
                 }}>
-                Đăng nhập
+                 {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đăng nhập...
+                  </>
+                ) : (
+                  "Đăng nhập"
+                )}
               </Button>
 
               <Typography
@@ -311,9 +321,11 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
 const PinCreation = ({phoneNumber}) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate()
   const context = useBookingContext()
   const handleSubmit = async(e) => {
+    setLoading(true)
     e.preventDefault();
     if (pin.length === 6 ) {
       let result = await Login({
@@ -342,6 +354,7 @@ const PinCreation = ({phoneNumber}) => {
     }
      
     }
+    setLoading(false)
   };
 
   const toggleShowPin = () => setShowPin(!showPin);
@@ -542,7 +555,14 @@ const PinCreation = ({phoneNumber}) => {
                   },
                 }}
               >
-                Tiếp tục
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang xác thực...
+                  </>
+                ) : (
+                  "Tiếp tục"
+                )}
               </Button>
             </Box>
           </Box>

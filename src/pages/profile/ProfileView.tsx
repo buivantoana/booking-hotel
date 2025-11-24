@@ -23,6 +23,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -65,6 +66,7 @@ const ProfileView = ({
   const [detailBooking, setDetailBooking] = useState(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [loadingSubmit,setLoadingSubmit] = useState(false)
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
@@ -302,6 +304,7 @@ const ProfileView = ({
       }
     };
     const handleSubmit = async () => {
+      setLoadingSubmit(true)
       try {
         if (getBookingNameStatus(detailBooking) == "Hủy đặt phòng") {
           let result = await cancelBooking(detailBooking.booking_id);
@@ -313,6 +316,7 @@ const ProfileView = ({
       } catch (error) {
         console.log(error);
       }
+      setLoadingSubmit(false)
     };
     return (
       <Stack spacing={3}>
@@ -699,6 +703,7 @@ const ProfileView = ({
               handleSubmit();
             }}
             variant='contained'
+            disabled={loadingSubmit}
             sx={{
               bgcolor: "#98b720",
               color: "white",
@@ -711,7 +716,18 @@ const ProfileView = ({
               "&:hover": { bgcolor: "#7a9a1a" },
               minWidth: isMobile ? "100%" : "220px",
             }}>
-            {getBookingNameStatus(detailBooking)}
+               {loadingSubmit ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    {getBookingNameStatus(detailBooking)}
+                  </>
+                ) : (
+                  <>
+                  
+                  {getBookingNameStatus(detailBooking)}
+                  </>
+                )}
+           
           </Button>
         </Stack>
       </Stack>

@@ -349,10 +349,10 @@ function UserDropdownMenuV2({ context }) {
             </Avatar>
             <Box>
               <Typography fontWeight={700} fontSize='16px' color='#333'>
-                Thangdv
+                {context?.state?.user?.name}
               </Typography>
               <Typography fontSize='14px' color='#666' mt={0.5}>
-                +(84) 123456789
+                +(84) {context?.state?.user?.phone?.split(0)}
               </Typography>
             </Box>
           </Stack>

@@ -18,6 +18,7 @@ import {
   Modal,
   TextField,
   FormControlLabel,
+  CircularProgress,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -46,9 +47,11 @@ const CheckOutView = ({ dataCheckout }) => {
   const [openCancelPolicyModal, setOpenCancelPolicyModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState("+84 123456789");
-  const [name, setName] = useState("Thangdv");
+  const [phone, setPhone] = useState(JSON.parse(localStorage.getItem("user"))?.phone);
+  const [name, setName] = useState(JSON.parse(localStorage.getItem("user"))?.name);
+  const [loading,setLoading] = useState(false)
   const navigate = useNavigate()
+  
   // Dữ liệu từ props
   const {
     type = "hourly",
@@ -122,6 +125,7 @@ const CheckOutView = ({ dataCheckout }) => {
     { id: "3", discount: "15K", title: "Super sale - quà 50% cho thành viên mới đăng ký", desc: "Giảm tới 50% 50k" },
   ];
   const handleCreateBooking = async () => {
+    setLoading(true)
     if (!dataCheckout) {
       alert("Thiếu thông tin đặt phòng!");
       return;
@@ -182,6 +186,7 @@ const CheckOutView = ({ dataCheckout }) => {
       console.error("Lỗi đặt phòng:", error);
       alert(error.message || "Đặt phòng thất bại, vui lòng thử lại!");
     }
+    setLoading(false)
   };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
@@ -395,6 +400,7 @@ const CheckOutView = ({ dataCheckout }) => {
                   </Typography>
                   <Button
                     onClick={handleCreateBooking}
+                    disabled={loading}
                     variant="contained"
                     sx={{
                       bgcolor: "#98b720",
@@ -408,7 +414,15 @@ const CheckOutView = ({ dataCheckout }) => {
                       width: isMobile ? "100%" : "282px",
                     }}
                   >
-                    Thanh toán
+                     {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Thanh toán...
+                  </>
+                ) : (
+                  "Thanh toán"
+                )}
+                   
                   </Button>
                 </Stack>
               </Stack>

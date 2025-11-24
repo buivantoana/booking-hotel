@@ -9,6 +9,7 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import Flag from "react-country-flag";
@@ -18,7 +19,7 @@ import { toast } from "react-toastify";
 const Account = ({ context }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const [loading,setLoading] = useState(false)
   // Lấy dữ liệu ban đầu từ context
   const initialData = {
     name: context?.state?.user?.name || "",
@@ -49,6 +50,7 @@ const Account = ({ context }) => {
 
   // Xử lý submit (bạn có thể gọi API ở đây)
   const handleSubmit = async () => {
+    setLoading(true)
     try {
       // Ví dụ gọi API cập nhật
       // await context.updateUserProfile(formData);
@@ -77,6 +79,7 @@ const Account = ({ context }) => {
       console.error("Lỗi cập nhật:", error);
       alert("Cập nhật thất bại!");
     }
+    setLoading(false)
   };
 
   return (
@@ -244,6 +247,7 @@ const Account = ({ context }) => {
               <Button
                 variant='contained'
                 size='large'
+                disabled={loading}
                 onClick={handleSubmit}
                 sx={{
                   backgroundColor: "rgba(152, 183, 32, 1)",
@@ -257,7 +261,15 @@ const Account = ({ context }) => {
                     backgroundColor: "rgba(152, 183, 32, 1)",
                   },
                 }}>
-                Cập nhật
+                   {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Cập nhật
+                  </>
+                ) : (
+                  "Cập nhật"
+                )}
+                
               </Button>
             </Box>
           </Grid>

@@ -17,6 +17,7 @@ import {
   Modal,
   TextField,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import {
   Wifi as WifiIcon,
@@ -351,6 +352,7 @@ const RoomCard = ({
 const RoomList = ({ loading, data,hotel }) => {
 
   const [openModal, setOpenModal] = useState(false);
+  const [lodingLogin, setLoadingLogin] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [openDetail, setOpenDetail] = useState(false)
@@ -478,6 +480,7 @@ const RoomList = ({ loading, data,hotel }) => {
             <Button
               fullWidth
               onClick={async () => {
+                setLoadingLogin(true)
                 try {
                   let result = await checkUser({
                     "type": "phone",
@@ -491,6 +494,7 @@ const RoomList = ({ loading, data,hotel }) => {
                 } catch (error) {
                   console.log(error)
                 }
+                setLoadingLogin(false)
               }}
               variant='outlined'
               disabled={!phoneNumber || !isValidPhone(phoneNumber)}
@@ -503,7 +507,14 @@ const RoomList = ({ loading, data,hotel }) => {
                 textTransform: "none",
                 background: "rgba(152, 183, 32, 1)",
               }}>
-              Đăng nhập
+              {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đăng nhập...
+                  </>
+                ) : (
+                  "Đăng nhập"
+                )}
             </Button>
             <Typography my={2} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
               Bạn chưa có tài khoản Booking Hotel?{" "}
@@ -848,9 +859,11 @@ const RoomDetailModal = ({ open, onClose, room,hotel }) => {
 const PinCreation = ({phoneNumber,setOpenModal}) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
+  const [loading,setLoading] = useState(false)
   const navigate = useNavigate()
   const context = useBookingContext()
   const handleSubmit = async(e) => {
+    setLoading(true)
     e.preventDefault();
     if (pin.length === 6 ) {
       let result = await Login({
@@ -878,6 +891,7 @@ const PinCreation = ({phoneNumber,setOpenModal}) => {
     }
      
     }
+    setLoading(false)
   };
 
   const toggleShowPin = () => setShowPin(!showPin);
@@ -1043,7 +1057,14 @@ const PinCreation = ({phoneNumber,setOpenModal}) => {
                   },
                 }}
               >
-                Tiếp tục
+               {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang xác thực...
+                  </>
+                ) : (
+                  "Tiếp tục"
+                )}
               </Button>
             </Box>
           </Box>

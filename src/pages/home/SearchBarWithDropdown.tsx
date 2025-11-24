@@ -905,6 +905,7 @@ const SearchBarWithDropdown = ({ location }) => {
                 <Button
                   variant='contained'
                   onClick={handleSearch}
+                  disabled={!searchValue || !checkIn || !checkOut}
                   size='large'
                   startIcon={<Search sx={{ fontSize: 22 }} />}
                   sx={{

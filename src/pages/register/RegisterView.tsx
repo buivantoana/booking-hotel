@@ -10,6 +10,7 @@ import {
   Link,
   IconButton,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -49,7 +50,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   onNext,
 }) => {
   const [touched, setTouched] = useState(false);
+  const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     if (phoneNumber && name && birthDate) {
       try {
@@ -65,12 +68,14 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
       } catch (error) {
         console.log(error)
       }
+      setLoading(false);
 
     };
   };
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
+  const isDisabled = !phoneNumber || !name || !birthDate || !isValidPhone(phoneNumber) || loading;
   return (
     <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
@@ -212,21 +217,29 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               <Button
                 type="submit"
                 fullWidth
-                disabled={!phoneNumber || !name || !birthDate || !isValidPhone(phoneNumber)}
+                disabled={isDisabled}
                 sx={{
                   mb: 3,
                   py: 1.5,
                   borderRadius: "16px",
-                  backgroundColor: !phoneNumber || !name || !birthDate ? "#e0e0e0" : "#98b720",
-                  color: !phoneNumber || !name || !birthDate ? "#888" : "#fff",
+                  backgroundColor: isDisabled ? "#e0e0e0" : "#98b720",
+                  color: isDisabled ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: !phoneNumber || !name || !birthDate ? "#e0e0e0" : "#98b720" },
+                  position: "relative",
+                  "&:hover": { backgroundColor: isDisabled ? "#e0e0e0" : "#98b720" },
                 }}
               >
-                Đăng ký
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang gửi mã...
+                  </>
+                ) : (
+                  "Đăng ký"
+                )}
               </Button>
 
               {/* Social buttons & login link giữ nguyên... */}
@@ -266,33 +279,35 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   name,
   birthDate
 }) => {
+  const [loading, setLoading] = useState(false);
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
-    if (otp.length === 4) { 
+    if (otp.length === 4) {
       try {
         let result = await verifyOtp({
           "platform": "ios",
           "type": "phone",
-          "value": "0"+phoneNumber,
+          "value": "0" + phoneNumber,
           "otp": otp,
           "location": "hanoi",
-          "name":name,
-          "birthday":birthDate
-      })
-      if(result.access_token){
-         onSuccess(result);
-      }
-        
+          "name": name,
+          "birthday": birthDate
+        })
+        if (result.access_token) {
+          onSuccess(result);
+        }
+
       } catch (error) {
         console.log(error)
       }
-      
+      setLoading(false);
     }
   };
 
@@ -325,7 +340,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                     "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
                       width: { xs: 50, sm: 60 },
                       height: { xs: 50, sm: 60 },
-                      borderRadius: "24px",
+                      borderRadius: "0px",
                       backgroundColor: "#fff",
                       "& fieldset": { borderColor: "#9AC700" },
                       "&:hover fieldset": { borderColor: "#7cb400" },
@@ -347,19 +362,28 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
               <Button
                 type="submit"
                 fullWidth
+                disabled={otp.length !== 4 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: "#9AC700",
-                  color: "#fff",
+                  backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#9AC700",
+                  color: (otp.length !== 4 || loading) ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: "#7cb400" },
+                  "&:hover": { backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#7cb400" },
+                  position: "relative",
                 }}
               >
-                Xác nhận OTP
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang xác nhận...
+                  </>
+                ) : (
+                  "Xác nhận OTP"
+                )}
               </Button>
             </Box>
           </Box>
@@ -471,22 +495,24 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
   );
 };
 
-const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm,dataUser }) => {
+const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
   const [pin, setPin] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPin, setShowPin] = useState(false);
+  const [loading, setLoading] = useState(false);
   const context = useBookingContext()
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     if (pin.length === 6 && pinConfirm == pin) {
       try {
         let result = await userUpdate({
           "password": pin,
-        },dataUser?.access_token)
-        if(result.code == "OK"){
-          localStorage.setItem("access_token",dataUser.access_token)
-          localStorage.setItem("refresh_token",dataUser.refresh_token)
-          localStorage.setItem("user",JSON.stringify(dataUser.user))
+        }, dataUser?.access_token)
+        if (result.code == "OK") {
+          localStorage.setItem("access_token", dataUser.access_token)
+          localStorage.setItem("refresh_token", dataUser.refresh_token)
+          localStorage.setItem("user", JSON.stringify(dataUser.user))
           context.dispatch({
             type: "LOGIN",
             payload: {
@@ -496,11 +522,12 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm,dataUser }) => {
           });
           onSuccess();
         }
-       
+
       } catch (error) {
         console.log(error)
       }
-      
+      setLoading(false);
+
     }
   };
 
@@ -576,23 +603,28 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm,dataUser }) => {
               <Button
                 type="submit"
                 fullWidth
-                disabled={pin.length !== 6}
-                onClick={() => setShowConfirm(true)}
+                disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: pin.length === 6 ? "#9AC700" : "#e0e0e0",
-                  color: pin.length === 6 ? "#fff" : "#888",
+                  backgroundColor: (pin.length !== 6 || loading) ? "#e0e0e0" : "#9AC700",
+                  color: (pin.length !== 6 || loading) ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": {
-                    backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
-                  },
+                  "&:hover": { backgroundColor: (pin.length !== 6 || loading) ? "#e0e0e0" : "#7cb400" },
+                  position: "relative",
                 }}
               >
-                Tiếp tục
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang hoàn tất...
+                  </>
+                ) : (
+                  "Hoàn tất đăng ký"
+                )}
               </Button>
             </Box>
           </Box>
