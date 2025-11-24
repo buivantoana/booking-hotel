@@ -21,7 +21,7 @@ import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
 import vn from "../../images/VN - Vietnam.png";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import { Login, checkUser } from "../../service/admin";
+import { Login, LoginGoogle, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
@@ -48,7 +48,8 @@ export default LoginView;
 const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
-
+  const context = useBookingContext()
+  const navigate = useNavigate()
   const handleRegister = async () => {
     setLoading(true)
     try {
@@ -69,13 +70,40 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
-  const handleGoogleSuccess = (credentialResponse) => {
+  const handleGoogleSuccess = async(credentialResponse) => {
+    try {
+      let result = await LoginGoogle({
+        "platform": "ios",
+        "id_token": credentialResponse?.access_token,
+        "location": "hanoi"
+    })
+    if(result.access_token){
+      localStorage.setItem("access_token",result.access_token)
+      localStorage.setItem("refresh_token",result.refresh_token)
+      localStorage.setItem("user",JSON.stringify(result.user))
+      context.dispatch({
+        type: "LOGIN",
+        payload: {
+          ...context.state,
+          user: { ...result.user },
+        },
+      });
+      toast.success("Login success")
+      setTimeout(()=>{
+        navigate("/")
+      },300)
+    }else{
+      toast.error(result.message)
+    }
+    } catch (error) {
+      console.log(error)
+    }
     console.log("Google login success:", credentialResponse);
     // Gửi credentialResponse.credential về backend để xác thực token
   };
 
   const handleGoogleError = () => {
-    console.log("Google login failed");
+    toast.error("Google login failed");
   };
   return (
     <Container
