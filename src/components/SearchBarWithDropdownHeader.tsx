@@ -183,9 +183,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const endTime = checkIn
     ? checkIn
-        .hour(parseInt(time.split(":")[0]))
-        .minute(0)
-        .add(duration, "hour")
+      .hour(parseInt(time.split(":")[0]))
+      .minute(0)
+      .add(duration, "hour")
     : null;
 
   return (
@@ -206,8 +206,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                ? 680
-                : 380,
+                  ? 680
+                  : 380,
           },
           bgcolor: "white",
         }}>
@@ -227,7 +227,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disablePast
                     sx={{
                       width: "100%",
@@ -392,7 +392,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         onClick={() =>
                           setDuration(
                             durations[
-                              Math.min(durations.length - 1, durationIndex + 1)
+                            Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -430,7 +430,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disablePast
                     sx={{
                       width: "100%",
@@ -464,8 +464,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                  ? "#f0f8f0"
-                                  : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
                               "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
@@ -482,7 +482,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
                       value={checkIn}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       disablePast
                       sx={{
                         width: "100%",
@@ -516,8 +516,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                      ? "#f0f8f0"
+                                      : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
                                 "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
@@ -581,6 +581,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const [checkOut, setCheckOut] = useState<Dayjs | null>(null);
   const [checkInTime, setCheckInTime] = useState<string>("10:00");
   const [checkInDuration, setCheckInDuration] = useState<number>(2);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
 
   const [searchParams] = useSearchParams();
@@ -592,6 +593,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     const durationParam = searchParams.get("duration") || 2;
     const checkInParam = searchParams.get("checkIn");
     const checkOutParam = searchParams.get("checkOut");
+
 
     setBookingType(typeParam);
     setSearchValue(
@@ -669,6 +671,8 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener
         onClickAway={(e: any) => {
+          if (inputRef.current && !inputRef.current.contains(e.target))
+             setDropdownOpen(false);
           if (typeRef.current && !typeRef.current.contains(e.target))
             setTypeDropdownOpen(false);
           if (dateRef.current && !dateRef.current.contains(e.target))
@@ -695,6 +699,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                     variant='outlined'
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
+                    onFocus={() => setDropdownOpen(true)}
                     inputRef={inputRef}
                     InputProps={{
                       startAdornment: (
@@ -705,16 +710,22 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                     }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        height: 40,
-                        borderRadius: "50px 0 0 50px",
-                        "& fieldset": { border: "none" },
-                        fontSize: "14px",
+                        height: { xs: 48, md: 40 },
+                        borderRadius: "50px 15px 15px 50px",
+                        "& fieldset": { border: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important" },
+
+                        "&:hover": { borderColor: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important" },
+                        "&.Mui-focused": {
+                          borderColor: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important",
+                          borderWidth: 2,
+                        },
                       },
                     }}
                   />
                   <Popper
-                    open={searchValue && !isLocationSelected}
+                    open={dropdownOpen}
                     anchorEl={inputRef.current}
+                    
                     placement='bottom-start'
                     sx={{ zIndex: 20, padding: "0px !important" }}>
                     {filteredLocations.length == 0 ? (
@@ -740,12 +751,14 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                           borderRadius: "16px",
                           maxHeight: 300,
                           overflow: "auto",
+                          padding:.5
                         }}>
                         <List disablePadding>
                           {filteredLocations.map((loc, i) => (
                             <ListItemButton
                               key={i}
-                              onClick={() => setSearchValue(loc.name.vi)}
+                              onClick={() => {setSearchValue(loc.name.vi)
+                                setDropdownOpen(false)}}
                               sx={{
                                 py: 1.5,
                                 borderBottom:
@@ -777,52 +790,60 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 {/* Loại đặt phòng */}
                 <Box
                   ref={typeRef}
-                  sx={{ cursor: "pointer", flex: "0 0 200px" }}
+                  sx={{ cursor: "pointer", flex: "0 0 200px", mx: 1 }}
                   onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}>
                   <Box
                     sx={{
-                      height: 40,
-                      px: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 0.5,
-                      bgcolor: typeDropdownOpen ? "#f9f9f9" : "transparent",
                       borderLeft: "1px solid #eee",
                       borderRight: "1px solid #eee",
-                    }}>
-                    {bookingType === "hourly" ? (
-                      <AccessTime sx={{ color: "#98b720", fontSize: 18 }} />
-                    ) : bookingType === "overnight" ? (
-                      <Nightlight sx={{ color: "#98b720", fontSize: 18 }} />
-                    ) : (
-                      <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
-                    )}
-                    <Typography
+                      height: 40,
+                      px: 1,
+                    }}
+                  >
+                    <Box
                       sx={{
-                        fontWeight: 500,
-                        color: "#333",
-                        fontSize: "0.9rem",
+                        height:"100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 0.5,
+                        border:typeDropdownOpen?"1px solid #98b720":"1px solid transparent",
+                        borderRadius:"7px"
+
                       }}>
-                      {getTypeLabel()}
-                    </Typography>
-                    <KeyboardArrowDown
-                      sx={{
-                        fontSize: 16,
-                        color: "#666",
-                        transition: "0.2s",
-                        transform: typeDropdownOpen
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                      }}
-                    />
+                      {bookingType === "hourly" ? (
+                        <AccessTime sx={{ color: "#98b720", fontSize: 18 }} />
+                      ) : bookingType === "overnight" ? (
+                        <Nightlight sx={{ color: "#98b720", fontSize: 18 }} />
+                      ) : (
+                        <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                      )}
+                      <Typography
+                        sx={{
+                          fontWeight: 500,
+                          color: "#333",
+                          fontSize: "0.9rem",
+                        }}>
+                        {getTypeLabel()}
+                      </Typography>
+                      <KeyboardArrowDown
+                        sx={{
+                          fontSize: 16,
+                          color: "#666",
+                          transition: "0.2s",
+                          transform: typeDropdownOpen
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                        }}
+                      />
+                    </Box>
                   </Box>
                 </Box>
 
                 {/* Ngày giờ */}
                 <Box
                   ref={dateRef}
-                  sx={{ flex: 1, cursor: "pointer" }}
+                  sx={{ flex: 1, cursor: "pointer",mr:1 }}
                   onClick={() => setPickerOpen(true)}>
                   <Box
                     sx={{
@@ -830,7 +851,8 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       px: 2,
                       display: "flex",
                       alignItems: "center",
-                      bgcolor: pickerOpen ? "#f9f9f9" : "transparent",
+                     border:pickerOpen? "1px solid #98b720" :"1px solid transparent",
+                     borderRadius:"7px"
                     }}>
                     <Typography
                       sx={{

@@ -36,6 +36,7 @@ import { useBookingContext } from "../../App";
 import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { MuiOtpInput } from "mui-one-time-password-input";
+import no_room from "../../images/Calendar.svg"
 interface Room {
   id: number;
   name: string;
@@ -110,40 +111,7 @@ const RoomCard = ({
     ),
   };
 
-  if (loading) {
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "20px",
-          overflow: "hidden",
-          bgcolor: "white",
-          p: 2,
-        }}>
-        <Skeleton
-          variant='rectangular'
-          height={200}
-          sx={{ borderRadius: "16px" }}
-        />
-        <Stack spacing={1.5} mt={2}>
-          <Skeleton width='60%' height={24} />
-          <Skeleton width='40%' height={20} />
-          <Stack direction='row' gap={1} flexWrap='wrap'>
-            {[...Array(5)].map((_, i) => (
-              <Skeleton
-                key={i}
-                width={80}
-                height={32}
-                sx={{ borderRadius: "50px" }}
-              />
-            ))}
-          </Stack>
-          <Skeleton width='50%' height={40} sx={{ borderRadius: "50px" }} />
-        </Stack>
-      </Paper>
-    );
-  }
-
+ 
   const isSoldOut = room.remaining === null;
   const isLowStock = room.remaining === 1;
 
@@ -534,6 +502,50 @@ const RoomList = ({ loading, data,hotel }) => {
           </Box>
         </Modal>
         <RoomDetailModal open={openDetail} hotel={hotel} onClose={() => setOpenDetail(false)} room={selectedRoom} />
+
+        {loading? <>
+        <Box display={"flex"} justifyContent={"space-between"} gap={3}>
+          {[1,2,3].map((item)=>{
+            return <Paper
+            elevation={0}
+            sx={{
+              borderRadius: "20px",
+              overflow: "hidden",
+              bgcolor: "white",
+              p: 2,
+             
+            }}>
+            <Skeleton
+              variant='rectangular'
+              height={200}
+              sx={{ borderRadius: "16px" }}
+            />
+            <Stack spacing={1.5} mt={2}>
+              <Skeleton width='60%' height={24} />
+              <Skeleton width='40%' height={20} />
+              <Stack direction='row' gap={1} flexWrap='wrap'>
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton
+                    key={i}
+                    width={80}
+                    height={32}
+                    sx={{ borderRadius: "50px" }}
+                  />
+                ))}
+              </Stack>
+              <Skeleton width='50%' height={40} sx={{ borderRadius: "50px" }} />
+            </Stack>
+          </Paper>
+          })}
+        </Box>
+        </>:<>
+      {data.length == 0 ?<>
+        <Box display={"flex"} flexDirection={"column"} gap={2} alignItems={"center"} justifyContent={"center"}>
+          <img src={no_room} alt="" />
+          <Typography color="#2B2F38" fontWeight={600}>Không còn phòng trống</Typography>
+          <Typography color="#2B2F38">Rất tiệc, khách sạn đã hết phòng vào thời này. hãy trọn thời khác để đặt phòng</Typography>
+        </Box>
+        </>:
         <Grid container justifyContent={data.length >= 3 ? "space-between" : "start"} gap={data.length <= 3 ? 3 : 0}>
           {data?.map((room) => (
             <Grid item xs={12} md={3.8} key={room.id}>
@@ -547,7 +559,9 @@ const RoomList = ({ loading, data,hotel }) => {
               />
             </Grid>
           ))}
-        </Grid>
+        </Grid>}
+      </>}
+       
       </Stack>
     </Box>
   );

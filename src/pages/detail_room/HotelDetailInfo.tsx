@@ -25,7 +25,7 @@ import {
   Close as CloseIcon,
   Bathtub,
 } from "@mui/icons-material";
-
+import start from "../../images/star.svg"
 interface Review {
   id: number;
   author: string;
@@ -34,34 +34,9 @@ interface Review {
   content: string;
 }
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    author: "Thang Do",
-    date: "12/11/2025",
-    rating: 4.5,
-    content:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-  },
-  {
-    id: 2,
-    author: "Thang Do",
-    date: "12/11/2025",
-    rating: 4.5,
-    content:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-  },
-  {
-    id: 3,
-    author: "Thang Do",
-    date: "12/11/2025",
-    rating: 4.5,
-    content:
-      "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.",
-  },
-];
 
-const HotelDetailInfo = ({info,reviews}) => {
+
+const HotelDetailInfo = ({ info, reviews }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -85,7 +60,11 @@ const HotelDetailInfo = ({info,reviews}) => {
       />
     ));
   };
-
+  const avgRate =
+  reviews.reduce((acc, r) => acc + r.rate, 0) / (reviews.length || 1);
+  const starCounts = [5, 4, 3, 2, 1].map((star) =>
+  reviews.filter((r) => r.rate === star).length
+);
   return (
     <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={5} sx={{ mx: "auto" }}>
@@ -170,7 +149,8 @@ const HotelDetailInfo = ({info,reviews}) => {
               bgcolor: "#f9f9f9",
               px: 0,
             }}>
-            <Grid container alignItems='center'>
+            <Grid container alignItems="start">
+              {/* Tổng điểm */}
               <Grid item xs={12} md={6}>
                 <Box display={"flex"} gap={2}>
                   <Box
@@ -185,45 +165,45 @@ const HotelDetailInfo = ({info,reviews}) => {
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                    }}>
-                    <Typography variant='h2'>4.9</Typography>
+                    }}
+                  >
+                    <Typography variant="h2">{avgRate.toFixed(1)}</Typography>
                   </Box>
                   <Box>
                     <Typography
                       fontWeight={600}
-                      fontSize='1.4rem'
-                      color='rgba(152, 183, 32, 1)'>
+                      fontSize="1.4rem"
+                      color="rgba(152, 183, 32, 1)"
+                    >
                       Xuất sắc
                     </Typography>
-                    <Typography fontSize='0.85rem' color='rgba(43, 47, 56, 1)'>
-                      Từ 100 đánh giá
+                    <Typography fontSize="0.85rem" color="rgba(43, 47, 56, 1)">
+                      Từ {reviews.length} đánh giá
                     </Typography>
-                    <Typography fontSize='0.8rem' color='#999'>
+                    <Typography fontSize="0.8rem" color="#999">
                       Bởi người dùng trong Booking Hotel
                     </Typography>
                   </Box>
                 </Box>
               </Grid>
 
+              {/* Biểu đồ rating */}
               <Grid item xs={12} md={6}>
                 <Stack spacing={2}>
-                  {[
-                    { label: "Sạch sẽ", value: 4.9 },
-                    { label: "Tiện nghi", value: 4.9 },
-                    { label: "Dịch vụ", value: 4.9 },
-                  ].map((item) => (
+                  {[5, 4, 3, 2, 1].map((star, idx) => (
                     <Stack
-                      key={item.label}
-                      direction='row'
-                      alignItems='center'
-                      spacing={2}>
-                      <Typography width={80} fontSize='0.9rem' color='#666'>
-                        {item.label}
+                      key={star}
+                      direction="row"
+                      alignItems="center"
+                      spacing={2}
+                    >
+                      <Typography width={40} fontSize="0.9rem" display={"flex"} alignItems={"center"} gap={1} color="#666">
+                        {star}  <img src={start} alt="" />
                       </Typography>
                       <Box sx={{ flex: 1 }}>
                         <LinearProgress
-                          variant='determinate'
-                          value={(item.value / 5) * 100}
+                          variant="determinate"
+                          value={starCounts[idx]}
                           sx={{
                             height: 8,
                             borderRadius: 4,
@@ -235,11 +215,8 @@ const HotelDetailInfo = ({info,reviews}) => {
                           }}
                         />
                       </Box>
-                      <Typography
-                        fontWeight={600}
-                        fontSize='0.9rem'
-                        color='#98b720'>
-                        {item.value}/5
+                      <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
+                        {starCounts[idx]}/100
                       </Typography>
                     </Stack>
                   ))}
@@ -269,7 +246,7 @@ const HotelDetailInfo = ({info,reviews}) => {
                         spacing={1.5}
                         justifyContent={"space-between"}
                         alignItems='center'>
-                        <img src={review?.avatar} width={40} height={40} style={{borderRadius:"50%"}} alt="" />
+                        <img src={review?.avatar} width={40} height={40} style={{ borderRadius: "50%" }} alt="" />
                         <Box
                           display={"flex"}
                           width={"90%"}
@@ -303,28 +280,17 @@ const HotelDetailInfo = ({info,reviews}) => {
                           WebkitLineClamp: isExpanded ? "unset" : 3,
                           WebkitBoxOrient: "vertical",
                         }}>
-                        {isExpanded ? review.comment : shortContent}
+                        {review.comment}
                       </Typography>
 
-                      {review.comment.length > 120 && (
-                        <Typography
-                          fontSize='0.85rem'
-                          color='#98b720'
-                          sx={{
-                            cursor: "pointer",
-                            textDecoration: "underline",
-                          }}
-                          onClick={() => toggleExpand(review.created_at)}>
-                          {isExpanded ? "Ẩn bớt" : "Xem thêm"}
-                        </Typography>
-                      )}
+
                     </Stack>
                   </Paper>
                 </Grid>
               );
             })}
           </Grid>
-
+            {reviews.length &&
           <Button
             variant='outlined'
             sx={{
@@ -341,7 +307,7 @@ const HotelDetailInfo = ({info,reviews}) => {
             }}
             onClick={() => setOpenModal(true)}>
             Show All 100 Reviews
-          </Button>
+          </Button>}
         </Stack>
 
         {/* === 4. CHÍNH SÁCH NHẬN - TRẢ PHÒNG === */}
@@ -351,10 +317,10 @@ const HotelDetailInfo = ({info,reviews}) => {
           </Typography>
           <Grid container>
             {[
-              { label: "Theo giờ", time: "08:00 - 21:00" },
-              { label: "Qua đêm", time: "22:00 - 12:00" },
-              { label: "Theo ngày", time: "14:00 - 12:00" },
-            ].map((item) => (
+              info?.rent_types?.hourly && { label: "Theo giờ", time: `${info?.rent_types?.hourly.from} - ${info?.rent_types?.hourly.to}` },
+              info?.rent_types?.overnight && { label: "Qua đêm", time: `${info?.rent_types?.overnight.from} - ${info?.rent_types?.overnight.to}` },
+              info?.rent_types?.daily && { label: "Theo ngày", time: `${info?.rent_types?.daily.from} - ${info?.rent_types?.daily.to}` },
+            ].filter(Boolean).map((item) => (
               <Grid item xs={12} sm={2} key={item.label}>
                 <Stack>
                   <Typography fontWeight={600} color='#333'>
@@ -509,7 +475,7 @@ const HotelDetailInfo = ({info,reviews}) => {
                   elevation={0}
                   sx={{ p: 3, borderRadius: "12px", border: "1px solid #eee" }}>
                   <Stack direction='row' spacing={2} alignItems='center' mb={1}>
-                    <img src={review?.avatar} width={40} height={40} style={{borderRadius:"50%"}} alt="" />
+                    <img src={review?.avatar} width={40} height={40} style={{ borderRadius: "50%" }} alt="" />
                     <Box>
                       <Typography fontWeight={600}>{review.user_name}</Typography>
                       <Typography fontSize='0.8rem' color='#999'>

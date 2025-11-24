@@ -675,10 +675,11 @@ const SearchBarWithDropdown = ({ location }) => {
                 bgcolor: "white",
                 p: { xs: 1.5, md: "70px 20px 20px" },
                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+
               }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
-                spacing={{ xs: 1.5, md: 0 }}
+                spacing={{ xs: 1.5, md: 1 }}
                 sx={{
                   borderRadius: "50px",
                   border: "1px solid #eee",
@@ -692,6 +693,7 @@ const SearchBarWithDropdown = ({ location }) => {
                     placeholder='Bạn muốn đi đâu?'
                     variant='outlined'
                     value={searchValue}
+                    
                     onChange={(e) => {
                       setSearchValue(e.target.value);
                       setDropdownOpen(true);
@@ -708,12 +710,12 @@ const SearchBarWithDropdown = ({ location }) => {
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         height: { xs: 48, md: 45 },
-                        borderRadius: "50px 0 0 50px",
-                        "& fieldset": { border: "none !important" },
+                        borderRadius: "50px 10px 10px 50px",
+                        "& fieldset": { border:dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important" },
 
-                        "&:hover": { borderColor: "none !important" },
+                        "&:hover": { borderColor: dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important" },
                         "&.Mui-focused": {
-                          borderColor: "none !important",
+                          borderColor: dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important",
                           borderWidth: 2,
                         },
                       },
@@ -800,9 +802,12 @@ const SearchBarWithDropdown = ({ location }) => {
                 )}
 
                 {/* Nhận phòng */}
+                
+                <Box sx={{flex: { md: 2 },display:"flex"}}>
+
                 <Box
                   ref={checkInRef}
-                  sx={{ flex: { md: 1 }, cursor: "pointer" }}
+                  sx={{ flex: { md: 1 }, cursor: "pointer",border:pickerOpen?"1px solid rgba(152, 183, 32, 1)":"1px solid transparent",borderRight:"none",borderRadius:"10px 0 0 10px" }}
                   onClick={() => setPickerOpen(true)}>
                   <Box
                     sx={{
@@ -811,7 +816,7 @@ const SearchBarWithDropdown = ({ location }) => {
                       display: "flex",
                       alignItems: "center",
 
-                      backgroundColor: pickerOpen ? "#f9f9f9" : "transparent",
+                     
                     }}>
                     <img
                       src={in_time}
@@ -844,7 +849,7 @@ const SearchBarWithDropdown = ({ location }) => {
                 {/* Trả phòng */}
                 <Box
                   ref={checkOutRef}
-                  sx={{ flex: { md: 1 }, cursor: "pointer" }}
+                  sx={{ flex: { md: 1 }, cursor: "pointer",border:pickerOpen?"1px solid rgba(152, 183, 32, 1)":"1px solid transparent",borderLeft:"none",borderRadius:"0 10px 10px 0" }}
                   onClick={() => setPickerOpen(true)}>
                   <Box
                     sx={{
@@ -853,7 +858,7 @@ const SearchBarWithDropdown = ({ location }) => {
                       display: "flex",
                       alignItems: "center",
 
-                      backgroundColor: pickerOpen ? "#f9f9f9" : "transparent",
+                      
                     }}>
                     <img
                       src={out_time}
@@ -881,6 +886,7 @@ const SearchBarWithDropdown = ({ location }) => {
                       }}
                     />
                   </Box>
+                </Box>
                 </Box>
 
                 {/* Popup duy nhất */}

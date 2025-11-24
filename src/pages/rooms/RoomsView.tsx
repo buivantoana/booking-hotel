@@ -477,7 +477,7 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                         sx={{ color: "#98b720", fontSize: "15px" }}
                       />
                     ) : (
-                      "100+"
+                      <>{dataHotel.length}</>
                     )}{" "}
                     kết quả tìm kiếm
                   </Typography>
