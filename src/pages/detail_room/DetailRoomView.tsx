@@ -49,7 +49,14 @@ const TabPanel = (props: TabPanelProps) => {
   );
 };
 
-const DetailRoomView = ({ detailHotel, loading, recommend }) => {
+const DetailRoomView = ({
+  detailHotel,
+  loading,
+  recommend,
+  reviews,
+  getReviewHotel,
+  hastag,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -72,12 +79,12 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
 
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
-       <Lightbox
-          open={lightboxOpen}
-          close={() => setLightboxOpen(false)}
-          index={photoIndex}
-          slides={detailHotel?.hotel?.images.map((src) => ({ src }))}
-        />
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={photoIndex}
+        slides={detailHotel?.hotel?.images.map((src) => ({ src }))}
+      />
       <Container maxWidth='lg'>
         <Stack spacing={3} sx={{}}>
           {/* HEADER INFO */}
@@ -245,41 +252,41 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
                               objectFit: "cover",
                             }}
                           />
-                          {i === 3 && detailHotel?.hotel?.images?.length>4 && (
-                            
-                            <Box
-                            onClick={()=> setLightboxOpen(true)}
-                              sx={{
-                                position: "absolute",
-                                inset: 0,
-
-                                display: "flex",
-                                alignItems: "end",
-                                justifyContent: "end",
-                                borderRadius: "16px",
-                                cursor: "pointer",
-                                m: "10px",
-                              }}>
-                              <Chip
-                                icon={
-                                  <PhotoLibraryIcon
-                                    sx={{
-                                      color: "white !important",
-                                      fontSize: "15px",
-                                    }}
-                                  />
-                                }
-                                label={`${detailHotel?.hotel?.images?.length}+`}
+                          {i === 3 &&
+                            detailHotel?.hotel?.images?.length > 4 && (
+                              <Box
+                                onClick={() => setLightboxOpen(true)}
                                 sx={{
-                                  bgcolor: "rgba(0, 0, 0, 0.6)",
-                                  color: "white",
+                                  position: "absolute",
+                                  inset: 0,
 
-                                  fontSize: "0.8rem",
-                                  p: "10px 6px",
-                                }}
-                              />
-                            </Box>
-                          )}
+                                  display: "flex",
+                                  alignItems: "end",
+                                  justifyContent: "end",
+                                  borderRadius: "16px",
+                                  cursor: "pointer",
+                                  m: "10px",
+                                }}>
+                                <Chip
+                                  icon={
+                                    <PhotoLibraryIcon
+                                      sx={{
+                                        color: "white !important",
+                                        fontSize: "15px",
+                                      }}
+                                    />
+                                  }
+                                  label={`${detailHotel?.hotel?.images?.length}+`}
+                                  sx={{
+                                    bgcolor: "rgba(0, 0, 0, 0.6)",
+                                    color: "white",
+
+                                    fontSize: "0.8rem",
+                                    p: "10px 6px",
+                                  }}
+                                />
+                              </Box>
+                            )}
                         </Box>
                       </Grid>
                     ))}
@@ -315,7 +322,9 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
         />
         <HotelDetailInfo
           info={detailHotel?.hotel || {}}
-          reviews={detailHotel?.reviews || []}
+          getReviewHotel={getReviewHotel}
+          reviews={reviews}
+          hastag={hastag}
         />
         <ListRoom
           loading={loading}

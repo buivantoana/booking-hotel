@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Stack,
@@ -14,6 +14,15 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Avatar,
+  TextField,
+  Rating,
+  Chip,
+  CircularProgress,
 } from "@mui/material";
 import {
   AcUnit as AcIcon,
@@ -24,8 +33,15 @@ import {
   Star as StarIcon,
   Close as CloseIcon,
   Bathtub,
+  PhotoCamera,
+  Clear,
 } from "@mui/icons-material";
-import start from "../../images/star.svg"
+import start from "../../images/star.svg";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import remove from "../../images/delete.png";
+import { editReviewBooking, reviewDelete } from "../../service/booking";
+import { toast } from "react-toastify";
 interface Review {
   id: number;
   author: string;
@@ -34,15 +50,15 @@ interface Review {
   content: string;
 }
 
-
-
-const HotelDetailInfo = ({ info, reviews }) => {
+const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [reviewDetail, setReviewDetail] = useState(null);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
-
+  const [loadingReview, setLoadingReview] = useState(false);
   const toggleExpand = (id: number) => {
     setExpandedReviews((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -61,10 +77,27 @@ const HotelDetailInfo = ({ info, reviews }) => {
     ));
   };
   const avgRate =
-  reviews.reduce((acc, r) => acc + r.rate, 0) / (reviews.length || 1);
-  const starCounts = [5, 4, 3, 2, 1].map((star) =>
-  reviews.filter((r) => r.rate === star).length
-);
+    reviews.reduce((acc, r) => acc + r.rate, 0) / (reviews.length || 1);
+  const starCounts = [5, 4, 3, 2, 1].map(
+    (star) => reviews.filter((r) => r.rate === star).length
+  );
+  const handleDeleteReview = async () => {
+    setLoadingReview(true);
+    try {
+      let result = await reviewDelete(reviewDetail.id);
+      if (result?.review_id) {
+        toast.success(result?.message);
+        getReviewHotel();
+        setDeleteDialogOpen(false);
+        setReviewDetail(null);
+      } else {
+        toast.error(result?.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setLoadingReview(false);
+  };
   return (
     <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={5} sx={{ mx: "auto" }}>
@@ -149,7 +182,7 @@ const HotelDetailInfo = ({ info, reviews }) => {
               bgcolor: "#f9f9f9",
               px: 0,
             }}>
-            <Grid container alignItems="start">
+            <Grid container alignItems='start'>
               {/* Tổng điểm */}
               <Grid item xs={12} md={6}>
                 <Box display={"flex"} gap={2}>
@@ -165,22 +198,20 @@ const HotelDetailInfo = ({ info, reviews }) => {
                       display: "flex",
                       justifyContent: "center",
                       alignItems: "center",
-                    }}
-                  >
-                    <Typography variant="h2">{avgRate.toFixed(1)}</Typography>
+                    }}>
+                    <Typography variant='h2'>{avgRate.toFixed(1)}</Typography>
                   </Box>
                   <Box>
                     <Typography
                       fontWeight={600}
-                      fontSize="1.4rem"
-                      color="rgba(152, 183, 32, 1)"
-                    >
+                      fontSize='1.4rem'
+                      color='rgba(152, 183, 32, 1)'>
                       Xuất sắc
                     </Typography>
-                    <Typography fontSize="0.85rem" color="rgba(43, 47, 56, 1)">
+                    <Typography fontSize='0.85rem' color='rgba(43, 47, 56, 1)'>
                       Từ {reviews.length} đánh giá
                     </Typography>
-                    <Typography fontSize="0.8rem" color="#999">
+                    <Typography fontSize='0.8rem' color='#999'>
                       Bởi người dùng trong Booking Hotel
                     </Typography>
                   </Box>
@@ -193,16 +224,21 @@ const HotelDetailInfo = ({ info, reviews }) => {
                   {[5, 4, 3, 2, 1].map((star, idx) => (
                     <Stack
                       key={star}
-                      direction="row"
-                      alignItems="center"
-                      spacing={2}
-                    >
-                      <Typography width={40} fontSize="0.9rem" display={"flex"} alignItems={"center"} gap={1} color="#666">
-                        {star}  <img src={start} alt="" />
+                      direction='row'
+                      alignItems='center'
+                      spacing={2}>
+                      <Typography
+                        width={40}
+                        fontSize='0.9rem'
+                        display={"flex"}
+                        alignItems={"center"}
+                        gap={1}
+                        color='#666'>
+                        {star} <img src={start} alt='' />
                       </Typography>
                       <Box sx={{ flex: 1 }}>
                         <LinearProgress
-                          variant="determinate"
+                          variant='determinate'
                           value={starCounts[idx]}
                           sx={{
                             height: 8,
@@ -215,7 +251,10 @@ const HotelDetailInfo = ({ info, reviews }) => {
                           }}
                         />
                       </Box>
-                      <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
+                      <Typography
+                        fontWeight={600}
+                        fontSize='0.9rem'
+                        color='#98b720'>
                         {starCounts[idx]}/100
                       </Typography>
                     </Stack>
@@ -227,7 +266,7 @@ const HotelDetailInfo = ({ info, reviews }) => {
 
           {/* DANH SÁCH REVIEW */}
           <Grid container justifyContent={"space-between"}>
-            {reviews.map((review) => {
+            {reviews.slice(0, 3).map((review) => {
               const isExpanded = expandedReviews.includes(review.created_at);
               const shortContent = review.comment.slice(0, 120) + "...";
               return (
@@ -246,7 +285,13 @@ const HotelDetailInfo = ({ info, reviews }) => {
                         spacing={1.5}
                         justifyContent={"space-between"}
                         alignItems='center'>
-                        <img src={review?.avatar} width={40} height={40} style={{ borderRadius: "50%" }} alt="" />
+                        <img
+                          src={review?.avatar}
+                          width={40}
+                          height={40}
+                          style={{ borderRadius: "50%" }}
+                          alt=''
+                        />
                         <Box
                           display={"flex"}
                           width={"90%"}
@@ -263,9 +308,29 @@ const HotelDetailInfo = ({ info, reviews }) => {
                             </Stack>
                           </Box>
 
-                          <Typography fontSize='0.75rem' color='#999'>
-                            {review.created_at}
-                          </Typography>
+                          <Box display={"flex"} alignItems={"start"} gap={1}>
+                            <Typography fontSize='0.75rem' color='#999'>
+                              {review.created_at}
+                            </Typography>
+                            <BorderColorIcon
+                              onClick={() => {
+                                setReviewDetail(review);
+                                setReviewModalOpen(true);
+                              }}
+                              sx={{ fontSize: "14px", cursor: "pointer" }}
+                            />
+                            <DeleteForeverIcon
+                              onClick={() => {
+                                setReviewDetail(review);
+                                setDeleteDialogOpen(true);
+                              }}
+                              sx={{
+                                color: "red",
+                                fontSize: "18px",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Box>
                         </Box>
                       </Stack>
 
@@ -282,32 +347,31 @@ const HotelDetailInfo = ({ info, reviews }) => {
                         }}>
                         {review.comment}
                       </Typography>
-
-
                     </Stack>
                   </Paper>
                 </Grid>
               );
             })}
           </Grid>
-            {reviews.length &&
-          <Button
-            variant='outlined'
-            sx={{
-              borderColor: "#98b720",
-              color: "#98b720",
-              borderRadius: "12px",
-              textTransform: "none",
-              fontWeight: 600,
-              mt: 3,
-              px: 2,
-              py: 1,
-              alignSelf: "flex-start",
-              "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
-            }}
-            onClick={() => setOpenModal(true)}>
-            Show All 100 Reviews
-          </Button>}
+          {reviews.length && (
+            <Button
+              variant='outlined'
+              sx={{
+                borderColor: "#98b720",
+                color: "#98b720",
+                borderRadius: "12px",
+                textTransform: "none",
+                fontWeight: 600,
+                mt: 3,
+                px: 2,
+                py: 1,
+                alignSelf: "flex-start",
+                "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
+              }}
+              onClick={() => setOpenModal(true)}>
+              Show All {reviews.length} Reviews
+            </Button>
+          )}
         </Stack>
 
         {/* === 4. CHÍNH SÁCH NHẬN - TRẢ PHÒNG === */}
@@ -317,21 +381,32 @@ const HotelDetailInfo = ({ info, reviews }) => {
           </Typography>
           <Grid container>
             {[
-              info?.rent_types?.hourly && { label: "Theo giờ", time: `${info?.rent_types?.hourly.from} - ${info?.rent_types?.hourly.to}` },
-              info?.rent_types?.overnight && { label: "Qua đêm", time: `${info?.rent_types?.overnight.from} - ${info?.rent_types?.overnight.to}` },
-              info?.rent_types?.daily && { label: "Theo ngày", time: `${info?.rent_types?.daily.from} - ${info?.rent_types?.daily.to}` },
-            ].filter(Boolean).map((item) => (
-              <Grid item xs={12} sm={2} key={item.label}>
-                <Stack>
-                  <Typography fontWeight={600} color='#333'>
-                    {item.label}
-                  </Typography>
-                  <Typography fontSize='0.9rem' color='#666' mt={0.5}>
-                    {item.time}
-                  </Typography>
-                </Stack>
-              </Grid>
-            ))}
+              info?.rent_types?.hourly && {
+                label: "Theo giờ",
+                time: `${info?.rent_types?.hourly.from} - ${info?.rent_types?.hourly.to}`,
+              },
+              info?.rent_types?.overnight && {
+                label: "Qua đêm",
+                time: `${info?.rent_types?.overnight.from} - ${info?.rent_types?.overnight.to}`,
+              },
+              info?.rent_types?.daily && {
+                label: "Theo ngày",
+                time: `${info?.rent_types?.daily.from} - ${info?.rent_types?.daily.to}`,
+              },
+            ]
+              .filter(Boolean)
+              .map((item) => (
+                <Grid item xs={12} sm={2} key={item.label}>
+                  <Stack>
+                    <Typography fontWeight={600} color='#333'>
+                      {item.label}
+                    </Typography>
+                    <Typography fontSize='0.9rem' color='#666' mt={0.5}>
+                      {item.time}
+                    </Typography>
+                  </Stack>
+                </Grid>
+              ))}
           </Grid>
           <Typography fontSize='0.85rem' color='#999'>
             Lưu ý: việc hủy phòng sẽ tuân theo quy định riêng của từng loại
@@ -386,77 +461,90 @@ const HotelDetailInfo = ({ info, reviews }) => {
             {/* TỔNG ĐIỂM */}
             <Paper elevation={0} sx={{ borderRadius: "12px", p: 3, mb: 3 }}>
               <Grid container spacing={3}>
-                <Grid container alignItems='start' justifyContent={"space-between"}>
-                <Grid item xs={12} md={5}>
-                <Box display={"flex"} gap={2}>
-                  <Box
-                    sx={{
-                      bgcolor: "#98b720",
-                      color: "white",
-                      borderRadius: "12px",
-                      px: 3,
-                      py: 1.5,
-                      fontSize: "2rem",
-                      fontWeight: 700,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography variant="h2">{avgRate.toFixed(1)}</Typography>
-                  </Box>
-                  <Box>
-                    <Typography
-                      fontWeight={600}
-                      fontSize="1.4rem"
-                      color="rgba(152, 183, 32, 1)"
-                    >
-                      Xuất sắc
-                    </Typography>
-                    <Typography fontSize="0.85rem" color="rgba(43, 47, 56, 1)">
-                      Từ {reviews.length} đánh giá
-                    </Typography>
-                    <Typography fontSize="0.8rem" color="#999">
-                      Bởi người dùng trong Booking Hotel
-                    </Typography>
-                  </Box>
-                </Box>
-              </Grid>
+                <Grid
+                  container
+                  alignItems='start'
+                  justifyContent={"space-between"}>
+                  <Grid item xs={12} md={5}>
+                    <Box display={"flex"} gap={2}>
+                      <Box
+                        sx={{
+                          bgcolor: "#98b720",
+                          color: "white",
+                          borderRadius: "12px",
+                          px: 3,
+                          py: 1.5,
+                          fontSize: "2rem",
+                          fontWeight: 700,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}>
+                        <Typography variant='h2'>
+                          {avgRate.toFixed(1)}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography
+                          fontWeight={600}
+                          fontSize='1.4rem'
+                          color='rgba(152, 183, 32, 1)'>
+                          Xuất sắc
+                        </Typography>
+                        <Typography
+                          fontSize='0.85rem'
+                          color='rgba(43, 47, 56, 1)'>
+                          Từ {reviews.length} đánh giá
+                        </Typography>
+                        <Typography fontSize='0.8rem' color='#999'>
+                          Bởi người dùng trong Booking Hotel
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Grid>
 
                   <Grid item xs={12} md={7}>
-                <Stack spacing={2}>
-                  {[5, 4, 3, 2, 1].map((star, idx) => (
-                    <Stack
-                      key={star}
-                      direction="row"
-                      alignItems="center"
-                      spacing={2}
-                    >
-                      <Typography width={40} fontSize="0.9rem" display={"flex"} alignItems={"center"} gap={1} color="#666">
-                        {star}  <img src={start} alt="" />
-                      </Typography>
-                      <Box sx={{ flex: 1 }}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={starCounts[idx]}
-                          sx={{
-                            height: 8,
-                            borderRadius: 4,
-                            bgcolor: "#e0e0e0",
-                            "& .MuiLinearProgress-bar": {
-                              bgcolor: "#98b720",
-                              borderRadius: 4,
-                            },
-                          }}
-                        />
-                      </Box>
-                      <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
-                        {starCounts[idx]}/100
-                      </Typography>
+                    <Stack spacing={2}>
+                      {[5, 4, 3, 2, 1].map((star, idx) => (
+                        <Stack
+                          key={star}
+                          direction='row'
+                          alignItems='center'
+                          spacing={2}>
+                          <Typography
+                            width={40}
+                            fontSize='0.9rem'
+                            display={"flex"}
+                            alignItems={"center"}
+                            gap={1}
+                            color='#666'>
+                            {star} <img src={start} alt='' />
+                          </Typography>
+                          <Box sx={{ flex: 1 }}>
+                            <LinearProgress
+                              variant='determinate'
+                              value={starCounts[idx]}
+                              sx={{
+                                height: 8,
+                                borderRadius: 4,
+                                bgcolor: "#e0e0e0",
+                                "& .MuiLinearProgress-bar": {
+                                  bgcolor: "#98b720",
+                                  borderRadius: 4,
+                                },
+                              }}
+                            />
+                          </Box>
+                          <Typography
+                            fontWeight={600}
+                            fontSize='0.9rem'
+                            color='#98b720'>
+                            {starCounts[idx]}/100
+                          </Typography>
+                        </Stack>
+                      ))}
                     </Stack>
-                  ))}
-                </Stack>
-              </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Paper>
@@ -468,18 +556,47 @@ const HotelDetailInfo = ({ info, reviews }) => {
                   key={review.id}
                   elevation={0}
                   sx={{ p: 3, borderRadius: "12px", border: "1px solid #eee" }}>
-                  <Stack direction='row' spacing={2} alignItems='center' mb={1}>
-                    <img src={review?.avatar} width={40} height={40} style={{ borderRadius: "50%" }} alt="" />
+                  <Stack direction='row' spacing={2} alignItems='start' mb={1}>
+                    <img
+                      src={review?.avatar}
+                      width={40}
+                      height={40}
+                      style={{ borderRadius: "50%" }}
+                      alt=''
+                    />
+
                     <Box>
-                      <Typography fontWeight={600}>{review.user_name}</Typography>
-                      <Typography fontSize='0.8rem' color='#999'>
-                        {review.date}
+                      <Typography fontWeight={600}>
+                        {review.user_name}
+                        <br />
+                        {renderStars(review.rate)}
                       </Typography>
                     </Box>
                     <Box sx={{ flex: 1 }} />
-                    <Stack direction='row' spacing={0.3}>
-                      {renderStars(review.rate)}
-                    </Stack>
+                    <Stack direction='row' spacing={0.3}></Stack>
+                    <Box display={"flex"} alignItems={"start"} gap={1}>
+                      <Typography fontSize='0.8rem' color='#999'>
+                        {review.created_at}
+                      </Typography>
+                      <BorderColorIcon
+                        onClick={() => {
+                          setReviewDetail(review);
+                          setReviewModalOpen(true);
+                        }}
+                        sx={{ fontSize: "14px", cursor: "pointer" }}
+                      />
+                      <DeleteForeverIcon
+                        onClick={() => {
+                          setReviewDetail(review);
+                          setDeleteDialogOpen(true);
+                        }}
+                        sx={{
+                          color: "red",
+                          fontSize: "18px",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </Box>
                   </Stack>
                   <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
                     {review.comment}
@@ -504,8 +621,393 @@ const HotelDetailInfo = ({ info, reviews }) => {
           </Box>
         </Modal>
       </Stack>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{ sx: { borderRadius: "16px" } }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={remove} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setDeleteDialogOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='18px' mb={1}>
+            Xóa lịch review
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa review?
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={handleDeleteReview}
+            variant='contained'
+            disabled={loadingReview}
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            {loadingReview ? (
+              <>
+                <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                Đang xóa...
+              </>
+            ) : (
+              "Đồng ý"
+            )}{" "}
+          </Button>
+          <Button
+            onClick={() => setDeleteDialogOpen(false)}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+            }}>
+            Hủy bỏ
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <ReviewModal
+        open={reviewModalOpen}
+        onClose={() => setReviewModalOpen(false)}
+        id={reviewDetail?.id}
+        hastag={hastag}
+        reviewDetail={reviewDetail}
+        getReviewHotel={getReviewHotel}
+      />
     </Box>
   );
 };
 
 export default HotelDetailInfo;
+
+function ReviewModal({
+  open,
+  onClose,
+  id, // booking_id
+  hastag,
+  reviewDetail, // ← có thể null hoặc object như bạn gửi
+  getReviewHotel,
+}: {
+  open: boolean;
+  onClose: () => void;
+  id: string;
+  hastag: any[];
+  reviewDetail?: {
+    id: string;
+    rate: number;
+    comment: string;
+    hashtags: string[]; // dạng ["[\"roombeautyfull\",\"good\"]"] → cần parse
+    attachments: { url: string }[];
+  } | null;
+}) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const [rating, setRating] = useState<number | null>(0);
+  const [reviewText, setReviewText] = useState("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]); // preview
+  const [fileObjects, setFileObjects] = useState<File[]>([]); // file mới upload
+  const [loading, setLoading] = useState(false);
+  // Danh sách hashtag từ backend
+  const tags = hastag.map((item) => ({
+    label: item.name.vi,
+    value: item.id,
+  }));
+
+  // Khi có reviewDetail → tự động fill dữ liệu
+  useEffect(() => {
+    if (reviewDetail) {
+      setRating(reviewDetail.rate);
+      setReviewText(reviewDetail.comment || "");
+
+      // Xử lý hashtags: backend lưu dạng ["[\"tag1\",\"tag2\"]"] → cần parse
+      const rawHashtags = reviewDetail.hashtags || [];
+      const parsedTags: string[] = [];
+
+      rawHashtags.forEach((item) => {
+        try {
+          const arr = JSON.parse(item); // ["roombeautyfull", "good"]
+          parsedTags.push(...arr);
+        } catch (e) {
+          // nếu không parse được thì bỏ qua
+        }
+      });
+
+      setSelectedTags(parsedTags);
+
+      // Load ảnh cũ từ attachments
+      if (reviewDetail.attachments && reviewDetail.attachments.length > 0) {
+        const oldImages = reviewDetail.attachments.map((att: any) => att.url);
+        setUploadedImages(oldImages);
+      }
+    } else {
+      // Reset form khi tạo mới
+      setRating(0);
+      setReviewText("");
+      setSelectedTags([]);
+      setUploadedImages([]);
+      setFileObjects([]);
+    }
+  }, [reviewDetail, open]);
+
+  const handleTagClick = (tagValue: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tagValue)
+        ? prev.filter((t) => t !== tagValue)
+        : [...prev, tagValue]
+    );
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+    setFileObjects((prev) => [...prev, ...newFiles]);
+    setUploadedImages((prev) => [...prev, ...newPreviews]);
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+    setFileObjects((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    if (!rating || rating === 0 || reviewText.trim() === "") {
+      alert("Vui lòng chọn sao và viết đánh giá");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("rate", rating.toString());
+    formData.append("comment", reviewText.trim());
+    formData.append("booking_id", id);
+
+    // Hashtags: gửi dưới dạng JSON string của mảng id
+    if (selectedTags.length > 0) {
+      formData.append("hashtags", JSON.stringify(selectedTags));
+    }
+
+    // Gửi file mới (nếu có)
+    fileObjects.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    // Nếu có ảnh cũ nhưng bị xóa → cần gửi thêm danh sách xóa (tùy API)
+    // Ở đây tạm bỏ qua, bạn có thể thêm sau nếu cần
+
+    try {
+      const res = await editReviewBooking(id, formData);
+      if (res?.review_id) {
+        toast.success(res.message);
+        getReviewHotel();
+        setUploadedImages([]);
+        setFileObjects([]);
+        onClose();
+      } else {
+        toast.error(res.message);
+      }
+      console.log("Cập nhật thành công:", res);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi mạng");
+    }
+    setLoading(false);
+  };
+
+  const isSubmitDisabled =
+    !rating || rating === 0 || reviewText.trim().length === 0 || loading;
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth='sm'
+      fullWidth
+      fullScreen={isMobile}>
+      <DialogTitle sx={{ pb: 1, position: "relative" }}>
+        <Typography variant='h6' fontWeight={700}>
+          {reviewDetail ? "Chỉnh sửa đánh giá" : "Đánh giá khách sạn"}
+        </Typography>
+
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8 }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent>
+        <Box textAlign='center' mb={4}>
+          <Rating
+            value={rating}
+            onChange={(e, v) => setRating(v)}
+            size='large'
+            sx={{
+              fontSize: { xs: "3rem", sm: "4rem" },
+              "& .MuiRating-iconFilled": { color: "#FFB400" },
+            }}
+          />
+        </Box>
+
+        <Stack direction='row' gap={1} flexWrap='wrap' mb={3}>
+          {tags.map((tag) => (
+            <Chip
+              key={tag.value}
+              label={tag.label}
+              clickable
+              onClick={() => handleTagClick(tag.value)}
+              color={selectedTags.includes(tag.value) ? "success" : "default"}
+              variant={selectedTags.includes(tag.value) ? "filled" : "outlined"}
+              sx={{
+                borderRadius: "20px",
+                fontWeight: 500,
+                bgcolor: selectedTags.includes(tag.value)
+                  ? "#98b720"
+                  : "transparent",
+                color: selectedTags.includes(tag.value)
+                  ? "white"
+                  : "text.primary",
+              }}
+            />
+          ))}
+        </Stack>
+
+        <Typography fontWeight={600} mb={1}>
+          Viết đánh giá
+        </Typography>
+        <TextField
+          multiline
+          rows={4}
+          placeholder='Chia sẻ trải nghiệm của bạn...'
+          value={reviewText}
+          onChange={(e) => setReviewText(e.target.value)}
+          fullWidth
+          variant='outlined'
+          inputProps={{ maxLength: 1000 }}
+          helperText={`${reviewText.length}/1000`}
+          sx={{ mb: 3 }}
+        />
+
+        <Typography fontWeight={600} mb={2}>
+          Hình ảnh / Video
+        </Typography>
+        <Stack direction='row' gap={2} flexWrap='wrap'>
+          <label htmlFor='upload-review-images'>
+            <input
+              accept='image/*,video/*'
+              id='upload-review-images'
+              multiple
+              type='file'
+              style={{ display: "none" }}
+              onChange={handleImageUpload}
+            />
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                border: "2px dashed #ccc",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                bgcolor: "#fafafa",
+                "&:hover": { borderColor: "#98b720", bgcolor: "#f5f9f0" },
+              }}>
+              <PhotoCamera sx={{ fontSize: 32, color: "#999" }} />
+            </Box>
+          </label>
+
+          {uploadedImages.map((src, index) => (
+            <Box key={index} sx={{ position: "relative" }}>
+              <Avatar
+                variant='rounded'
+                src={src}
+                sx={{ width: 80, height: 80, borderRadius: "12px" }}
+              />
+              <IconButton
+                size='small'
+                onClick={() => handleRemoveImage(index)}
+                sx={{
+                  position: "absolute",
+                  top: -8,
+                  right: -8,
+                  bgcolor: "white",
+                  boxShadow: 3,
+                  "&:hover": { bgcolor: "#ffebee" },
+                }}>
+                <Clear sx={{ fontSize: 16, color: "#e91e63" }} />
+              </IconButton>
+            </Box>
+          ))}
+        </Stack>
+      </DialogContent>
+
+      <Box sx={{ p: 3, pt: 0 }}>
+        <Button
+          fullWidth
+          variant='contained'
+          size='large'
+          onClick={handleSubmit}
+          disabled={isSubmitDisabled}
+          sx={{
+            borderRadius: "30px",
+            py: 1.8,
+            fontSize: "1.1rem",
+            fontWeight: 600,
+            bgcolor: "#98b720",
+            "&:hover": { bgcolor: "#8ab020" },
+            "&.Mui-disabled": { bgcolor: "#ddd" },
+          }}>
+          {loading ? (
+            <>
+              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+              Cập nhật đánh giá...
+            </>
+          ) : (
+            "Cập nhật đánh giá"
+          )}
+        </Button>
+      </Box>
+    </Dialog>
+  );
+}

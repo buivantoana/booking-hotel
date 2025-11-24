@@ -22,6 +22,7 @@ import {
   DialogTitle,
   TextField,
   Rating,
+  CircularProgress,
 } from "@mui/material";
 import {
   AccessTime as AccessTimeIcon,
@@ -549,9 +550,6 @@ const SortButton = ({
 function ReviewModal({
   open,
   onClose,
-  hotelName,
-  roomType,
-  bookingTime,
   id,
   hastag,
 }: {
@@ -569,7 +567,7 @@ function ReviewModal({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [fileObjects, setFileObjects] = useState<File[]>([]); // ← Thêm state này
-
+  const [loading, setLoading] = useState(false);
   const tags = hastag.map((item) => {
     return {
       label: item.name.vi,
@@ -602,6 +600,7 @@ function ReviewModal({
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     if (!rating || rating === 0 || reviewText.trim() === "") return;
 
     const formData = new FormData();
@@ -617,6 +616,7 @@ function ReviewModal({
 
     // 3. comment
     formData.append("comment", reviewText.trim());
+    formData.append("booking_id", id);
 
     // 4. files
     fileObjects.forEach((file) => {
@@ -629,16 +629,26 @@ function ReviewModal({
     }
 
     try {
-      const res = await reviewBooking(id, formData);
+      const res = await reviewBooking(formData);
+      if (res?.id) {
+        toast.success("Tạo review thành công");
+        setUploadedImages([]);
+        setRating(0);
+        setReviewText("");
+        setSelectedTags([]);
+      } else {
+        toast.error(res.message);
+      }
       console.log("AAA res", res);
     } catch (err) {
       console.error(err);
       alert("Lỗi mạng");
     }
+    setLoading(false);
   };
 
   const isSubmitDisabled =
-    !rating || rating === 0 || reviewText.trim().length === 0;
+    !rating || rating === 0 || reviewText.trim().length === 0 || loading;
 
   return (
     <Dialog
@@ -791,7 +801,14 @@ function ReviewModal({
             "&:hover": { bgcolor: "#8ab020" },
             "&.Mui-disabled": { bgcolor: "#ccc", color: "#999" },
           }}>
-          Gửi đánh giá
+          {loading ? (
+            <>
+              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+              Gửi đánh giá...
+            </>
+          ) : (
+            "Gửi đánh giá"
+          )}
         </Button>
       </Box>
     </Dialog>
@@ -804,7 +821,7 @@ export default function MyBookingsPage({
   historyBooking = [],
   getHistoryBooking,
   hastag,
-  loading
+  loading,
 }: {
   setDetailBooking: (open: boolean) => void;
   historyBooking?: any[];
@@ -837,65 +854,93 @@ export default function MyBookingsPage({
       </Box>
 
       <Box>
-       {loading? <BookingCardSkeleton/>:
-       <>
-       {filtered.length === 0 ? (
-         <Box display={"flex"} flexDirection={"column"} gap={3}mt={8} alignItems={"center"} justifyContent={"center"}>
-         <img src={no_room} alt="" />
-         <Typography textAlign='center' color='#999'  fontSize='1.1rem'>
-           Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi đặc biệt.
-         </Typography>
-         
-         </Box>
-       ) : (
-         filtered.map((booking) => (
-           <BookingCard
-             key={booking.booking_id}
-             booking={booking}
-             setDetailBooking={setDetailBooking}
-             getHistoryBooking={getHistoryBooking}
-             hastag={hastag}
-           />
-         ))
-       )}
-       
-       </>}
+        {loading ? (
+          <BookingCardSkeleton />
+        ) : (
+          <>
+            {filtered.length === 0 ? (
+              <Box
+                display={"flex"}
+                flexDirection={"column"}
+                gap={3}
+                mt={8}
+                alignItems={"center"}
+                justifyContent={"center"}>
+                <img src={no_room} alt='' />
+                <Typography textAlign='center' color='#999' fontSize='1.1rem'>
+                  Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi
+                  đặc biệt.
+                </Typography>
+              </Box>
+            ) : (
+              filtered.map((booking) => (
+                <BookingCard
+                  key={booking.booking_id}
+                  booking={booking}
+                  setDetailBooking={setDetailBooking}
+                  getHistoryBooking={getHistoryBooking}
+                  hastag={hastag}
+                />
+              ))
+            )}
+          </>
+        )}
       </Box>
     </Box>
   );
 }
 
-
-
-import {  Card,  Skeleton } from "@mui/material";
+import { Card, Skeleton } from "@mui/material";
 
 const BookingCardSkeleton = () => {
   return (
     <Card sx={{ display: "flex", p: 2, gap: 2, borderRadius: 2 }}>
       {/* Ảnh */}
-      <Skeleton variant="rectangular" width={120} height={80} sx={{ borderRadius: 1 }} />
+      <Skeleton
+        variant='rectangular'
+        width={120}
+        height={80}
+        sx={{ borderRadius: 1 }}
+      />
 
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+      <Box
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}>
         {/* Header: Mã đặt phòng và trạng thái */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-          <Skeleton variant="text" width={100} height={24} />
-          <Skeleton variant="rounded" width={80} height={24} />
+          <Skeleton variant='text' width={100} height={24} />
+          <Skeleton variant='rounded' width={80} height={24} />
         </Box>
 
         {/* Tên khách sạn và số phòng */}
-        <Skeleton variant="text" width="50%" height={28} />
-        <Skeleton variant="text" width="30%" height={20} sx={{ mb: 1 }} />
+        <Skeleton variant='text' width='50%' height={28} />
+        <Skeleton variant='text' width='30%' height={20} sx={{ mb: 1 }} />
 
         {/* Thời gian */}
-        <Skeleton variant="text" width="70%" height={20} sx={{ mb: 1 }} />
+        <Skeleton variant='text' width='70%' height={20} sx={{ mb: 1 }} />
 
         {/* Ghi chú */}
-        <Skeleton variant="text" width="60%" height={20} />
+        <Skeleton variant='text' width='60%' height={20} />
 
         {/* Footer: giá và nút */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
-          <Skeleton variant="text" width={80} height={28} />
-          <Skeleton variant="rectangular" width={100} height={36} sx={{ borderRadius: 2 }} />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+          }}>
+          <Skeleton variant='text' width={80} height={28} />
+          <Skeleton
+            variant='rectangular'
+            width={100}
+            height={36}
+            sx={{ borderRadius: 2 }}
+          />
         </Box>
       </Box>
     </Card>
