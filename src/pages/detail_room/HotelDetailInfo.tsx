@@ -362,7 +362,7 @@ const HotelDetailInfo = ({ info, reviews }) => {
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              width: { xs: "95%", sm: 600 },
+              width: { xs: "95%", sm: 700 },
               maxHeight: "90vh",
               bgcolor: "white",
               borderRadius: "16px",
@@ -386,83 +386,77 @@ const HotelDetailInfo = ({ info, reviews }) => {
             {/* TỔNG ĐIỂM */}
             <Paper elevation={0} sx={{ borderRadius: "12px", p: 3, mb: 3 }}>
               <Grid container spacing={3}>
-                <Grid container alignItems='center'>
-                  <Grid item xs={12} md={6}>
-                    <Box display={"flex"} gap={2}>
-                      <Box
-                        sx={{
-                          bgcolor: "#98b720",
-                          color: "white",
-                          borderRadius: "12px",
-                          px: 3,
-                          py: 1.5,
-                          fontSize: "2rem",
-                          fontWeight: 700,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}>
-                        <Typography variant='h2'>4.9</Typography>
-                      </Box>
-                      <Box>
-                        <Typography
-                          fontWeight={600}
-                          fontSize='1.4rem'
-                          color='rgba(152, 183, 32, 1)'>
-                          Xuất sắc
-                        </Typography>
-                        <Typography
-                          fontSize='0.85rem'
-                          color='rgba(43, 47, 56, 1)'>
-                          Từ 100 đánh giá
-                        </Typography>
-                        <Typography fontSize='0.8rem' color='#999'>
-                          Bởi người dùng trong Booking Hotel
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Grid>
+                <Grid container alignItems='start' justifyContent={"space-between"}>
+                <Grid item xs={12} md={5}>
+                <Box display={"flex"} gap={2}>
+                  <Box
+                    sx={{
+                      bgcolor: "#98b720",
+                      color: "white",
+                      borderRadius: "12px",
+                      px: 3,
+                      py: 1.5,
+                      fontSize: "2rem",
+                      fontWeight: 700,
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="h2">{avgRate.toFixed(1)}</Typography>
+                  </Box>
+                  <Box>
+                    <Typography
+                      fontWeight={600}
+                      fontSize="1.4rem"
+                      color="rgba(152, 183, 32, 1)"
+                    >
+                      Xuất sắc
+                    </Typography>
+                    <Typography fontSize="0.85rem" color="rgba(43, 47, 56, 1)">
+                      Từ {reviews.length} đánh giá
+                    </Typography>
+                    <Typography fontSize="0.8rem" color="#999">
+                      Bởi người dùng trong Booking Hotel
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
 
-                  <Grid item xs={12} md={6}>
-                    <Stack spacing={2}>
-                      {[
-                        { label: "Sạch sẽ", value: 4.9 },
-                        { label: "Tiện nghi", value: 4.9 },
-                        { label: "Dịch vụ", value: 4.9 },
-                      ].map((item) => (
-                        <Stack
-                          key={item.label}
-                          direction='row'
-                          alignItems='center'
-                          spacing={2}>
-                          <Typography width={80} fontSize='0.9rem' color='#666'>
-                            {item.label}
-                          </Typography>
-                          <Box sx={{ flex: 1 }}>
-                            <LinearProgress
-                              variant='determinate'
-                              value={(item.value / 5) * 100}
-                              sx={{
-                                height: 8,
-                                borderRadius: 4,
-                                bgcolor: "#e0e0e0",
-                                "& .MuiLinearProgress-bar": {
-                                  bgcolor: "#98b720",
-                                  borderRadius: 4,
-                                },
-                              }}
-                            />
-                          </Box>
-                          <Typography
-                            fontWeight={600}
-                            fontSize='0.9rem'
-                            color='#98b720'>
-                            {item.value}/5
-                          </Typography>
-                        </Stack>
-                      ))}
+                  <Grid item xs={12} md={7}>
+                <Stack spacing={2}>
+                  {[5, 4, 3, 2, 1].map((star, idx) => (
+                    <Stack
+                      key={star}
+                      direction="row"
+                      alignItems="center"
+                      spacing={2}
+                    >
+                      <Typography width={40} fontSize="0.9rem" display={"flex"} alignItems={"center"} gap={1} color="#666">
+                        {star}  <img src={start} alt="" />
+                      </Typography>
+                      <Box sx={{ flex: 1 }}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={starCounts[idx]}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: "#e0e0e0",
+                            "& .MuiLinearProgress-bar": {
+                              bgcolor: "#98b720",
+                              borderRadius: 4,
+                            },
+                          }}
+                        />
+                      </Box>
+                      <Typography fontWeight={600} fontSize="0.9rem" color="#98b720">
+                        {starCounts[idx]}/100
+                      </Typography>
                     </Stack>
-                  </Grid>
+                  ))}
+                </Stack>
+              </Grid>
                 </Grid>
               </Grid>
             </Paper>

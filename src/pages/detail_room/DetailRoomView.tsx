@@ -22,12 +22,8 @@ import StarIcon from "@mui/icons-material/Star";
 import ShareIcon from "@mui/icons-material/Share";
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 
-// Mock ảnh
-import imgMain from "../../images/Rectangle 12.png";
-import img1 from "../../images/Rectangle 13.png";
-import img2 from "../../images/Rectangle 14.png";
-import img3 from "../../images/Rectangle 7.png";
-import img4 from "../../images/Rectangle 8.png";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import RoomList from "./RoomList";
 
 import HotelDetailInfo from "./HotelDetailInfo";
@@ -57,7 +53,8 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -75,6 +72,12 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
 
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
+       <Lightbox
+          open={lightboxOpen}
+          close={() => setLightboxOpen(false)}
+          index={photoIndex}
+          slides={detailHotel?.hotel?.images.map((src) => ({ src }))}
+        />
       <Container maxWidth='lg'>
         <Stack spacing={3} sx={{}}>
           {/* HEADER INFO */}
@@ -242,8 +245,10 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
                               objectFit: "cover",
                             }}
                           />
-                          {i === 3 && (
+                          {i === 3 && detailHotel?.hotel?.images?.length>4 && (
+                            
                             <Box
+                            onClick={()=> setLightboxOpen(true)}
                               sx={{
                                 position: "absolute",
                                 inset: 0,
@@ -264,7 +269,7 @@ const DetailRoomView = ({ detailHotel, loading, recommend }) => {
                                     }}
                                   />
                                 }
-                                label='10+'
+                                label={`${detailHotel?.hotel?.images?.length}+`}
                                 sx={{
                                   bgcolor: "rgba(0, 0, 0, 0.6)",
                                   color: "white",
