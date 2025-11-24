@@ -356,6 +356,7 @@ const RoomList = ({ loading, data,hotel }) => {
   const [openDetail, setOpenDetail] = useState(false)
   const [touched, setTouched] = useState(false);
   const [password,setPassword] = useState(false)
+  const navigate = useNavigate()
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
@@ -507,9 +508,12 @@ const RoomList = ({ loading, data,hotel }) => {
             <Typography my={2} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
               Bạn chưa có tài khoản Booking Hotel?{" "}
               <Typography
+                onClick={()=>{
+                  navigate("/regisger")
+                }}
                 fontSize={"14px"}
                 variant='span'
-                sx={{ textDecoration: "underline" }}
+                sx={{ textDecoration: "underline",cursor:"pointer" }}
                 color='#ff7a00'>
                 {" "}
                 Đăng ký ngay

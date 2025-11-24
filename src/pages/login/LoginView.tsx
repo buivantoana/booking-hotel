@@ -24,7 +24,9 @@ import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
+const GOOGLE_CLIENT_ID = "285312507829-8puo8pp5kikc3ahdivtr9ehq1fm3kkks.apps.googleusercontent.com";
 const LoginView = () => {
   const theme = useTheme();
   const [currentStep, setCurrentStep] = useState("register"); // 'register' or 'pin'
@@ -63,6 +65,14 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
   }
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
+  };
+  const handleGoogleSuccess = (credentialResponse) => {
+    console.log("Google login success:", credentialResponse);
+    // Gửi credentialResponse.credential về backend để xác thực token
+  };
+
+  const handleGoogleError = () => {
+    console.log("Google login failed");
   };
   return (
     <Container
@@ -269,29 +279,10 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                   </Button>
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Button
-                    variant='outlined'
-                    fullWidth
-                    sx={{
-                      py: 1.2,
-                      textTransform: "none",
-                      fontWeight: 500,
-                      borderRadius: 3,
-                      borderColor: "#e0e0e0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1,
-                      "&:hover": { borderColor: "#bdbdbd" },
-                    }}>
-                    <Box
-                      component='img'
-                      src={google}
-                      alt='Google'
-                      sx={{ width: 23 }}
-                    />
-                    Sign up with Google
-                  </Button>
+                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+         <GoogleCustomButton onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
+        </GoogleOAuthProvider>
+                 
                 </Grid>
               </Grid>
 
@@ -560,3 +551,54 @@ const PinCreation = ({phoneNumber}) => {
     </Container>
   );
 };
+
+
+// GoogleCustomButton.tsx
+import { useGoogleLogin } from '@react-oauth/google';
+
+interface GoogleCustomButtonProps {
+  onSuccess: (response: any) => void;
+  onError: () => void;
+}
+
+ function GoogleCustomButton({ onSuccess, onError }: GoogleCustomButtonProps) {
+  const login = useGoogleLogin({
+    onSuccess: (codeResponse) => {
+      console.log('Google Login Success:', codeResponse);
+      onSuccess(codeResponse);
+    },
+    onError: () => {
+      console.error('Google Login Failed');
+      onError();
+    },
+  });
+
+  return (
+    <Button
+                    variant='outlined'
+                    onClick={()=>{
+                      login()
+                    }}
+                    fullWidth
+                    sx={{
+                      py: 1.2,
+                      textTransform: "none",
+                      fontWeight: 500,
+                      borderRadius: 3,
+                      borderColor: "#e0e0e0",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 1,
+                      "&:hover": { borderColor: "#bdbdbd" },
+                    }}>
+                    <Box
+                      component='img'
+                      src={google}
+                      alt='Google'
+                      sx={{ width: 23 }}
+                    />
+                    Sign up with Google
+                  </Button>
+  );
+}

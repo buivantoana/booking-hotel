@@ -79,7 +79,7 @@ api.interceptors.response.use(
             {
               headers: {
                 "Content-Type": "application/json", // Header bạn muốn thêm
-                "refresh-token": refresh_token,
+                "refresh-token": `Bearer ${refresh_token}`,
               },
             }
           );
