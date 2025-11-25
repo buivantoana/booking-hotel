@@ -528,6 +528,8 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
       }
       setLoading(false);
 
+    }else{
+      setShowConfirm(true)
     }
   };
 
