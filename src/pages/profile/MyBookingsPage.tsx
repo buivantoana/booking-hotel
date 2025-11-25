@@ -152,6 +152,7 @@ const BookingCard = ({
         bookingTime={timeDisplay}
         id={booking.booking_id}
         hastag={hastag}
+        getHistoryBooking={getHistoryBooking}
       />
 
       <Box
@@ -552,6 +553,7 @@ function ReviewModal({
   onClose,
   id,
   hastag,
+  getHistoryBooking
 }: {
   open: boolean;
   onClose: () => void;
@@ -632,10 +634,12 @@ function ReviewModal({
       const res = await reviewBooking(formData);
       if (res?.id) {
         toast.success("Tạo review thành công");
+        getHistoryBooking()
         setUploadedImages([]);
         setRating(0);
         setReviewText("");
         setSelectedTags([]);
+        
       } else {
         toast.error(res.message);
       }

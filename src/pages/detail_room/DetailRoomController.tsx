@@ -11,24 +11,29 @@ import { getHashtags } from "../../service/profile";
 type Props = {};
 
 const DetailRoomController = (props: Props) => {
-  const { id } = useParams();
+  const { id:idPrams } = useParams();
   const [detailHotel, setDetailHotel] = useState({});
   const [loading, setLoading] = useState(true);
   const [recommend, setRecommend] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [hastag, setHastag] = useState([]);
-
+  const [idHotel,setIdHotel] = useState(null);
+  useEffect(()=>{
+    if(idPrams){
+      setIdHotel(idPrams)
+    }
+  },[idPrams])
   useEffect(() => {
-    if (id) {
+    if (idHotel) {
       getDetailHotel();
       getReview();
       getHashtagsReview();
     }
-  }, [id]);
+  }, [idHotel]);
   const getDetailHotel = async () => {
     setLoading(true);
     try {
-      let result = await getDetailHotelApi(id);
+      let result = await getDetailHotelApi(idHotel);
       let recommend = await searchHotel({ category: "recommend" });
 
       if (recommend?.hotels?.length) {
@@ -42,11 +47,12 @@ const DetailRoomController = (props: Props) => {
     }
     setLoading(false);
   };
-  const getReview = async () => {
+  const getReview = async (id) => {
     setLoading(true);
     try {
-      let review = await getReviewHotel(id);
-      if (review?.reviews?.length) {
+      let review = await getReviewHotel(id||idHotel);
+      console.log("AAAA review",review)
+      if (review?.reviews) {
         setReviews(review?.reviews);
       }
     } catch (error) {
@@ -71,7 +77,7 @@ const DetailRoomController = (props: Props) => {
       recommend={recommend}
       loading={loading}
       reviews={reviews}
-      getReviewHotel={getReviewHotel}
+      getReviewHotel={getReview}
       hastag={hastag}
     />
   );

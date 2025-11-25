@@ -837,7 +837,7 @@ function ReviewModal({
       const res = await editReviewBooking(id, formData);
       if (res?.review_id) {
         toast.success(res.message);
-        getReviewHotel();
+        await getReviewHotel(reviewDetail?.hotel_id);
         setUploadedImages([]);
         setFileObjects([]);
         onClose();
@@ -845,7 +845,7 @@ function ReviewModal({
         toast.error(res.message);
       }
       console.log("Cập nhật thành công:", res);
-      onClose();
+      
     } catch (err) {
       console.error(err);
       alert("Lỗi mạng");
