@@ -48,7 +48,7 @@ const DetailRoomController = (props: Props) => {
     setLoading(false);
   };
   const getReview = async (id) => {
-    setLoading(true);
+    
     try {
       let review = await getReviewHotel(id||idHotel);
       console.log("AAAA review",review)
@@ -58,7 +58,7 @@ const DetailRoomController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
-    setLoading(false);
+   
   };
 
   const getHashtagsReview = async () => {

@@ -286,6 +286,7 @@ const BookingCard = ({
           <Stack direction='row' justifyContent='flex-end' spacing={1}>
             {isCompleted && (
               <>
+              {!booking?.review && 
                 <Button
                   onClick={() => setReviewModalOpen(true)}
                   variant='outlined'
@@ -298,7 +299,7 @@ const BookingCard = ({
                     minWidth: 120,
                   }}>
                   Đánh giá
-                </Button>
+                </Button>}
                 <Button
                   variant='contained'
                   sx={{

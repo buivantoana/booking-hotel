@@ -111,7 +111,7 @@ const RoomCard = ({
     ),
   };
 
- 
+
   const isSoldOut = room.remaining === null;
   const isLowStock = room.remaining === 1;
 
@@ -283,10 +283,10 @@ const RoomCard = ({
           {!isSoldOut && (
             <Button
               variant='contained'
-              onClick={Object.keys(context.state.user).length > 0?() => {
+              onClick={Object.keys(context.state.user).length > 0 ? () => {
                 setSelectedRoom(room)
                 setOpenDetail(true)
-              }:()=>{
+              } : () => {
                 setOpenModal(true)
               }}
               sx={{
@@ -317,7 +317,7 @@ const RoomCard = ({
   );
 };
 
-const RoomList = ({ loading, data,hotel }) => {
+const RoomList = ({ loading, data, hotel }) => {
 
   const [openModal, setOpenModal] = useState(false);
   const [lodingLogin, setLoadingLogin] = useState(false);
@@ -325,7 +325,7 @@ const RoomList = ({ loading, data,hotel }) => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [openDetail, setOpenDetail] = useState(false)
   const [touched, setTouched] = useState(false);
-  const [password,setPassword] = useState(false)
+  const [password, setPassword] = useState(false)
   const navigate = useNavigate()
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
@@ -356,25 +356,25 @@ const RoomList = ({ loading, data,hotel }) => {
               p: 4,
               overflow: "auto",
             }}>
-             {password?<PinCreation setOpenModal={setOpenModal} phoneNumber={phoneNumber}/>: <>
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'>
-              <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-                Xác minh số điện thoại
+            {password ? <PinCreation setOpenModal={setOpenModal} phoneNumber={phoneNumber} /> : <>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'>
+                <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
+                  Xác minh số điện thoại
+                </Typography>
+                <IconButton onClick={() => setOpenModal(false)}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
+              <Typography my={3} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
+                Vui lòng nhập số điện thoại để tiếp tục đặt phòng
               </Typography>
-              <IconButton onClick={() => setOpenModal(false)}>
-                <CloseIcon />
-              </IconButton>
-            </Stack>
-            <Typography my={3} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
-              Vui lòng nhập số điện thoại để tiếp tục đặt phòng
-            </Typography>
-            <Typography fontSize={14} fontWeight={500} mb={0.5}>
-              Số điện thoại
-            </Typography>
-            <TextField
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Số điện thoại
+              </Typography>
+              <TextField
                 fullWidth
                 placeholder="Nhập số điện thoại"
                 variant="outlined"
@@ -445,37 +445,37 @@ const RoomList = ({ loading, data,hotel }) => {
                     ) : null,
                 }}
               />
-            <Button
-              fullWidth
-              onClick={async () => {
-                setLoadingLogin(true)
-                try {
-                  let result = await checkUser({
-                    "type": "phone",
-                    "value": "0"+phoneNumber
-                })
-                if(result.code == "OK"){
-                  setPassword(true)
-                }else{
-                  toast.error(result.message)
-                }
-                } catch (error) {
-                  console.log(error)
-                }
-                setLoadingLogin(false)
-              }}
-              variant='outlined'
-              disabled={!phoneNumber || !isValidPhone(phoneNumber)}
-              sx={{
-                mt: 2,
-                borderColor: "#98b720",
-                color: "white",
-                borderRadius: "50px",
-                py: 1.5,
-                textTransform: "none",
-                background: "rgba(152, 183, 32, 1)",
-              }}>
-              {loading ? (
+              <Button
+                fullWidth
+                onClick={async () => {
+                  setLoadingLogin(true)
+                  try {
+                    let result = await checkUser({
+                      "type": "phone",
+                      "value": "0" + phoneNumber
+                    })
+                    if (result.code == "OK") {
+                      setPassword(true)
+                    } else {
+                      toast.error(result.message)
+                    }
+                  } catch (error) {
+                    console.log(error)
+                  }
+                  setLoadingLogin(false)
+                }}
+                variant='outlined'
+                disabled={!phoneNumber || !isValidPhone(phoneNumber)}
+                sx={{
+                  mt: 2,
+                  borderColor: "#98b720",
+                  color: "white",
+                  borderRadius: "50px",
+                  py: 1.5,
+                  textTransform: "none",
+                  background: "rgba(152, 183, 32, 1)",
+                }}>
+                {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
                     Đăng nhập...
@@ -483,85 +483,85 @@ const RoomList = ({ loading, data,hotel }) => {
                 ) : (
                   "Đăng nhập"
                 )}
-            </Button>
-            <Typography my={2} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
-              Bạn chưa có tài khoản Booking Hotel?{" "}
-              <Typography
-                onClick={()=>{
-                  navigate("/regisger")
-                }}
-                fontSize={"14px"}
-                variant='span'
-                sx={{ textDecoration: "underline",cursor:"pointer" }}
-                color='#ff7a00'>
-                {" "}
-                Đăng ký ngay
+              </Button>
+              <Typography my={2} fontSize={"14px"} color='rgba(152, 159, 173, 1)'>
+                Bạn chưa có tài khoản Booking Hotel?{" "}
+                <Typography
+                  onClick={() => {
+                    navigate("/regisger")
+                  }}
+                  fontSize={"14px"}
+                  variant='span'
+                  sx={{ textDecoration: "underline", cursor: "pointer" }}
+                  color='#ff7a00'>
+                  {" "}
+                  Đăng ký ngay
+                </Typography>
               </Typography>
-            </Typography>
-              </>}
+            </>}
           </Box>
         </Modal>
         <RoomDetailModal open={openDetail} hotel={hotel} onClose={() => setOpenDetail(false)} room={selectedRoom} />
 
-        {loading? <>
-        <Box display={"flex"} justifyContent={"space-between"} gap={3}>
-          {[1,2,3].map((item)=>{
-            return <Paper
-            elevation={0}
-            sx={{
-              borderRadius: "20px",
-              overflow: "hidden",
-              bgcolor: "white",
-              p: 2,
-             
-            }}>
-            <Skeleton
-              variant='rectangular'
-              height={200}
-              sx={{ borderRadius: "16px" }}
-            />
-            <Stack spacing={1.5} mt={2}>
-              <Skeleton width='60%' height={24} />
-              <Skeleton width='40%' height={20} />
-              <Stack direction='row' gap={1} flexWrap='wrap'>
-                {[...Array(5)].map((_, i) => (
-                  <Skeleton
-                    key={i}
-                    width={80}
-                    height={32}
-                    sx={{ borderRadius: "50px" }}
-                  />
-                ))}
-              </Stack>
-              <Skeleton width='50%' height={40} sx={{ borderRadius: "50px" }} />
-            </Stack>
-          </Paper>
-          })}
-        </Box>
-        </>:<>
-      {data.length == 0 ?<>
-        <Box display={"flex"} flexDirection={"column"} gap={2} alignItems={"center"} justifyContent={"center"}>
-          <img src={no_room} alt="" />
-          <Typography color="#2B2F38" fontWeight={600}>Không còn phòng trống</Typography>
-          <Typography color="#2B2F38">Rất tiệc, khách sạn đã hết phòng vào thời này. hãy trọn thời khác để đặt phòng</Typography>
-        </Box>
-        </>:
-        <Grid container justifyContent={data.length >= 3 ? "space-between" : "start"} gap={data.length <= 3 ? 3 : 0}>
-          {data?.map((room) => (
-            <Grid item xs={12} md={3.8} key={room.id}>
-              <RoomCard
-                room={room}
-                setOpenModal={setOpenModal}
-                loading={loading}
-                setOpenDetail={setOpenDetail}
-                setSelectedRoom={setSelectedRoom}
+        {loading ? <>
+          <Box display={"flex"} justifyContent={"space-between"} gap={3}>
+            {[1, 2, 3].map((item) => {
+              return <Paper
+                elevation={0}
+                sx={{
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  bgcolor: "white",
+                  p: 2,
 
-              />
-            </Grid>
-          ))}
-        </Grid>}
-      </>}
-       
+                }}>
+                <Skeleton
+                  variant='rectangular'
+                  height={200}
+                  sx={{ borderRadius: "16px" }}
+                />
+                <Stack spacing={1.5} mt={2}>
+                  <Skeleton width='60%' height={24} />
+                  <Skeleton width='40%' height={20} />
+                  <Stack direction='row' gap={1} flexWrap='wrap'>
+                    {[...Array(5)].map((_, i) => (
+                      <Skeleton
+                        key={i}
+                        width={80}
+                        height={32}
+                        sx={{ borderRadius: "50px" }}
+                      />
+                    ))}
+                  </Stack>
+                  <Skeleton width='50%' height={40} sx={{ borderRadius: "50px" }} />
+                </Stack>
+              </Paper>
+            })}
+          </Box>
+        </> : <>
+          {data.length == 0 ? <>
+            <Box display={"flex"} flexDirection={"column"} gap={2} alignItems={"center"} justifyContent={"center"}>
+              <img src={no_room} alt="" />
+              <Typography color="#2B2F38" fontWeight={600}>Không còn phòng trống</Typography>
+              <Typography color="#2B2F38">Rất tiệc, khách sạn đã hết phòng vào thời này. hãy trọn thời khác để đặt phòng</Typography>
+            </Box>
+          </> :
+            <Grid container justifyContent={data.length >= 3 ? "space-between" : "start"} gap={data.length <= 3 ? 3 : 0}>
+              {data?.map((room) => (
+                <Grid item xs={12} md={3.8} key={room.id}>
+                  <RoomCard
+                    room={room}
+                    setOpenModal={setOpenModal}
+                    loading={loading}
+                    setOpenDetail={setOpenDetail}
+                    setSelectedRoom={setSelectedRoom}
+
+                  />
+                </Grid>
+              ))}
+            </Grid>}
+        </>}
+
       </Stack>
     </Box>
   );
@@ -572,7 +572,7 @@ export default RoomList;
 
 
 
-const RoomDetailModal = ({ open, onClose, room,hotel }) => {
+const RoomDetailModal = ({ open, onClose, room, hotel }) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate()
@@ -599,25 +599,25 @@ const RoomDetailModal = ({ open, onClose, room,hotel }) => {
 
   if (!room) return null;
 
-  const handleBooking = ()=>{
-    if(localStorage.getItem("booking")){
-      localStorage.setItem("booking",JSON.stringify({
+  const handleBooking = () => {
+    if (localStorage.getItem("booking")) {
+      localStorage.setItem("booking", JSON.stringify({
         ...JSON.parse(localStorage.getItem("booking")),
-        hotel_id:hotel.id,
-        rooms:[
+        hotel_id: hotel.id,
+        rooms: [
           {
-            quantity:1,
-            room_type_id:room.id
+            quantity: 1,
+            room_type_id: room.id
           }
         ],
-        price:room.price_daily,
-        address:hotel?.address?.en,
-        name:hotel?.name?.en,
-        image:hotel?.images?.[0]
+        price: room.price_daily,
+        address: hotel?.address?.en,
+        name: hotel?.name?.en,
+        image: hotel?.images?.[0]
       }))
-      setTimeout(()=>{
+      setTimeout(() => {
         navigate("/check-out")
-      },300)
+      }, 300)
     }
   }
   return (
@@ -870,40 +870,40 @@ const RoomDetailModal = ({ open, onClose, room,hotel }) => {
 
 
 
-const PinCreation = ({phoneNumber,setOpenModal}) => {
+const PinCreation = ({ phoneNumber, setOpenModal }) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
-  const [loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const context = useBookingContext()
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     setLoading(true)
     e.preventDefault();
-    if (pin.length === 6 ) {
+    if (pin.length === 6) {
       let result = await Login({
         "platform": "ios",
         "type": "phone",
-        "value": "0"+phoneNumber,
+        "value": "0" + phoneNumber,
         "password": pin
-    })
-    if(result.access_token){
-      localStorage.setItem("access_token",result.access_token)
-      localStorage.setItem("refresh_token",result.refresh_token)
-      localStorage.setItem("user",JSON.stringify(result.user))
-      context.dispatch({
-        type: "LOGIN",
-        payload: {
-          ...context.state,
-          user: { ...result.user },
-        },
-      });
+      })
+      if (result.access_token) {
+        localStorage.setItem("access_token", result.access_token)
+        localStorage.setItem("refresh_token", result.refresh_token)
+        localStorage.setItem("user", JSON.stringify(result.user))
+        context.dispatch({
+          type: "LOGIN",
+          payload: {
+            ...context.state,
+            user: { ...result.user },
+          },
+        });
 
-      toast.success("Login success")
-      setOpenModal(false)
-    }else{
-      toast.error(result.message)
-    }
-     
+        toast.success("Login success")
+        setOpenModal(false)
+      } else {
+        toast.error(result.message)
+      }
+
     }
     setLoading(false)
   };
@@ -911,177 +911,177 @@ const PinCreation = ({phoneNumber,setOpenModal}) => {
   const toggleShowPin = () => setShowPin(!showPin);
 
   return (
-  
-          <Box
+
+    <Box
+      sx={{
+
+        display: "flex",
+        flexDirection: "column",
+        width: { xs: "100%", sm: "400px", md: "486px" },
+
+      }}
+    >
+      {/* TITLE */}
+
+      <Box>
+        <Typography
+          sx={{
+            fontSize: { xs: "26px", md: "30px" },
+            fontWeight: 700,
+            mb: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <ArrowBackIosNewIcon />
+          Hi,+84{phoneNumber}
+        </Typography>
+      </Box>
+
+      {/* DESCRIPTION */}
+
+      {/* PIN INPUT FORM */}
+      <Box component="form" onSubmit={handleSubmit}>
+        {/* NHẬP MÃ PIN */}
+        <Box display={"flex"} mb={2} justifyContent={"space-between"}>
+          <Typography fontSize={14} color="#5D6679" fontWeight={500} mb={1.5}>
+            Mã PIN của sẽ được dùng để đăng nhập
+          </Typography>
+          <Typography
+            color="#5D6679"
+            onClick={toggleShowPin}
+            fontSize={14}
             sx={{
-              
+
+              cursor: "pointer",
+              mb: 1,
               display: "flex",
-              flexDirection: "column",
-              width: { xs: "100%", sm: "400px", md: "486px" },
-              
+              alignItems: "center",
+              gap: 2,
             }}
           >
-            {/* TITLE */}
+            {showPin ? "Ẩn" : "Hiện"}
+          </Typography>
+        </Box>
 
-            <Box>
-              <Typography
-                sx={{
-                  fontSize: { xs: "26px", md: "30px" },
-                  fontWeight: 700,
-                  mb: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                }}
-              >
-                <ArrowBackIosNewIcon />
-                Hi,+84{phoneNumber}
-              </Typography>
-            </Box>
-
-            {/* DESCRIPTION */}
-
-            {/* PIN INPUT FORM */}
-            <Box component="form" onSubmit={handleSubmit}>
-              {/* NHẬP MÃ PIN */}
-              <Box display={"flex"} mb={2} justifyContent={"space-between"}>
-                <Typography fontSize={14} color="#5D6679" fontWeight={500} mb={1.5}>
-                  Mã PIN của sẽ được dùng để đăng nhập
-                </Typography>
-                <Typography
-                  color="#5D6679"
-                  onClick={toggleShowPin}
-                  fontSize={14}
-                  sx={{
-
-                    cursor: "pointer",
-                    mb: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 2,
-                  }}
-                >
-                  {showPin ? "Ẩn" : "Hiện"}
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  mb: 3,
-                  position: "relative",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <MuiOtpInput
-                  value={pin}
-                  onChange={setPin}
-                  length={6}
-                  TextFieldsProps={{
-                    type: showPin ? "text" : "password",
-                    inputProps: { maxLength: 1 },
-                  }}
-                  sx={{
-                    gap: 1.5,
-                    width: "100%",
-                    justifyContent: "space-between",
-                    "& .MuiOtpInput-TextField": {
-                      "& .MuiOutlinedInput-root": {
-                        width: { xs: 50, sm: 60 },
-                        height: { xs: 50, sm: 60 },
-                        borderRadius: "16px",
-                        backgroundColor: "#fff",
-                        "& fieldset": {
-                          borderColor: "#9AC700",
-                          borderWidth: "1px",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#7cb400",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "#9AC700",
-                          borderWidth: "1px",
-                        },
-                      },
-                      "& input": {
-                        textAlign: "center",
-                        fontSize: { xs: "20px", sm: "24px" },
-                        fontWeight: 700,
-                        color: "#9AC700",
-                        "&::placeholder": {
-                          color: "#9AC700",
-                          opacity: 0.6,
-                        },
-                      },
-                    },
-                  }}
-                />
-
-
-              </Box>
-
-              <Typography
-                variant="body2"
-                sx={{
-                  mb: 4,
-                  color: "#FF7A00",
-                  fontSize: "14px",
-                  fontWeight: 500,
-
-                }}
-              >
-                <Link
-                  href="#"
-                  sx={{
-                    cursor: "pointer",
-                    color: "#FF7A00",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Quên mã PIN?
-                </Link>
-              </Typography>
-
-            
-
-
-              <Button
-                type="submit"
-                fullWidth
-                disabled={pin.length !== 6 }
-                sx={{
-                  py: 1.6,
-                  borderRadius: "30px",
-                  backgroundColor:
-                    pin.length === 6 
-                      ? "#9AC700"
-                      : "#e0e0e0",
-                  color:
-                    pin.length === 6  ? "#fff" : "#888",
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: "18px",
-                  height: "56px",
-                  "&:hover": {
-                    backgroundColor:
-                      pin.length === 6 
-                        ? "#7cb400"
-                        : "#e0e0e0",
+        <Box
+          sx={{
+            mb: 3,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <MuiOtpInput
+            value={pin}
+            onChange={setPin}
+            length={6}
+            TextFieldsProps={{
+              type: showPin ? "text" : "password",
+              inputProps: { maxLength: 1 },
+            }}
+            sx={{
+              gap: 1.5,
+              width: "100%",
+              justifyContent: "space-between",
+              "& .MuiOtpInput-TextField": {
+                "& .MuiOutlinedInput-root": {
+                  width: { xs: 50, sm: 60 },
+                  height: { xs: 50, sm: 60 },
+                  borderRadius: "16px",
+                  backgroundColor: "#fff",
+                  "& fieldset": {
+                    borderColor: "#9AC700",
+                    borderWidth: "1px",
                   },
-                }}
-              >
-               {loading ? (
-                  <>
-                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang xác thực...
-                  </>
-                ) : (
-                  "Tiếp tục"
-                )}
-              </Button>
-            </Box>
-          </Box>
-   
+                  "&:hover fieldset": {
+                    borderColor: "#7cb400",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#9AC700",
+                    borderWidth: "1px",
+                  },
+                },
+                "& input": {
+                  textAlign: "center",
+                  fontSize: { xs: "20px", sm: "24px" },
+                  fontWeight: 700,
+                  color: "#9AC700",
+                  "&::placeholder": {
+                    color: "#9AC700",
+                    opacity: 0.6,
+                  },
+                },
+              },
+            }}
+          />
+
+
+        </Box>
+
+        <Typography
+          variant="body2"
+          sx={{
+            mb: 4,
+            color: "#FF7A00",
+            fontSize: "14px",
+            fontWeight: 500,
+
+          }}
+        >
+          <Link
+            href="#"
+            sx={{
+              cursor: "pointer",
+              color: "#FF7A00",
+              textDecoration: "underline",
+            }}
+          >
+            Quên mã PIN?
+          </Link>
+        </Typography>
+
+
+
+
+        <Button
+          type="submit"
+          fullWidth
+          disabled={pin.length !== 6}
+          sx={{
+            py: 1.6,
+            borderRadius: "30px",
+            backgroundColor:
+              pin.length === 6
+                ? "#9AC700"
+                : "#e0e0e0",
+            color:
+              pin.length === 6 ? "#fff" : "#888",
+            textTransform: "none",
+            fontWeight: 600,
+            fontSize: "18px",
+            height: "56px",
+            "&:hover": {
+              backgroundColor:
+                pin.length === 6
+                  ? "#7cb400"
+                  : "#e0e0e0",
+            },
+          }}
+        >
+          {loading ? (
+            <>
+              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+              Đang xác thực...
+            </>
+          ) : (
+            "Tiếp tục"
+          )}
+        </Button>
+      </Box>
+    </Box>
+
   );
 };

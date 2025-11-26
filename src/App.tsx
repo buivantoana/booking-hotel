@@ -9,7 +9,7 @@ import theme from "./theme";
 import { getInfo } from "./service/voice";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./translation/i18n";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import "react-quill/dist/quill.snow.css";
 const queryClient = new QueryClient();
 export const coursesContext = createContext({});
@@ -37,6 +37,7 @@ const reducer = (state: any, action: any) => {
   }
 };
 const App = () => {
+  
   const [state, dispatch] = useReducer(reducer, {
     user: {},
     history: {},
@@ -57,6 +58,7 @@ const App = () => {
       })();
     }
   }, [user]);
+ 
   // console.log("AAAA state ====", state);
   return (
     <div>

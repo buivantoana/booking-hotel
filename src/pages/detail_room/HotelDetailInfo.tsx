@@ -42,6 +42,7 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import remove from "../../images/delete.png";
 import { editReviewBooking, reviewDelete } from "../../service/booking";
 import { toast } from "react-toastify";
+import { useBookingContext } from "../../App";
 interface Review {
   id: number;
   author: string;
@@ -59,6 +60,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
   const [openModal, setOpenModal] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
   const [loadingReview, setLoadingReview] = useState(false);
+  const context = useBookingContext()
   const toggleExpand = (id: number) => {
     setExpandedReviews((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -312,14 +314,15 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                             <Typography fontSize='0.75rem' color='#999'>
                               {review.created_at}
                             </Typography>
+                            {context?.state?.user?.id == review?.user_id&&
                             <BorderColorIcon
                               onClick={() => {
                                 setReviewDetail(review);
                                 setReviewModalOpen(true);
                               }}
-                              sx={{ fontSize: "14px", cursor: "pointer" }}
-                            />
-                            <DeleteForeverIcon
+                              sx={{ fontSize: "15px", cursor: "pointer" }}
+                            />}
+                            {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
                               onClick={() => {
                                 setReviewDetail(review);
                                 setDeleteDialogOpen(true);
@@ -329,7 +332,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                                 fontSize: "18px",
                                 cursor: "pointer",
                               }}
-                            />
+                            />}
                           </Box>
                         </Box>
                       </Stack>
@@ -353,7 +356,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
               );
             })}
           </Grid>
-          {reviews.length && (
+          {reviews.length > 0 && (
             <Button
               variant='outlined'
               sx={{
@@ -578,14 +581,14 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                       <Typography fontSize='0.8rem' color='#999'>
                         {review.created_at}
                       </Typography>
-                      <BorderColorIcon
+                      {context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setReviewModalOpen(true);
                         }}
                         sx={{ fontSize: "14px", cursor: "pointer" }}
-                      />
-                      <DeleteForeverIcon
+                      />}
+                       {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setDeleteDialogOpen(true);
@@ -595,7 +598,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                           fontSize: "18px",
                           cursor: "pointer",
                         }}
-                      />
+                      />}
                     </Box>
                   </Stack>
                   <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
@@ -605,7 +608,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
               ))}
             </Stack>
 
-            <Button
+            {/* <Button
               fullWidth
               variant='outlined'
               sx={{
@@ -617,7 +620,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                 textTransform: "none",
               }}>
               Show All 100 Reviews
-            </Button>
+            </Button> */}
           </Box>
         </Modal>
       </Stack>
@@ -652,7 +655,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-            Xóa lịch review
+            Xóa review
           </Typography>
           <Typography fontSize='14px' color='#666'>
             Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa review?

@@ -16,7 +16,7 @@ const RoomsController = (props: Props) => {
   const [total,setTotal] = useState(1);
   const [totalAll,setTotalAll] = useState(1);
   const [loading, setLoading] = useState(true);
-  const limit = 2
+  const limit = 5
   useEffect(() => {
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
