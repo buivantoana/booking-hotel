@@ -100,7 +100,7 @@ const DetailRoomView = ({
                 fontWeight={700}
                 fontSize={{ xs: "1.25rem", md: "1.5rem" }}
                 color='#333'>
-                {detailHotel?.hotel?.name?.en}
+                {detailHotel?.hotel?.name?.vi}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />

@@ -892,7 +892,7 @@ const ItemHotel = ({
                         justifyContent='space-between'>
                         <Box>
                           <Typography fontWeight={600} fontSize='1.1rem'>
-                            {JSON.parse(hotel.name).en}
+                            {JSON.parse(hotel.name).vi}
                           </Typography>
                           <Typography fontSize='0.85rem' color='#999' mt={0.5}>
                             {JSON.parse(hotel.address).en}
