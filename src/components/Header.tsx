@@ -109,7 +109,7 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {(location.pathname == "/rooms" ) && (
+            {location.pathname == "/rooms" && (
               <SearchBarWithDropdownHeader locationAddress={locationAddress} />
             )}
             {/* RIGHT: AVATAR */}
@@ -351,7 +351,7 @@ function UserDropdownMenuV2({ context }) {
                 {context?.state?.user?.name}
               </Typography>
               <Typography fontSize='14px' color='#666' mt={0.5}>
-                +(84) {context?.state?.user?.phone?.split(0)}
+                +(84) {context?.state?.user?.phone?.slice(3)}
               </Typography>
             </Box>
           </Stack>

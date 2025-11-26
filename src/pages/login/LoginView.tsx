@@ -55,7 +55,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
     try {
       let result = await checkUser({
         "type": "phone",
-        "value": "0"+phoneNumber
+        "value": "+84"+phoneNumber
     })
     if(result.code == "OK"){
       setCurrentStep("pin")
@@ -357,11 +357,11 @@ const PinCreation = ({phoneNumber}) => {
     e.preventDefault();
     if (pin.length === 6 ) {
       let result = await Login({
-        "platform": "ios",
-        "type": "phone",
-        "value": "0"+phoneNumber,
-        "password": pin
-    })
+        platform: "ios",
+        type: "phone",
+        value: "+84" + phoneNumber,
+        password: pin,
+      });
     if(result.access_token){
       localStorage.setItem("access_token",result.access_token)
       localStorage.setItem("refresh_token",result.refresh_token)

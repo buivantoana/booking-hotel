@@ -66,7 +66,7 @@ const ProfileView = ({
   const [detailBooking, setDetailBooking] = useState(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [loadingSubmit,setLoadingSubmit] = useState(false)
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
@@ -131,7 +131,7 @@ const ProfileView = ({
               {context?.state?.user?.name}
             </Typography>
             <Typography fontSize='0.8rem' color='#666'>
-              +84 {context?.state?.user?.phone?.split(0)}
+              +84 {context?.state?.user?.phone?.slice(3)}
             </Typography>
           </Stack>
         </Stack>
@@ -304,7 +304,7 @@ const ProfileView = ({
       }
     };
     const handleSubmit = async () => {
-      setLoadingSubmit(true)
+      setLoadingSubmit(true);
       try {
         if (getBookingNameStatus(detailBooking) == "Hủy đặt phòng") {
           let result = await cancelBooking(detailBooking.booking_id);
@@ -316,7 +316,7 @@ const ProfileView = ({
       } catch (error) {
         console.log(error);
       }
-      setLoadingSubmit(false)
+      setLoadingSubmit(false);
     };
     return (
       <Stack spacing={3}>
@@ -619,7 +619,7 @@ const ProfileView = ({
                 Số điện thoại
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
-                +84 {context.state?.user?.phone?.split(0)}
+                +84 {context.state?.user?.phone?.slice(3)}
               </Typography>
             </Stack>
             <Stack
@@ -716,18 +716,14 @@ const ProfileView = ({
               "&:hover": { bgcolor: "#7a9a1a" },
               minWidth: isMobile ? "100%" : "220px",
             }}>
-               {loadingSubmit ? (
-                  <>
-                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    {getBookingNameStatus(detailBooking)}
-                  </>
-                ) : (
-                  <>
-                  
-                  {getBookingNameStatus(detailBooking)}
-                  </>
-                )}
-           
+            {loadingSubmit ? (
+              <>
+                <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                {getBookingNameStatus(detailBooking)}
+              </>
+            ) : (
+              <>{getBookingNameStatus(detailBooking)}</>
+            )}
           </Button>
         </Stack>
       </Stack>

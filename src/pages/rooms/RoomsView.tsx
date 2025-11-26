@@ -55,7 +55,7 @@ import iconHairdryer from "../../images/Frame 1321317937.png";
 import iconHairdryerActive from "../../images/Frame 1321317937 (1).png";
 import swap from "../../images/Swap.png";
 import map from "../../images/maps.png";
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import starActive from "../../images/star.svg";
 import starInactive from "../../images/star.svg";
 import image_room from "../../images/Rectangle 29975.png";
@@ -139,7 +139,19 @@ const ratings = [
   { label: "≥ 4.5", active: false },
 ];
 
-const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, getHotel,totalAll }) => {
+const RoomsView = ({
+  dataHotel,
+  loading,
+  setPage,
+  total,
+  page,
+  getHotelLatLon,
+  getHotel,
+  totalAll,
+  amenities,
+  queryHotel,
+  setQueryHotel,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -150,19 +162,30 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
   const [priceRange, setPriceRange] = useState<[number, number]>([
     20000, 10000000,
   ]);
-  const context = useBookingContext()
+  const context = useBookingContext();
   const [center, setCenter] = useState({
     lat: 21.0285,
     lng: 105.8542,
   });
   useEffect(() => {
+    setAmenityList(amenities);
+  }, [amenities]);
+  useEffect(() => {
     if (activeMap) {
-      getHotelLatLon({ lat: center.lat, lng: center.lng })
+      getHotelLatLon({ lat: center.lat, lng: center.lng });
     }
-  }, [center])
+  }, [center]);
   const handleAmenityToggle = (index: number) => {
     const newList = [...amenityList];
     newList[index].active = !newList[index].active;
+    setQueryHotel({
+      ...queryHotel,
+      amenities: newList
+        .filter((item) => item.active)
+        .map((item) => item.id)
+        .join(","),
+    });
+    setPage(1);
     setAmenityList(newList);
   };
 
@@ -178,11 +201,29 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
   };
 
   return (
-    <Container maxWidth="lg" sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: activeMap ? 0 : 3 }, mb: activeMap ? 3 : 0 }}>
-      {activeMap ? <FilterMap setActiveMap={setActiveMap} getHotel={getHotel} setCenter={setCenter} center={center} dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} /> :
-        <Stack
-          spacing={3}
-          sx={{}}>
+    <Container
+      maxWidth='lg'
+      sx={{
+        bgcolor: "#f9f9f9",
+        py: { xs: 2, md: activeMap ? 0 : 3 },
+        mb: activeMap ? 3 : 0,
+      }}>
+      {activeMap ? (
+        <FilterMap
+          setActiveMap={setActiveMap}
+          getHotel={getHotel}
+          setCenter={setCenter}
+          center={center}
+          dataHotel={dataHotel}
+          page={page}
+          setPage={setPage}
+          isMobile={isMobile}
+          isTablet={isTablet}
+          loading={loading}
+          total={total}
+        />
+      ) : (
+        <Stack spacing={3} sx={{}}>
           {/* ================= HEADER: KẾT QUẢ + SẮP XẾP ================= */}
 
           <Grid container justifyContent={"space-between"}>
@@ -205,7 +246,6 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                       justifyContent: "center",
                       alignItems: "center",
                       backgroundSize: "100%",
-
                     }}>
                     <Box
                       onClick={() => setActiveMap(true)}
@@ -223,7 +263,7 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                         border: "1px solid rgba(152, 183, 32, 1)",
                         color: "rgba(152, 183, 32, 1)",
                         height: "40px",
-                        cursor: "pointer"
+                        cursor: "pointer",
                       }}>
                       <LocationOnIcon
                         sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }}
@@ -382,7 +422,10 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                             <Box
                               component='img'
                               src={rating.active ? starActive : starInactive}
-                              sx={{ width: 16, height: 16 }}
+                              sx={{
+                                width: 16,
+                                height: 16,
+                              }}
                             />
                           }
                           label={rating.label}
@@ -392,8 +435,9 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                             color: rating.active
                               ? "#98b720"
                               : "rgba(185, 189, 199, 1)",
-                            border: `1px solid ${rating.active ? "#98b720" : "#eee"
-                              }`,
+                            border: `1px solid ${
+                              rating.active ? "#98b720" : "#eee"
+                            }`,
                             borderRadius: "50px",
                             fontSize: "0.85rem",
                             height: 36,
@@ -424,11 +468,16 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                             icon={
                               <Box
                                 component='img'
-                                src={item.active ? item.iconActive : item.icon}
-                                sx={{ width: 20, height: 20 }}
+                                src={item.icon}
+                                sx={{
+                                  width: 20,
+                                  height: 20,
+                                  objectFit: "cover",
+                                  borderRadius: "50%",
+                                }}
                               />
                             }
-                            label={item.label}
+                            label={item.name.vi}
                             onClick={() => handleAmenityToggle(i)}
                             sx={{
                               justifyContent: "flex-start",
@@ -436,8 +485,9 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
                               color: item.active
                                 ? "#98b720"
                                 : "rgba(185, 189, 199, 1)",
-                              border: `1px solid ${item.active ? "#98b720" : "#eee"
-                                }`,
+                              border: `1px solid ${
+                                item.active ? "#98b720" : "#eee"
+                              }`,
                               borderRadius: "50px",
                               fontSize: "0.8rem",
                               height: 40,
@@ -457,7 +507,9 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
 
             {/* ================= RIGHT: DANH SÁCH KHÁCH SẠN (DỌC) ================= */}
             <Grid item xs={12} md={8} lg={8.4}>
-             {Object.keys(context.state.user).length == 0&& <PromotionBanner />}
+              {Object.keys(context.state.user).length == 0 && (
+                <PromotionBanner />
+              )}
               <Box
                 sx={{
                   display: "flex",
@@ -485,23 +537,42 @@ const RoomsView = ({ dataHotel, loading, setPage, total, page, getHotelLatLon, g
 
                 <SortButton />
               </Box>
-              <ItemHotel dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} />
+              <ItemHotel
+                dataHotel={dataHotel}
+                page={page}
+                setPage={setPage}
+                isMobile={isMobile}
+                isTablet={isTablet}
+                loading={loading}
+                total={total}
+              />
             </Grid>
           </Grid>
-        </Stack>}
+        </Stack>
+      )}
     </Container>
   );
 };
 
 export default RoomsView;
 
-const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage, setCenter, center, setActiveMap, getHotel }) => {
+const FilterMap = ({
+  dataHotel,
+  loading,
+  isMobile,
+  isTablet,
+  total,
+  page,
+  setPage,
+  setCenter,
+  center,
+  setActiveMap,
+  getHotel,
+}) => {
   const containerStyle = {
-    width: '100%',
-    height: '50vh',
-
+    width: "100%",
+    height: "50vh",
   };
-
 
   const mapRef = useRef(null);
 
@@ -519,12 +590,14 @@ const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
     const lng = newCenter.lng();
 
     // kiểm tra nếu giống nhau thì không update
-    if (Math.abs(center.lat - lat) < 0.000001 && Math.abs(center.lng - lng) < 0.000001) {
+    if (
+      Math.abs(center.lat - lat) < 0.000001 &&
+      Math.abs(center.lng - lng) < 0.000001
+    ) {
       return;
     }
 
     setCenter({ lat, lng });
-
   };
   const parseField = (value) => {
     try {
@@ -533,145 +606,179 @@ const FilterMap = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
       return value;
     }
   };
-  return <>
-    <Grid justifyContent={"space-between"} container>
-      <Grid item xs={5}>
-
-        <Typography my={2} onClick={() => {
-          getHotel()
-          setActiveMap(false)
-        }} fontSize={"20px"} color="#48505E" display={"flex"} sx={{ cursor: "pointer" }} alignItems={"center"} gap={1}><ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />Xem danh sách khách sạn </Typography>
-        <Box height={"50vh"} className="hidden-add-voice" sx={{ overflowY: "scroll" }}>
-          <ItemHotel setActiveHotel={setActiveHotel} dataHotel={dataHotel} page={page} setPage={setPage} isMobile={isMobile} isTablet={isTablet} loading={loading} total={total} isMap={true} />
-        </Box>
-      </Grid>
-      <Grid item xs={6.8}>
-        <LoadScript googleMapsApiKey="AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc">
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={14}
-            onLoad={onLoad}
-            onIdle={onIdle}
-            options={{
-              zoomControl: true,
-              streetViewControl: false,
-              mapTypeControl: false,
-              fullscreenControl: false,
-              styles: [
-                {
-                  featureType: "poi",
-                  elementType: "labels",
-                  stylers: [{ visibility: "off" }],
-                },
-              ],
+  return (
+    <>
+      <Grid justifyContent={"space-between"} container>
+        <Grid item xs={5}>
+          <Typography
+            my={2}
+            onClick={() => {
+              getHotel();
+              setActiveMap(false);
             }}
-          >
-            {/* MARKERS */}
-            {dataHotel?.map((hotel) => {
-              const imgs = parseField(hotel.images) || [];
-              const nameObj = parseField(hotel.name) || {};
-              const addressObj = parseField(hotel.address) || {};
-
-              const hotelName = nameObj.vi || nameObj.en || "Unnamed";
-              const hotelAddress = addressObj.vi || addressObj.en || "";
-
-              return (
-                <Marker
-                  key={hotel.id}
-                  position={{ lat: hotel.latitude, lng: hotel.longitude }}
-                  onClick={() => setActiveHotel(hotel)}
-                />
-              );
-            })}
-
-            {/* INFO WINDOW */}
-            {activeHotel && (
-              <InfoWindow
-                position={{
-                  lat: activeHotel.latitude,
-                  lng: activeHotel.longitude,
-                }}
-                onCloseClick={() => setActiveHotel(null)}
-              >
-                <Box sx={{ width: 230 }}>
-                  {(() => {
-                    const imgs = parseField(activeHotel.images) || [];
-                    const nameObj = parseField(activeHotel.name) || {};
-                    const addressObj = parseField(activeHotel.address) || {};
-
-                    const hotelName = nameObj.vi || nameObj.en || "Unnamed";
-                    const hotelAddress = addressObj.vi || addressObj.en || "";
-
-                    return (
-                      <>
-                        <img
-                          src={imgs[0]}
-                          style={{
-                            width: "100%",
-                            height: 120,
-                            objectFit: "cover",
-                            borderRadius: 8,
-                          }}
-                        />
-
-                        <Typography sx={{ fontWeight: 700, mt: 1 }}>
-                          {hotelName}
-                        </Typography>
-
-                        <Typography sx={{ fontSize: 13, color: "#666" }}>
-                          {hotelAddress}
-                        </Typography>
-
-                        <Typography sx={{ mt: 1, fontSize: 14 }}>
-                          ⭐ {activeHotel.rating} / 5
-                        </Typography>
-
-                        <Typography sx={{ fontSize: 14, color: "#FF5722" }}>
-                          Từ {activeHotel.price_min}$ / đêm
-                        </Typography>
-                      </>
-                    );
-                  })()}
-                </Box>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        </LoadScript>
-      </Grid>
-    </Grid>
-  </>
-}
-
-const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPage, isMap, setActiveHotel }) => {
-  const navigate = useNavigate()
-  return <>
-    {loading ? (
-      /* LOADING + ICON LOADING */
-      <Stack spacing={3} alignItems='center'>
-        {/* SKELETON CARDS - GIỐNG HỆT ẢNH */}
-        <Stack spacing={3} width='100%'>
-          {[...Array(isMobile ? 1 : isTablet ? 2 : 3)].map((_, i) => (
-            <Paper
-              key={i}
-              elevation={0}
-              sx={{
-                borderRadius: "16px",
-                overflow: "hidden",
-                bgcolor: "white",
-                height: { xs: 200, sm: isMap ? 160 : 200 },
+            fontSize={"20px"}
+            color='#48505E'
+            display={"flex"}
+            sx={{ cursor: "pointer" }}
+            alignItems={"center"}
+            gap={1}>
+            <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
+            Xem danh sách khách sạn{" "}
+          </Typography>
+          <Box
+            height={"50vh"}
+            className='hidden-add-voice'
+            sx={{ overflowY: "scroll" }}>
+            <ItemHotel
+              setActiveHotel={setActiveHotel}
+              dataHotel={dataHotel}
+              page={page}
+              setPage={setPage}
+              isMobile={isMobile}
+              isTablet={isTablet}
+              loading={loading}
+              total={total}
+              isMap={true}
+            />
+          </Box>
+        </Grid>
+        <Grid item xs={6.8}>
+          <LoadScript googleMapsApiKey='AIzaSyASJk1hzLv6Xoj0fRsYnfuO6ptOXu0fZsc'>
+            <GoogleMap
+              mapContainerStyle={containerStyle}
+              center={center}
+              zoom={14}
+              onLoad={onLoad}
+              onIdle={onIdle}
+              options={{
+                zoomControl: true,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false,
+                styles: [
+                  {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [{ visibility: "off" }],
+                  },
+                ],
               }}>
-              <Grid container>
-                {/* Ảnh + tag */}
-                <Grid item xs={12} sm={5} md={4}>
-                  <Box sx={{ position: "relative", height: "100%" }}>
-                    <Skeleton
-                      variant='rectangular'
-                      width='100%'
-                      height={isMap ? "80%" : '100%'}
-                      sx={{ borderRadius: "20px" }}
-                    />
-                    {/* <Box
+              {/* MARKERS */}
+              {dataHotel?.map((hotel) => {
+                const imgs = parseField(hotel.images) || [];
+                const nameObj = parseField(hotel.name) || {};
+                const addressObj = parseField(hotel.address) || {};
+
+                const hotelName = nameObj.vi || nameObj.en || "Unnamed";
+                const hotelAddress = addressObj.vi || addressObj.en || "";
+
+                return (
+                  <Marker
+                    key={hotel.id}
+                    position={{ lat: hotel.latitude, lng: hotel.longitude }}
+                    onClick={() => setActiveHotel(hotel)}
+                  />
+                );
+              })}
+
+              {/* INFO WINDOW */}
+              {activeHotel && (
+                <InfoWindow
+                  position={{
+                    lat: activeHotel.latitude,
+                    lng: activeHotel.longitude,
+                  }}
+                  onCloseClick={() => setActiveHotel(null)}>
+                  <Box sx={{ width: 230 }}>
+                    {(() => {
+                      const imgs = parseField(activeHotel.images) || [];
+                      const nameObj = parseField(activeHotel.name) || {};
+                      const addressObj = parseField(activeHotel.address) || {};
+
+                      const hotelName = nameObj.vi || nameObj.en || "Unnamed";
+                      const hotelAddress = addressObj.vi || addressObj.en || "";
+
+                      return (
+                        <>
+                          <img
+                            src={imgs[0]}
+                            style={{
+                              width: "100%",
+                              height: 120,
+                              objectFit: "cover",
+                              borderRadius: 8,
+                            }}
+                          />
+
+                          <Typography sx={{ fontWeight: 700, mt: 1 }}>
+                            {hotelName}
+                          </Typography>
+
+                          <Typography sx={{ fontSize: 13, color: "#666" }}>
+                            {hotelAddress}
+                          </Typography>
+
+                          <Typography sx={{ mt: 1, fontSize: 14 }}>
+                            ⭐ {activeHotel.rating} / 5
+                          </Typography>
+
+                          <Typography sx={{ fontSize: 14, color: "#FF5722" }}>
+                            Từ {activeHotel.price_min}$ / đêm
+                          </Typography>
+                        </>
+                      );
+                    })()}
+                  </Box>
+                </InfoWindow>
+              )}
+            </GoogleMap>
+          </LoadScript>
+        </Grid>
+      </Grid>
+    </>
+  );
+};
+
+const ItemHotel = ({
+  dataHotel,
+  loading,
+  isMobile,
+  isTablet,
+  total,
+  page,
+  setPage,
+  isMap,
+  setActiveHotel,
+}) => {
+  const navigate = useNavigate();
+  return (
+    <>
+      {loading ? (
+        /* LOADING + ICON LOADING */
+        <Stack spacing={3} alignItems='center'>
+          {/* SKELETON CARDS - GIỐNG HỆT ẢNH */}
+          <Stack spacing={3} width='100%'>
+            {[...Array(isMobile ? 1 : isTablet ? 2 : 3)].map((_, i) => (
+              <Paper
+                key={i}
+                elevation={0}
+                sx={{
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  bgcolor: "white",
+                  height: { xs: 200, sm: isMap ? 160 : 200 },
+                }}>
+                <Grid container>
+                  {/* Ảnh + tag */}
+                  <Grid item xs={12} sm={5} md={4}>
+                    <Box sx={{ position: "relative", height: "100%" }}>
+                      <Skeleton
+                        variant='rectangular'
+                        width='100%'
+                        height={isMap ? "80%" : "100%"}
+                        sx={{ borderRadius: "20px" }}
+                      />
+                      {/* <Box
                               sx={{
                                 position: "absolute",
                                 top: 12,
@@ -682,219 +789,228 @@ const ItemHotel = ({ dataHotel, loading, isMobile, isTablet, total, page, setPag
                               }}>
                               <Skeleton width='100%' height='100%' />
                             </Box> */}
-                  </Box>
-                </Grid>
-
-                {/* Nội dung */}
-                <Grid item xs={12} sm={7} md={8}>
-                  <Stack
-                    p={2}
-                    spacing={1.5}
-                    height='100%'
-                    justifyContent='space-between'>
-                    <Box>
-                      <Skeleton width='80%' height={28} />
-                      <Skeleton width='60%' height={20} mt={0.5} />
-                      <Skeleton width='50%' height={20} mt={0.5} />
-                    </Box>
-
-                    <Stack alignItems='flex-end'>
-                      <Skeleton width='40%' height={20} />
-                      <Skeleton width='60%' height={32} mt={1} />
-                      <Skeleton
-                        width='50%'
-                        height={36}
-                        mt={1}
-                        sx={{ borderRadius: "6px" }}
-                      />
-                    </Stack>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
-          ))}
-        </Stack>
-      </Stack>
-    ) : (
-      <>
-        {dataHotel.length > 0 ?
-          <Stack spacing={3}>
-            {dataHotel.map((hotel, i) => (
-              <Paper
-                key={i}
-                onClick={() => isMap ? setActiveHotel(hotel) : navigate(`/room/${hotel.id}`)}
-                elevation={0}
-                sx={{
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  bgcolor: "white",
-                  transition: "0.2s",
-                  "&:hover": { boxShadow: 3 },
-                  height: { xs: 200, sm: isMap ? "160px" : "200px" },
-                  cursor: "pointer"
-                }}>
-                <Grid container>
-                  {/* Ảnh */}
-                  <Grid item xs={12} sm={5} md={4}>
-                    <Box
-                      sx={{
-                        position: "relative",
-                        height: { xs: 200, sm: isMap ? "160px" : "200px" },
-                      }}>
-                      {hotel?.tag && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 12,
-                            left: 12,
-                            bgcolor: "#ff9800",
-                            color: "white",
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: "4px",
-                            fontSize: "0.75rem",
-                            fontWeight: 600,
-                            zIndex: 1,
-                          }}>
-                          {hotel?.tag}
-                        </Box>
-                      )}
-                      <img
-                        src={JSON.parse(hotel.images)[0]}
-                        alt={JSON.parse(hotel.images)[0]}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          borderRadius: "15px",
-                        }}
-                      />
                     </Box>
                   </Grid>
 
                   {/* Nội dung */}
                   <Grid item xs={12} sm={7} md={8}>
                     <Stack
-                      px={2}
+                      p={2}
                       spacing={1.5}
                       height='100%'
                       justifyContent='space-between'>
                       <Box>
-                        <Typography fontWeight={600} fontSize='1.1rem'>
-                          {JSON.parse(hotel.name).en}
-                        </Typography>
-                        <Typography
-                          fontSize='0.85rem'
-                          color='#999'
-                          mt={0.5}>
-                          {JSON.parse(hotel.address).en}
-                        </Typography>
-                        <Stack
-                          direction='row'
-                          alignItems='center'
-                          spacing={0.5}
-                          mt={0.5}>
-                          <Box
-                            component='img'
-                            src={starActive}
-                            sx={{ width: 16, height: 16 }}
-                          />
-                          <Typography
-                            fontSize='0.9rem'
-                            color='#98b720'
-                            fontWeight={600}>
-                            {hotel.rating}
-                          </Typography>
-                          <Typography fontSize='0.8rem' color='#666'>
-                            ({hotel.reviews || 100})
-                          </Typography>
-                        </Stack>
+                        <Skeleton width='80%' height={28} />
+                        <Skeleton width='60%' height={20} mt={0.5} />
+                        <Skeleton width='50%' height={20} mt={0.5} />
                       </Box>
 
-                      <Stack
-                        direction='row'
-                        justifyContent='end'
-                        alignItems='flex-end'>
-                        <Stack alignItems={"end"}>
-                          <Typography fontSize='14px' color='#999'>
-                            Giá cho 2 giờ
-                          </Typography>
-                          <Typography
-                            fontWeight={700}
-                            color='#98b720'
-                            fontSize='1.25rem'
-                            sx={{
-                              display: "flex",
-                              gap: 1,
-                              alignItems: "end",
-                            }}>
-                            <Typography
-                              fontSize='14px'
-                              lineHeight={2}
-                              color='#999'>
-                              Chỉ từ
-                            </Typography>{" "}
-                            {hotel.price_min.toLocaleString("vi-VN")}đ
-                          </Typography>
-
-                          <Box
-                            sx={{
-                              bgcolor: "rgba(255, 237, 233, 1)",
-                              color: "rgba(204, 50, 0, 1)",
-                              px: 2.5,
-                              py: 1,
-                              borderRadius: "6px",
-                              fontSize: "0.8rem",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}>
-                            Chỉ còn {hotel.remaining || 1} phòng
-                          </Box>
-                        </Stack>
+                      <Stack alignItems='flex-end'>
+                        <Skeleton width='40%' height={20} />
+                        <Skeleton width='60%' height={32} mt={1} />
+                        <Skeleton
+                          width='50%'
+                          height={36}
+                          mt={1}
+                          sx={{ borderRadius: "6px" }}
+                        />
                       </Stack>
                     </Stack>
                   </Grid>
                 </Grid>
               </Paper>
             ))}
-            {!isMap && <Box display={"flex"} justifyContent={"center"}>
+          </Stack>
+        </Stack>
+      ) : (
+        <>
+          {dataHotel.length > 0 ? (
+            <Stack spacing={3}>
+              {dataHotel.map((hotel, i) => (
+                <Paper
+                  key={i}
+                  onClick={() =>
+                    isMap
+                      ? setActiveHotel(hotel)
+                      : navigate(`/room/${hotel.id}`)
+                  }
+                  elevation={0}
+                  sx={{
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    bgcolor: "white",
+                    transition: "0.2s",
+                    "&:hover": { boxShadow: 3 },
+                    height: { xs: 200, sm: isMap ? "160px" : "200px" },
+                    cursor: "pointer",
+                  }}>
+                  <Grid container>
+                    {/* Ảnh */}
+                    <Grid item xs={12} sm={5} md={4}>
+                      <Box
+                        sx={{
+                          position: "relative",
+                          height: { xs: 200, sm: isMap ? "160px" : "200px" },
+                        }}>
+                        {hotel?.tag && (
+                          <Box
+                            sx={{
+                              position: "absolute",
+                              top: 12,
+                              left: 12,
+                              bgcolor: "#ff9800",
+                              color: "white",
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: "4px",
+                              fontSize: "0.75rem",
+                              fontWeight: 600,
+                              zIndex: 1,
+                            }}>
+                            {hotel?.tag}
+                          </Box>
+                        )}
+                        <img
+                          src={JSON.parse(hotel.images)[0]}
+                          alt={JSON.parse(hotel.images)[0]}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            borderRadius: "15px",
+                          }}
+                        />
+                      </Box>
+                    </Grid>
 
-              <Pagination page={page} onChange={(e, value) => setPage(value)} sx={{
-                "& .MuiPaginationItem-root": {
-                  color: "#98b720",
-                },
-                "& .Mui-selected": {
-                  backgroundColor: "#98b720 !important",  // màu background khi active
-                  color: "#fff",                // chữ khi active
-                },
-                "& .MuiPaginationItem-root:hover": {
-                  backgroundColor: "#d0e65f", // màu hover
-                },
-              }} count={total} />
-            </Box>}
-          </Stack> :
-          <Box
-            display={"flex"}
-            justifyContent={"center"}
-            height={isMap ? "40vh" : "60vh"}
-            alignItems={"center"}>
+                    {/* Nội dung */}
+                    <Grid item xs={12} sm={7} md={8}>
+                      <Stack
+                        px={2}
+                        spacing={1.5}
+                        height='100%'
+                        justifyContent='space-between'>
+                        <Box>
+                          <Typography fontWeight={600} fontSize='1.1rem'>
+                            {JSON.parse(hotel.name).en}
+                          </Typography>
+                          <Typography fontSize='0.85rem' color='#999' mt={0.5}>
+                            {JSON.parse(hotel.address).en}
+                          </Typography>
+                          <Stack
+                            direction='row'
+                            alignItems='center'
+                            spacing={0.5}
+                            mt={0.5}>
+                            <Box
+                              component='img'
+                              src={starActive}
+                              sx={{ width: 16, height: 16 }}
+                            />
+                            <Typography
+                              fontSize='0.9rem'
+                              color='#98b720'
+                              fontWeight={600}>
+                              {hotel.rating}
+                            </Typography>
+                            <Typography fontSize='0.8rem' color='#666'>
+                              ({hotel.reviews || 100})
+                            </Typography>
+                          </Stack>
+                        </Box>
+
+                        <Stack
+                          direction='row'
+                          justifyContent='end'
+                          alignItems='flex-end'>
+                          <Stack alignItems={"end"}>
+                            <Typography fontSize='14px' color='#999'>
+                              Giá cho 2 giờ
+                            </Typography>
+                            <Typography
+                              fontWeight={700}
+                              color='#98b720'
+                              fontSize='1.25rem'
+                              sx={{
+                                display: "flex",
+                                gap: 1,
+                                alignItems: "end",
+                              }}>
+                              <Typography
+                                fontSize='14px'
+                                lineHeight={2}
+                                color='#999'>
+                                Chỉ từ
+                              </Typography>{" "}
+                              {hotel.price_min.toLocaleString("vi-VN")}đ
+                            </Typography>
+
+                            <Box
+                              sx={{
+                                bgcolor: "rgba(255, 237, 233, 1)",
+                                color: "rgba(204, 50, 0, 1)",
+                                px: 2.5,
+                                py: 1,
+                                borderRadius: "6px",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                                cursor: "pointer",
+                              }}>
+                              Chỉ còn {hotel.remaining || 1} phòng
+                            </Box>
+                          </Stack>
+                        </Stack>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Paper>
+              ))}
+              {!isMap && (
+                <Box display={"flex"} justifyContent={"center"}>
+                  <Pagination
+                    page={page}
+                    onChange={(e, value) => setPage(value)}
+                    sx={{
+                      "& .MuiPaginationItem-root": {
+                        color: "#98b720",
+                      },
+                      "& .Mui-selected": {
+                        backgroundColor: "#98b720 !important", // màu background khi active
+                        color: "#fff", // chữ khi active
+                      },
+                      "& .MuiPaginationItem-root:hover": {
+                        backgroundColor: "#d0e65f", // màu hover
+                      },
+                    }}
+                    count={total}
+                  />
+                </Box>
+              )}
+            </Stack>
+          ) : (
             <Box
               display={"flex"}
               justifyContent={"center"}
-              flexDirection={"column"}
+              height={isMap ? "40vh" : "60vh"}
               alignItems={"center"}>
-              <img src={no_room} alt='' />
-              <Typography mt={3}>
-                Tệ thật, mình không thấy khách sạn vào phù hợp với tìm kiếm
-                của bạn.
-              </Typography>
+              <Box
+                display={"flex"}
+                justifyContent={"center"}
+                flexDirection={"column"}
+                alignItems={"center"}>
+                <img src={no_room} alt='' />
+                <Typography mt={3}>
+                  Tệ thật, mình không thấy khách sạn vào phù hợp với tìm kiếm
+                  của bạn.
+                </Typography>
+              </Box>
             </Box>
-          </Box>}
-      </>
-
-    )}
-  </>
-}
+          )}
+        </>
+      )}
+    </>
+  );
+};
 
 import { Menu, MenuItem, ListItemText, ListItemIcon } from "@mui/material";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
@@ -1020,52 +1136,44 @@ const SortButton = () => {
   );
 };
 
-import gift from "../../images/image 8.png"
+import gift from "../../images/image 8.png";
 import { useBookingContext } from "../../App";
 
-
 function PromotionBanner() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <Box
       sx={{
-
         borderRadius: "16px",
         // ĐÃ SỬA: thêm md và đóng ngoặc đúng
         my: 2,
         position: "relative",
         overflow: "hidden",
-        background: "white"
-      }}
-    >
-      <Container maxWidth="lg">
+        background: "white",
+      }}>
+      <Container maxWidth='lg'>
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={{ xs: 3, md: 6 }}
-          alignItems="center"
-          justifyContent="space-between"
-        >
+          alignItems='center'
+          justifyContent='space-between'>
           {/* Phần trái: quà + text */}
           <Stack
             direction={{ xs: "column", md: "row" }}
             spacing={3}
-            alignItems="center"
+            alignItems='center'
             textAlign={{ xs: "center", md: "left" }}
-            flex={1}
-          >
+            flex={1}>
             {/* Icon quà tặng */}
             <Box
               sx={{
                 fontSize: { xs: 80, md: 80 },
                 color: "#e91e63",
-               
-               
-              }}
-            >
+              }}>
               {/* Nếu bạn có hình quà tặng thì dùng, không thì dùng icon */}
               <img
                 src={gift}
-                alt="Quà tặng"
+                alt='Quà tặng'
                 style={{ width: "100%", height: "auto", maxWidth: "120px" }}
               />
               {/* Hoặc dùng icon MUI nếu không có ảnh */}
@@ -1074,24 +1182,26 @@ function PromotionBanner() {
 
             <Box>
               <Typography
-                variant="h6"
-                fontWeight="bold"
-                color="#2B2F38"
+                variant='h6'
+                fontWeight='bold'
+                color='#2B2F38'
                 gutterBottom
-                sx={{ lineHeight: 1.3,fontSize:"17px" }}
-              >
+                sx={{ lineHeight: 1.3, fontSize: "17px" }}>
                 Nhận ưu đãi đặc biệt - khi đăng ký tài khoản ngay !
               </Typography>
-              <Typography fontSize={"12px"} color="#5D6679">
-                Hãy đăng ký ngay tài khoản để nhận ưu đãi đặc biệt và trải nghiệm tốt nhất từ chúng tôi
+              <Typography fontSize={"12px"} color='#5D6679'>
+                Hãy đăng ký ngay tài khoản để nhận ưu đãi đặc biệt và trải
+                nghiệm tốt nhất từ chúng tôi
               </Typography>
             </Box>
           </Stack>
 
           {/* Nút Đăng ký ngay */}
           <Button
-            onClick={() => { navigate("/register") }}
-            variant="contained"
+            onClick={() => {
+              navigate("/register");
+            }}
+            variant='contained'
             sx={{
               bgcolor: "#98b720",
               color: "white",
@@ -1099,8 +1209,7 @@ function PromotionBanner() {
               px: 3,
               py: 1.2,
               textTransform: "none",
-            }}
-          >
+            }}>
             Đăng ký ngay
           </Button>
         </Stack>

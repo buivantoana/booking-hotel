@@ -57,10 +57,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     if (phoneNumber && name && birthDate) {
       try {
         let result = await sendOtp({
-          "platform": "ios",
-          "type": "phone",
-          "value": "0" + phoneNumber
-        })
+          platform: "ios",
+          type: "phone",
+          value: "+84" + phoneNumber,
+        });
         if (result.success) {
           onNext()
         }
@@ -292,14 +292,14 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
     if (otp.length === 4) {
       try {
         let result = await verifyOtp({
-          "platform": "ios",
-          "type": "phone",
-          "value": "0" + phoneNumber,
-          "otp": otp,
-          "location": "hanoi",
-          "name": name,
-          "birthday": birthDate
-        })
+          platform: "ios",
+          type: "phone",
+          value: "+84" + phoneNumber,
+          otp: otp,
+          location: "hanoi",
+          name: name,
+          birthday: birthDate,
+        });
         if (result.access_token) {
           onSuccess(result);
         }
