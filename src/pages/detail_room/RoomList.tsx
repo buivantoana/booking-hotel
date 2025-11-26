@@ -61,13 +61,15 @@ const RoomCard = ({
   loading,
   setOpenModal,
   setSelectedRoom,
-  setOpenDetail
+  setOpenDetail,
+  booking
 }: {
   room: Room;
   loading: boolean;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+ 
   const context = useBookingContext()
   const sliderRef = useRef<any>(null);
   const settings = {
@@ -275,7 +277,10 @@ const RoomCard = ({
                 fontWeight={700}
                 fontSize='1.1rem'
                 color='rgba(234, 106, 0, 1)'>
-                {room.price_daily.toLocaleString("vi-VN")}đ
+                  
+                {booking.type == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
+                {booking.type == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
+                {booking.type == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
               </Typography>
             </Stack>
           )}
@@ -318,7 +323,7 @@ const RoomCard = ({
 };
 
 const RoomList = ({ loading, data, hotel }) => {
-
+  let booking = localStorage.getItem("booking") ? JSON.parse(localStorage.getItem("booking")): {}
   const [openModal, setOpenModal] = useState(false);
   const [lodingLogin, setLoadingLogin] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -501,7 +506,7 @@ const RoomList = ({ loading, data, hotel }) => {
             </>}
           </Box>
         </Modal>
-        <RoomDetailModal open={openDetail} hotel={hotel} onClose={() => setOpenDetail(false)} room={selectedRoom} />
+        <RoomDetailModal open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} room={selectedRoom} />
 
         {loading ? <>
           <Box display={"flex"} justifyContent={"space-between"} gap={3}>
@@ -555,7 +560,7 @@ const RoomList = ({ loading, data, hotel }) => {
                     loading={loading}
                     setOpenDetail={setOpenDetail}
                     setSelectedRoom={setSelectedRoom}
-
+                    booking={booking}
                   />
                 </Grid>
               ))}
@@ -572,7 +577,7 @@ export default RoomList;
 
 
 
-const RoomDetailModal = ({ open, onClose, room, hotel }) => {
+const RoomDetailModal = ({ open, onClose, room, hotel ,booking}) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate()
@@ -843,7 +848,9 @@ const RoomDetailModal = ({ open, onClose, room, hotel }) => {
                 color="rgba(234, 106, 0, 1)"
                 fontSize="1.3rem"
               >
-                {room?.price_daily?.toLocaleString("vi-VN")}đ <Typography variant="span" fontSize={"14px"} color="#5D6679" >/2 giờ</Typography>
+               {booking.type == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
+                {booking.type == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
+                {booking.type == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
               </Typography>
 
               <Button
