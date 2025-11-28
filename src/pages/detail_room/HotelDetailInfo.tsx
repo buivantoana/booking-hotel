@@ -100,6 +100,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
     }
     setLoadingReview(false);
   };
+  console.log("AAAA context",context)
   return (
     <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={5} sx={{ mx: "auto" }}>
@@ -314,7 +315,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                             <Typography fontSize='0.75rem' color='#999'>
                               {review.created_at}
                             </Typography>
-                            {context?.state?.user?.id == review?.user_id&&
+                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id &&
                             <BorderColorIcon
                               onClick={() => {
                                 setReviewDetail(review);
@@ -322,7 +323,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                               }}
                               sx={{ fontSize: "15px", cursor: "pointer" }}
                             />}
-                            {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
+                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id && <DeleteForeverIcon
                               onClick={() => {
                                 setReviewDetail(review);
                                 setDeleteDialogOpen(true);
@@ -581,14 +582,14 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                       <Typography fontSize='0.8rem' color='#999'>
                         {review.created_at}
                       </Typography>
-                      {context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
+                      { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setReviewModalOpen(true);
                         }}
                         sx={{ fontSize: "14px", cursor: "pointer" }}
                       />}
-                       {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
+                       { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setDeleteDialogOpen(true);
