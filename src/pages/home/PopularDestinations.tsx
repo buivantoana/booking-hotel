@@ -30,7 +30,8 @@ const destinations = [
 const DestinationItem = ({
   name,
   hotels,
-  id
+  id,
+  total_hotels
 }: {
   name: string;
   hotels: string;
@@ -54,7 +55,7 @@ const DestinationItem = ({
         variant='body2'
         color='#999'
         sx={{ fontSize: { xs: "0.8rem", md: "0.85rem" } }}>
-       100 khách sạn
+       {total_hotels} khách sạn
       </Typography>
     </Box>
   )

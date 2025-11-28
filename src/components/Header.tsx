@@ -58,7 +58,7 @@ const Header = () => {
   };
 
   return (
-    <Box bgcolor={"white"} sx={{}} p={0}>
+    <Box bgcolor={"white"} sx={{position:"sticky",top:0,left:0,zIndex:1000}} p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
