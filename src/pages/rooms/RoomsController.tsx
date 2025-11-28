@@ -60,7 +60,7 @@ const RoomsController = (props: Props) => {
     setLoading(true);
     try {
       let result = await searchHotel(query || queryHotel);
-      if (result?.hotels?.length > 0) {
+      if (result?.hotels) {
         setDataHotel(result?.hotels);
         setTotal(result?.total_pages);
         setTotalAll(result?.total);
