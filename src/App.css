@@ -74,25 +74,32 @@ body {
   background-color: transparent;
   border: 0px solid transparent;
 }
-
-body::-webkit-scrollbar-track {
-  border: 0px solid transparent;
-  padding: 0;
-  background-color: transparent;
-}
 .white-text-content,
 .white-text-content * {
   color: white !important;
 }
-body::-webkit-scrollbar {
-  width: 0px;
+/* Thanh track */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-body::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-  background-color: transparent;
-  border: 0px solid transparent;
+/* Background track */
+::-webkit-scrollbar-track {
+  background: #c1c1c1;
+  
 }
+
+/* Thanh kéo */
+::-webkit-scrollbar-thumb {
+  background:  #98b720;
+  border-radius: 10px;
+}
+
+/* Hover đẹp hơn */
+::-webkit-scrollbar-thumb:hover {
+  background: #586d03;
+}
+
 .hidden-story::-webkit-scrollbar-track {
   border: 0px solid transparent;
   padding: 0;

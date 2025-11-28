@@ -18,13 +18,16 @@ const RoomsController = (props: Props) => {
   const [loading, setLoading] = useState(true);
   const limit = 5;
   useEffect(() => {
+    console.log("AAAAAA toan tesst")
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
+    const category = searchParams.get("category") ;
     setQueryHotel({
+      ...queryHotel,
       city: locationParam,
       rent_types: typeParam,
+      category,
       limit,
-      ...queryHotel,
       page,
     });
   }, [location.pathname, searchParams, page]);

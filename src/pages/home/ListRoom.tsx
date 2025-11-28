@@ -211,11 +211,14 @@ const ListRoom = ({
   isDetail,
   data,
   loading,
+  category,
+  location
 }: {
   title: string;
   isDetail?: boolean;
   data: any[];
 }) => {
+  const navigate = useNavigate()
   const settings = {
     dots: false,
     infinite: true,
@@ -272,7 +275,7 @@ const ListRoom = ({
               </Typography>
             )}
             {!isDetail && (
-              <Typography color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
+              <Typography onClick={()=>{navigate(`/rooms?catrgory=${category}&location=${location}`)}} sx={{cursor:"pointer"}} color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
                 Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
               </Typography>
             )}
