@@ -153,7 +153,7 @@ const HomeView = ({
           location={address?.id||"hanoi"}
         />
         <ListRoom loading={loading}  category={"new"} location={address?.id||"hanoi"}  data={newHotel} title={"Khách sạn mới"} />
-        <PopularDestinations />
+        <PopularDestinations location={location} />
       </Container>
     </Box>
   );

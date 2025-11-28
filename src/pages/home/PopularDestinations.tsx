@@ -10,6 +10,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const destinations = [
   { name: "Hà Nội", hotels: "100 khách sạn" },
@@ -29,32 +30,37 @@ const destinations = [
 const DestinationItem = ({
   name,
   hotels,
+  id
 }: {
   name: string;
   hotels: string;
-}) => (
-  <Box>
-    <Typography
-      variant='subtitle1'
-      fontWeight='600'
-      color='rgba(43, 47, 56, 1)'
-      sx={{
-        fontSize: { xs: "0.95rem", md: "1rem" },
-        mb: 0.5,
-        "&:hover": { textDecoration: "underline", cursor: "pointer" },
-      }}>
-      {name}
-    </Typography>
-    <Typography
-      variant='body2'
-      color='#999'
-      sx={{ fontSize: { xs: "0.8rem", md: "0.85rem" } }}>
-      {hotels}
-    </Typography>
-  </Box>
-);
+}) => {
+  const navigate = useNavigate()
+  return (
+    <Box>
+      <Typography
+      onClick={()=>navigate(`/rooms?location=${id}`)}
+        variant='subtitle1'
+        fontWeight='600'
+        color='rgba(43, 47, 56, 1)'
+        sx={{
+          fontSize: { xs: "0.95rem", md: "1rem" },
+          mb: 0.5,
+          "&:hover": { textDecoration: "underline", cursor: "pointer" },
+        }}>
+        {name.vi}
+      </Typography>
+      <Typography
+        variant='body2'
+        color='#999'
+        sx={{ fontSize: { xs: "0.8rem", md: "0.85rem" } }}>
+       100 khách sạn
+      </Typography>
+    </Box>
+  )
+};
 
-const PopularDestinations = () => {
+const PopularDestinations = ({location}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -92,13 +98,13 @@ const PopularDestinations = () => {
               minWidth: { xs: "130px", sm: "140px" },
             },
           }}>
-          {destinations.map((dest, index) => (
+          {location.map((dest, index) => (
             <DestinationItem key={index} {...dest} />
           ))}
         </Stack>
 
         {/* Nút Xem tất cả */}
-        <Box sx={{ mt: 5 }}>
+        {/* <Box sx={{ mt: 5 }}>
           <Button
             endIcon={<ExpandMore />}
             sx={{
@@ -114,7 +120,7 @@ const PopularDestinations = () => {
             }}>
             Xem tất cả
           </Button>
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );
