@@ -18,13 +18,16 @@ const RoomsController = (props: Props) => {
   const [loading, setLoading] = useState(true);
   const limit = 5;
   useEffect(() => {
+    console.log("AAAAAA toan tesst")
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
+    const category = searchParams.get("category") ;
     setQueryHotel({
+      ...queryHotel,
       city: locationParam,
       rent_types: typeParam,
+      category,
       limit,
-      ...queryHotel,
       page,
     });
   }, [location.pathname, searchParams, page]);
@@ -57,7 +60,7 @@ const RoomsController = (props: Props) => {
     setLoading(true);
     try {
       let result = await searchHotel(query || queryHotel);
-      if (result?.hotels?.length > 0) {
+      if (result?.hotels) {
         setDataHotel(result?.hotels);
         setTotal(result?.total_pages);
         setTotalAll(result?.total);

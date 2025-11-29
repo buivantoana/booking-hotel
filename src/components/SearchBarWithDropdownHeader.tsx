@@ -33,6 +33,7 @@ import { DateCalendar, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 // === DROPDOWN CHỌN LOẠI (giống ảnh) ===
 const BookingTypeDropdown: React.FC<{
@@ -618,7 +619,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   );
 
   const formatDateDisplay = () => {
-    if (!checkIn) return "10:00 - 12:00, 4/11";
+    if (!checkIn) return "";
     if (bookingType === "hourly") {
       const endHour =
         (parseInt(checkInTime.split(":")[0]) + checkInDuration) % 24;
@@ -641,6 +642,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   );
   const isLocationSelected = !!selectedLocation;
   const handleSearch = () => {
+    if (!checkIn) return toast.warning("Vui lòng chọn ngày giờ!")
     const searchParams = {
       location: locationAddress.find((item) => item.name.vi == searchValue)?.id,
       type: bookingType,

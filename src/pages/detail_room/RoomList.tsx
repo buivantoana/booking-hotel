@@ -322,7 +322,7 @@ const RoomCard = ({
   );
 };
 
-const RoomList = ({ loading, data, hotel }) => {
+const RoomList = ({ loading, data, hotel,section1Ref }) => {
   let booking = localStorage.getItem("booking") ? JSON.parse(localStorage.getItem("booking")): {}
   const [openModal, setOpenModal] = useState(false);
   const [lodingLogin, setLoadingLogin] = useState(false);
@@ -337,7 +337,7 @@ const RoomList = ({ loading, data, hotel }) => {
   };
   console.log("AAA data", data)
   return (
-    <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
+    <Box ref={section1Ref} sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
       <Stack spacing={3} sx={{}}>
         <Typography
           fontWeight={700}

@@ -29,6 +29,7 @@ import ListRoom from "./ListRoom";
 import PopularDestinations from "./PopularDestinations";
 import FirstTimeExplore from "./FirstTimeExplore";
 import SearchBarWithDropdown from "./SearchBarWithDropdown";
+import { useNavigate } from "react-router-dom";
 
 const HomeView = ({
   location,
@@ -40,9 +41,9 @@ const HomeView = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const [address, setAddress] = useState(null);
   const [bookingType, setBookingType] = useState("hourly");
-
+  const navigate = useNavigate();
   const handleBookingType = (event, newType) => {
     if (newType !== null) {
       setBookingType(newType);
@@ -111,28 +112,77 @@ const HomeView = ({
           mb={"50px"}
           display={"flex"}
           justifyContent={"center"}
-          sx={{ cursor: "pointer" }}>
+          sx={{ cursor: "pointer", position: "relative" }}>
           <img
             src={type_booking}
             width={"100%"}
             style={{ objectFit: "contain" }}
             alt=''
           />
+          <Box
+            display={"flex"}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+            }}>
+            <Box
+              flex={1}
+              onClick={() => {
+                navigate(
+                  `/rooms?location=${address?.id || "hanoi"}&type=hourly`
+                );
+              }}></Box>
+            <Box
+              onClick={() => {
+                navigate(
+                  `/rooms?location=${address?.id || "hanoi"}&type=hourly`
+                );
+              }}></Box>
+            <Box
+              onClick={() => {
+                navigate(
+                  `/rooms?location=${address?.id || "hanoi"}&type=hourly`
+                );
+              }}></Box>
+          </Box>
         </Box>
-        <FirstTimeExplore />
+        <FirstTimeExplore
+          setAddress={setAddress}
+          address={address}
+          location={location}
+        />
         {/* <ListRoom
           loading={loading}
           data={featured}
           title={"Ưu đãi độc quyền"}
+          category={"featured"}
+          location={address?.id || "hanoi"}
         /> */}
-        <ListRoom loading={loading} data={recommend} title={"Gợi ý cho bạn"} />
+        <ListRoom
+          loading={loading}
+          data={recommend}
+          location={address?.id || "hanoi"}
+          category={"recommend"}
+          title={"Gợi ý cho bạn"}
+        />
         <ListRoom
           loading={loading}
           data={toprated}
+          category={"toprated"}
           title={"Top được bình chọn"}
+          location={address?.id || "hanoi"}
         />
-        <ListRoom loading={loading} data={newHotel} title={"Khách sạn mới"} />
-        <PopularDestinations />
+        <ListRoom
+          loading={loading}
+          category={"new"}
+          location={address?.id || "hanoi"}
+          data={newHotel}
+          title={"Khách sạn mới"}
+        />
+        <PopularDestinations location={location} />
       </Container>
     </Box>
   );

@@ -51,7 +51,10 @@ interface Review {
   content: string;
 }
 
-const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
+const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
+  section3Ref,
+  section4Ref,
+  section5Ref,section6Ref}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -100,12 +103,13 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
     }
     setLoadingReview(false);
   };
+  console.log("AAAA context",context)
   return (
     <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={5} sx={{ mx: "auto" }}>
         {/* === 1. GIỚI THIỆU KHÁCH SẠN === */}
-        <Stack spacing={2}>
-          <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
+        <Stack ref={section2Ref}  spacing={2}>
+          <Typography  fontWeight={600} fontSize='1.1rem' color='#333'>
             Giới thiệu khách sạn
           </Typography>
           <Typography fontSize='0.95rem' color='#666' lineHeight={1.7}>
@@ -120,7 +124,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
         </Stack>
 
         {/* === 2. TIỆN ÍCH KHÁCH SẠN === */}
-        <Stack spacing={3}>
+        <Stack ref={section3Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Tiện ích khách sạn
           </Typography>
@@ -170,7 +174,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
         </Stack>
 
         {/* === 3. ĐÁNH GIÁ === */}
-        <Stack spacing={4}>
+        <Stack ref={section4Ref} spacing={4}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Đánh giá
           </Typography>
@@ -314,7 +318,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                             <Typography fontSize='0.75rem' color='#999'>
                               {review.created_at}
                             </Typography>
-                            {context?.state?.user?.id == review?.user_id&&
+                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id &&
                             <BorderColorIcon
                               onClick={() => {
                                 setReviewDetail(review);
@@ -322,7 +326,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                               }}
                               sx={{ fontSize: "15px", cursor: "pointer" }}
                             />}
-                            {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
+                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id && <DeleteForeverIcon
                               onClick={() => {
                                 setReviewDetail(review);
                                 setDeleteDialogOpen(true);
@@ -378,7 +382,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
         </Stack>
 
         {/* === 4. CHÍNH SÁCH NHẬN - TRẢ PHÒNG === */}
-        <Stack spacing={3}>
+        <Stack ref={section5Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Chính sách nhận - trả phòng
           </Typography>
@@ -418,7 +422,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
         </Stack>
 
         {/* === 5. CHÍNH SÁCH KHÁCH SẠN === */}
-        <Stack spacing={2}>
+        <Stack ref={section6Ref} spacing={2}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Chính sách khách sạn
           </Typography>
@@ -581,14 +585,14 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag }) => {
                       <Typography fontSize='0.8rem' color='#999'>
                         {review.created_at}
                       </Typography>
-                      {context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
+                      { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setReviewModalOpen(true);
                         }}
                         sx={{ fontSize: "14px", cursor: "pointer" }}
                       />}
-                       {context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
+                       { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
                         onClick={() => {
                           setReviewDetail(review);
                           setDeleteDialogOpen(true);

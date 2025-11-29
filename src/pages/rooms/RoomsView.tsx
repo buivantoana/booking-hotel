@@ -134,9 +134,9 @@ const amenities: Amenity[] = [
 ];
 
 const ratings = [
-  { label: "≥ 3.5", active: false },
-  { label: "≥ 4.0", active: false },
-  { label: "≥ 4.5", active: false },
+  { label: "≥ 3.5", active: false,value:3.5 },
+  { label: "≥ 4.0", active: false ,value:4},
+  { label: "≥ 4.5", active: false ,value:4.5},
 ];
 
 const RoomsView = ({
@@ -162,6 +162,7 @@ const RoomsView = ({
   const [priceRange, setPriceRange] = useState<[number, number]>([
     20000, 10000000,
   ]);
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const context = useBookingContext();
   const [center, setCenter] = useState({
     lat: 21.0285,
@@ -190,16 +191,61 @@ const RoomsView = ({
   };
 
   const handleRatingToggle = (index: number) => {
-    const newList = [...ratingList];
-    newList[index].active = !newList[index].active;
+    const newList = ratingList.map((item,i)=>{
+      if(index == i){
+        return {
+          ...item,
+          active:true
+        }
+      }
+      return {
+        ...item,
+        active:false
+      }
+    });
+    
     setRatingList(newList);
+    setQueryHotel({...queryHotel,page:1,min_rating:newList.filter((item)=>item.active).map((item)=>item.value).join(",")})
   };
 
-  const formatPrice = (value: number) => {
-    if (value >= 1000000) return `${(value / 1000000).toFixed(1)}Mđ`;
-    return `${(value / 1000).toFixed(0)}đ`;
+  const formatPrice = (value: number): string => {
+    // Trường hợp >= 10_000_000 → hiển thị dạng "10.000.000đ+"
+    if (value >= 10_000_000) {
+      const billions = value / 1_000_000;
+      // Làm tròn xuống để tránh 10.000.001đ+ thành 10.000.001đ+
+      const floored = Math.floor(billions * 10) / 10; // giữ 1 chữ số thập phân nếu cần
+      return `${floored.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}.000.000đ+`;
+    }
+  
+    // Các trường hợp còn lại: thêm dấu chấm ngăn cách và chữ đ
+    const formatted = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${formatted}đ`;
   };
 
+  const handlePriceChange = (_: Event, newValue: number | number[]) => {
+    const value = newValue as [number, number];
+    setPriceRange(value);
+  
+    // Xóa timeout cũ
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+  
+    // Đặt timeout mới: sau 1s mới gọi API
+    debounceTimeout.current = setTimeout(() => {
+      console.log('Gọi API sau 1s dừng kéo:', value);
+     setQueryHotel({...queryHotel,min_price:newValue[0],max_price:newValue[1],page:1})
+    }, 1000);
+  };
+  
+  // Đừng quên cleanup khi component unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
   return (
     <Container
       maxWidth='lg'
@@ -289,9 +335,7 @@ const RoomsView = ({
                     <Box display={"flex"} justifyContent={"center"}>
                       <Slider
                         value={priceRange}
-                        onChange={(_, newValue) =>
-                          setPriceRange(newValue as [number, number])
-                        }
+                        onChange={handlePriceChange}
                         valueLabelDisplay='off'
                         min={0}
                         max={10000000}
@@ -535,7 +579,7 @@ const RoomsView = ({
                   </Typography>
                 </Stack>
 
-                <SortButton />
+                <SortButton queryHotel={queryHotel} setQueryHotel={setQueryHotel} />
               </Box>
               <ItemHotel
                 dataHotel={dataHotel}
@@ -1019,14 +1063,14 @@ import CheckIcon from "@mui/icons-material/Check";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import { useNavigate } from "react-router-dom";
 const sortOptions = [
-  { label: "Phù hợp nhất", value: "best" },
-  { label: "Khoảng cách từ gần đến xa", value: "distance_asc" },
-  { label: "Điểm đánh giá từ cao đến thấp", value: "rating_desc" },
+  { label: "Phù hợp nhất", value: "all" },
+  { label: "Khoảng cách từ gần đến xa", value: "distance" },
+  { label: "Điểm đánh giá từ cao đến thấp", value: "rating" },
   { label: "Giá từ thấp đến cao", value: "price_asc" },
   { label: "Giá từ cao đến thấp", value: "price_desc" },
 ];
 
-const SortButton = () => {
+const SortButton = ({queryHotel,setQueryHotel}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selected, setSelected] = useState(sortOptions[0].value);
 
@@ -1043,6 +1087,7 @@ const SortButton = () => {
   const handleSelect = (value: string) => {
     setSelected(value);
     handleClose();
+    setQueryHotel({...queryHotel,page:1,sort_by:value})
   };
 
   const selectedLabel = sortOptions.find(

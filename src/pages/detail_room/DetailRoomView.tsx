@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Stack,
@@ -64,7 +64,39 @@ const DetailRoomView = ({
   const [photoIndex, setPhotoIndex] = useState(0);
   const [tabValue, setTabValue] = useState(0);
 
+  const section1Ref = useRef(null);
+  const section2Ref = useRef(null);
+  const section3Ref = useRef(null);
+  const section4Ref = useRef(null);
+  const section5Ref = useRef(null);
+  const section6Ref = useRef(null);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    let ref
+    switch (newValue) {
+      case 0:
+        ref = section1Ref
+        break;
+      case 1:
+        ref = section2Ref
+        break;
+      case 2:
+        ref = section3Ref
+        break;
+      case 3:
+        ref = section4Ref
+        break;
+      case 4:
+        ref = section5Ref
+        break;
+      case 5:
+        ref = section6Ref
+        break;
+
+
+      default:
+        break;
+    }
+    handleScroll(ref)
     setTabValue(newValue);
   };
 
@@ -76,7 +108,16 @@ const DetailRoomView = ({
     "Chính sách nhận - trả phòng",
     "Chính sách khách sạn",
   ];
+  const handleScroll = (ref) => {
+    if (!ref.current) return;
 
+  const top = ref.current.getBoundingClientRect().top + window.pageYOffset;
+
+  window.scrollTo({
+    top: top - 150,   // ⬅️ lùi lên 200px
+    behavior: "smooth",
+  });
+  };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
       <Lightbox
@@ -155,7 +196,11 @@ const DetailRoomView = ({
               variant='scrollable'
               scrollButtons={false}
               sx={{
+                position: "sticky",
+                top: 80,
+                background: "#f9f9f9",
                 borderBottom: "1px solid #ccc",
+                zIndex: "100",
                 "& .MuiTabs-indicator": {
                   bgcolor: "#98b720",
                   height: 3,
@@ -314,24 +359,30 @@ const DetailRoomView = ({
               </Typography>
             )}
           </TabPanel> */}
+          <RoomList
+            loading={loading}
+            hotel={detailHotel?.hotel || {}}
+            data={detailHotel?.room_types || []}
+            section1Ref={section1Ref}
+          />
+          <HotelDetailInfo
+            info={detailHotel?.hotel || {}}
+            getReviewHotel={getReviewHotel}
+            reviews={reviews}
+            hastag={hastag}
+            section2Ref={section2Ref}
+            section3Ref={section3Ref}
+            section4Ref={section4Ref}
+            section5Ref={section5Ref}
+            section6Ref={section6Ref}
+          />
+          <ListRoom
+            loading={loading}
+            title={"Ưu đãi độc quyền"}
+            data={recommend}
+            isDetail={true}
+          />
         </Stack>
-        <RoomList
-          loading={loading}
-          hotel={detailHotel?.hotel || {}}
-          data={detailHotel?.room_types || []}
-        />
-        <HotelDetailInfo
-          info={detailHotel?.hotel || {}}
-          getReviewHotel={getReviewHotel}
-          reviews={reviews}
-          hastag={hastag}
-        />
-        <ListRoom
-          loading={loading}
-          title={"Ưu đãi độc quyền"}
-          data={recommend}
-          isDetail={true}
-        />
       </Container>
     </Box>
   );
