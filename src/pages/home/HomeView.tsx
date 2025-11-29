@@ -120,11 +120,11 @@ const HomeView = ({
           />
         </Box>
         <FirstTimeExplore />
-        <ListRoom
+        {/* <ListRoom
           loading={loading}
           data={featured}
           title={"Ưu đãi độc quyền"}
-        />
+        /> */}
         <ListRoom loading={loading} data={recommend} title={"Gợi ý cho bạn"} />
         <ListRoom
           loading={loading}
