@@ -37,7 +37,6 @@ const reducer = (state: any, action: any) => {
   }
 };
 const App = () => {
-  
   const [state, dispatch] = useReducer(reducer, {
     user: {},
     history: {},
@@ -58,7 +57,7 @@ const App = () => {
       })();
     }
   }, [user]);
- 
+
   // console.log("AAAA state ====", state);
   return (
     <div>

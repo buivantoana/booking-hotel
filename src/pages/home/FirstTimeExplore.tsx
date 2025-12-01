@@ -16,8 +16,6 @@ import qr from "../../images/image 5.png";
 import left from "../../images/Frame 1321317998.png";
 import { useNavigate } from "react-router-dom";
 
-
-
 // === NGƯỜI ĐANG CẦM ĐIỆN THOẠI ===
 const PhonePerson = () => (
   <svg width='100' height='100' viewBox='0 0 100 100' fill='none'>
@@ -40,12 +38,14 @@ const PhonePerson = () => (
   </svg>
 );
 
-const FirstTimeExplore = ({ location,setAddress,address }) => {
+const FirstTimeExplore = ({ location, setAddress, address }) => {
   const theme = useTheme();
-  
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [openLocation, setOpenLocation] = useState(false);
-  const navigate = useNavigate()
+  const [openLocation, setOpenLocation] = useState(
+    localStorage.getItem("location") ? false : true
+  );
+  const navigate = useNavigate();
   return (
     <Box sx={{ py: { xs: 6, md: 8 } }}>
       <LocationModal
@@ -54,7 +54,7 @@ const FirstTimeExplore = ({ location,setAddress,address }) => {
         location={location}
         address={address}
         onSelect={(location) => {
-          setAddress(location)
+          setAddress(location);
         }}
       />
       <Box sx={{ maxWidth: "1400px", mx: "auto" }}>
@@ -82,12 +82,19 @@ const FirstTimeExplore = ({ location,setAddress,address }) => {
                 sx={{ fontSize: 18, color: "rgba(152, 183, 32, 1) !important" }}
               />
             }
-            label={address?"Khu vực:"+" "+address?.name?.vi :'Khu vực: Hà Nội'}
+            label={
+              location &&
+              "Khu vực:" +
+                " " +
+                location.find(
+                  (item) => item.id == localStorage.getItem("location")
+                )?.name.vi
+            }
             clickable
             deleteIcon={
               <ArrowForwardIos sx={{ fontSize: "14px !important" }} />
             }
-            onDelete={() => { }}
+            onDelete={() => {}}
             sx={{
               bgcolor: "white",
               color: "rgba(152, 183, 32, 1)",
@@ -223,10 +230,9 @@ const FirstTimeExplore = ({ location,setAddress,address }) => {
 
 export default FirstTimeExplore;
 
+("use client");
 
-'use client';
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -239,17 +245,16 @@ import {
   IconButton,
   Divider,
   Slide,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CheckIcon from '@mui/icons-material/Check';
+} from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import CloseIcon from "@mui/icons-material/Close";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import CheckIcon from "@mui/icons-material/Check";
 
-
-function LocationModal({ open, onClose, onSelect, location,address }: any) {
-  const [search, setSearch] = useState('');
+function LocationModal({ open, onClose, onSelect, location, address }: any) {
+  const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [filter, setFilter] = useState([])
+  const [filter, setFilter] = useState([]);
   // Tự động focus input khi mở modal
   useEffect(() => {
     if (open && inputRef.current) {
@@ -258,100 +263,113 @@ function LocationModal({ open, onClose, onSelect, location,address }: any) {
   }, [open]);
   const removeVietnameseTones = (str: string): string => {
     return str
-      .normalize('NFD')                    // Tách dấu ra khỏi chữ cái
-      .replace(/[\u0300-\u036f]/g, '')     // Xóa hết các dấu
-      .replace(/đ/g, 'd')
-      .replace(/Đ/g, 'D')
+      .normalize("NFD") // Tách dấu ra khỏi chữ cái
+      .replace(/[\u0300-\u036f]/g, "") // Xóa hết các dấu
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
       .toLowerCase();
   };
   useEffect(() => {
     if (search) {
-      setFilter(location.filter((item) => {
-        const searchNoTone = removeVietnameseTones(search);
-        const nameNoTone = removeVietnameseTones(item.name.vi);
-        return nameNoTone.includes(searchNoTone);
-      }))
+      setFilter(
+        location.filter((item) => {
+          const searchNoTone = removeVietnameseTones(search);
+          const nameNoTone = removeVietnameseTones(item.name.vi);
+          return nameNoTone.includes(searchNoTone);
+        })
+      );
     } else {
-      setFilter(location)
+      setFilter(location);
     }
-  }, [location, search])
-
+  }, [location, search]);
 
   const handleSelect = (data: string) => {
     onSelect(data);
-    onClose();
   };
 
   const handleClearSearch = () => {
-    setSearch('');
+    setSearch("");
     inputRef.current?.focus();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      // onClose={onClose}
       fullScreen // Mobile: full màn hình
       TransitionComponent={Slide}
-      TransitionProps={{ direction: 'up' } as any}
+      TransitionProps={{ direction: "up" } as any}
       PaperProps={{
         sx: {
-          borderRadius: { xs: '20px 20px 0 0', sm: '16px' },
+          borderRadius: { xs: "20px 20px 0 0", sm: "16px" },
           maxWidth: { sm: 680 },
-          width: { sm: '90%' },
+          width: { sm: "90%" },
           m: { sm: 2 },
-          height: { xs: '90vh', sm: 'auto' },
-          maxHeight: { xs: 'none', sm: '90vh' },
+          // height: { xs: "90vh", sm: "auto" },
+          maxHeight: { xs: "none", sm: "90vh" },
         },
-      }}
-    >
-      <DialogContent sx={{ p: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      }}>
+      <DialogContent
+        sx={{
+          p: 2,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}>
         {/* Header */}
-        <Box sx={{  pb: 2 }}>
-          <Typography variant="h6" fontWeight={700} textAlign="center">
+        <Box sx={{ pb: 2 }}>
+          <Typography variant='h6' fontWeight={700} textAlign='center'>
             Hãy chọn địa điểm của bạn
           </Typography>
-          <Typography variant="body2" color="text.secondary" textAlign="center" mt={1}>
-            Hotel Booking sẽ gợi ý những khách sạn phù hợp gần nhất với ưu đãi hấp dẫn
-            nhất dựa theo khu vực bạn chọn
+          <Typography
+            variant='body2'
+            color='text.secondary'
+            textAlign='center'
+            mt={1}>
+            Hotel Booking sẽ gợi ý những khách sạn phù hợp gần nhất với ưu đãi
+            hấp dẫn nhất dựa theo khu vực bạn chọn
           </Typography>
 
           {/* Search Input */}
           <TextField
             inputRef={inputRef}
             fullWidth
-            placeholder="Tên khu vực của bạn"
+            placeholder='Tên khu vực của bạn'
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{ mt: 3 }}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#98b720' }} />
+                <InputAdornment position='start'>
+                  <SearchIcon sx={{ color: "#98b720" }} />
                 </InputAdornment>
               ),
               endAdornment: search ? (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={handleClearSearch}>
-                    <CloseIcon fontSize="small" />
+                <InputAdornment position='end'>
+                  <IconButton size='small' onClick={handleClearSearch}>
+                    <CloseIcon fontSize='small' />
                   </IconButton>
                 </InputAdornment>
               ) : null,
               sx: {
-                borderRadius: '12px',
-                bgcolor: '#f9f9f9',
-                '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e0e0e0' },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#98b720' },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#98b720' },
+                borderRadius: "12px",
+                bgcolor: "#f9f9f9",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#e0e0e0",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#98b720",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#98b720",
+                },
               },
             }}
           />
         </Box>
 
-       
-
         {/* Scrollable List */}
-        <Box sx={{ flex: 1, overflowY: 'auto', pb: 5 }}>
+        <Box sx={{ flex: 1, overflowY: "auto", pb: 5 }}>
           <List>
             {/* Phổ biến */}
             {/* <Typography sx={{ bgcolor: 'transparent', fontWeight: 600, color: 'text.primary' }}>
@@ -367,29 +385,44 @@ function LocationModal({ open, onClose, onSelect, location,address }: any) {
               </ListItem>
             ))} */}
 
-        
-
             {/* Địa điểm khác */}
-            <Typography sx={{ bgcolor: 'transparent', fontWeight: 600, color: 'text.primary' }}>
+            <Typography
+              sx={{
+                bgcolor: "transparent",
+                fontWeight: 600,
+                color: "text.primary",
+              }}>
               Địa điểm khác
             </Typography>
             {filter.length > 0 ? (
               filter.map((loc) => (
                 <>
-                 <ListItem button key={loc} sx={{justifyContent:"space-between"}} onClick={() => handleSelect(loc)}>
-                <Box display={"flex"} alignItems={"center"} gap={1}>
-                <LocationOnIcon sx={{ mr: 2, color: '#98b720', fontSize: 20 }} />
-                <ListItemText primary={loc.name.vi} primaryTypographyProps={{ fontWeight: 500 }} />
-                </Box>
-                {address && ( address?.id == loc.id) && <CheckIcon sx={{color:"#98b720"}}/>}
-               
-              </ListItem>
-                 <Divider />
+                  <ListItem
+                    button
+                    key={loc}
+                    sx={{ justifyContent: "space-between" }}
+                    onClick={() => handleSelect(loc)}>
+                    <Box display={"flex"} alignItems={"center"} gap={1}>
+                      <LocationOnIcon
+                        sx={{ mr: 2, color: "#98b720", fontSize: 20 }}
+                      />
+                      <ListItemText
+                        primary={loc.name.vi}
+                        primaryTypographyProps={{ fontWeight: 500 }}
+                      />
+                    </Box>
+                    {address && address?.id == loc.id && (
+                      <CheckIcon sx={{ color: "#98b720" }} />
+                    )}
+                  </ListItem>
+                  <Divider />
                 </>
-               
               ))
             ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ px: 4, py: 2 }}>
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                sx={{ px: 4, py: 2 }}>
                 Không tìm thấy địa điểm nào
               </Typography>
             )}
@@ -397,37 +430,40 @@ function LocationModal({ open, onClose, onSelect, location,address }: any) {
         </Box>
 
         {/* Fixed Bottom Button */}
-        {/* <Box
+        <Box
           sx={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 0,
             left: 0,
             right: 0,
             p: 3,
-            bgcolor: 'background.paper',
-            borderTop: '1px solid #e0e0e0',
-          }}
-        >
+            bgcolor: "background.paper",
+            borderTop: "1px solid #e0e0e0",
+          }}>
           <Button
             fullWidth
-            variant="contained"
-            size="large"
+            disabled={!address}
+            variant='contained'
+            size='large'
             sx={{
-              bgcolor: '#98b720',
-              color: 'white',
-              borderRadius: '12px',
+              bgcolor: "#98b720",
+              color: "white",
+              borderRadius: "12px",
               py: 1.5,
               fontWeight: 600,
-              textTransform: 'none',
-              fontSize: '1.1rem',
-              boxShadow: '0 4px 12px rgba(152, 183, 32, 0.3)',
-              '&:hover': { bgcolor: '#85a11c' },
+              textTransform: "none",
+              fontSize: "1.1rem",
+              boxShadow: "0 4px 12px rgba(152, 183, 32, 0.3)",
+              "&:hover": { bgcolor: "#85a11c" },
             }}
-            onClick={onClose} // Có thể thay bằng hành động tiếp theo
+            onClick={() => {
+              localStorage.setItem("location", address.id);
+              onClose();
+            }} // Có thể thay bằng hành động tiếp theo
           >
             Tiếp tục
           </Button>
-        </Box> */}
+        </Box>
       </DialogContent>
     </Dialog>
   );

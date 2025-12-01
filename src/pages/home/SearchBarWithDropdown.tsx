@@ -20,6 +20,7 @@ import {
   ClickAwayListener,
   IconButton,
   Container,
+  Modal,
 } from "@mui/material";
 
 import {
@@ -33,6 +34,7 @@ import {
   KeyboardArrowDown,
   ChevronLeft,
   ChevronRight,
+  Close,
 } from "@mui/icons-material";
 
 import { DateCalendar, LocalizationProvider } from "@mui/x-date-pickers";
@@ -539,11 +541,11 @@ const SearchBarWithDropdown = ({ location }) => {
   const [checkOut, setCheckOut] = useState<Dayjs | null>(null);
   const [checkInTime, setCheckInTime] = useState<string | null>(null);
   const [checkInDuration, setCheckInDuration] = useState<number | null>(null);
-
+  const [loading, setLoading] = useState(false);
   const checkInRef = useRef<HTMLDivElement>(null);
   const checkOutRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
+  const [coords, setCoords] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
@@ -578,32 +580,111 @@ const SearchBarWithDropdown = ({ location }) => {
     return checkOut.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
   };
 
-  const handleSearch = () => {
-    const searchParams = {
-      location: location.find((item) => item.name.vi == searchValue)?.id,
-      type: bookingType,
-      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-      checkInTime: checkInTime || "",
-      duration: checkInDuration || "",
-    };
-    localStorage.setItem(
-      "booking",
-      JSON.stringify({
-        location: location.find((item) => item.name.vi == searchValue)?.id,
-        type: bookingType,
-        checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-        checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-        checkInTime: checkInTime || "",
-        duration: checkInDuration || "",
-      })
-    );
-    const queryString = new URLSearchParams(searchParams).toString();
+  // Hàm convert "Hà Nội" -> "hanoi"
+ function toCityKey(text) {
+   if (!text) return "";
+   return text
+     .normalize("NFD")
+     .replace(/[\u0300-\u036f]/g, "")
+     .replace(/đ/g, "d")
+     .replace(/Đ/g, "D")
+     .replace(/\s+/g, "")
+     .toLowerCase();
+ }
 
-    setTimeout(() => {
-      navigate(`/rooms?${queryString}`);
-    }, 300);
-  };
+ // Get location + reverse geocode -> return cityKey
+ const getLocation = async () => {
+   if (!("geolocation" in navigator)) return null;
+
+   setLoading(true);
+
+   return new Promise((resolve) => {
+     navigator.geolocation.getCurrentPosition(
+       async (position) => {
+         try {
+           const { latitude, longitude } = position.coords;
+
+           const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+           const res = await fetch(url, {
+             headers: { "Accept-Language": "vi" },
+           });
+
+           if (!res.ok) {
+             setLoading(false);
+             return resolve(null);
+           }
+
+           const data = await res.json();
+           const addr = data.address || {};
+
+           const detectedCity =
+             addr.city ||
+             addr.town ||
+             addr.village ||
+             addr.county ||
+             addr.state ||
+             null;
+
+           setLoading(false);
+           resolve(toCityKey(detectedCity));
+         } catch (e) {
+           console.log("Reverse error:", e);
+           setLoading(false);
+           resolve(null);
+         }
+       },
+
+       // 👉 USER CHỌN CHẶN HOẶC LỖI
+       (err) => {
+         console.log("Geo error:", err);
+         setLoading(false); // <--- TẮT LOADING
+         resolve(null);
+       },
+
+       {
+         enableHighAccuracy: true,
+         timeout: 10000,
+         maximumAge: 60000,
+       }
+     );
+   });
+ };
+
+ // -------------------------------------
+ // HANDLE SEARCH
+ // -------------------------------------
+ const handleSearch = async () => {
+   console.log("AAA AsearchValue", searchValue);
+
+   let city = null;
+
+   // Nếu không searchValue thì mới lấy vị trí
+   if (!searchValue) {
+     city = await getLocation(); // <--- giờ sẽ đồng bộ + loading chuẩn
+   }
+
+   // Lấy ID location từ searchValue nếu có
+   const locationId = searchValue
+     ? location.find((item) => item.name.vi === searchValue)?.id
+     : city;
+
+   const searchParams = {
+     location: locationId || localStorage.getItem("location"),
+     type: bookingType,
+     checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+     checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+     checkInTime: checkInTime || "",
+     duration: checkInDuration || "",
+   };
+
+   console.log("AAAA searchParams", searchParams);
+
+   localStorage.setItem("booking", JSON.stringify(searchParams));
+
+   const queryString = new URLSearchParams(searchParams).toString();
+
+   navigate(`/rooms?${queryString}`);
+ };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={handleClickAway}>
@@ -675,7 +756,6 @@ const SearchBarWithDropdown = ({ location }) => {
                 bgcolor: "white",
                 p: { xs: 1.5, md: "70px 20px 20px" },
                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-
               }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
@@ -693,7 +773,6 @@ const SearchBarWithDropdown = ({ location }) => {
                     placeholder='Bạn muốn đi đâu?'
                     variant='outlined'
                     value={searchValue}
-                    
                     onChange={(e) => {
                       setSearchValue(e.target.value);
                       setDropdownOpen(true);
@@ -711,11 +790,21 @@ const SearchBarWithDropdown = ({ location }) => {
                       "& .MuiOutlinedInput-root": {
                         height: { xs: 48, md: 45 },
                         borderRadius: "50px 10px 10px 50px",
-                        "& fieldset": { border:dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important" },
+                        "& fieldset": {
+                          border: dropdownOpen
+                            ? "1px solid rgba(152, 183, 32, 1) !important"
+                            : "none !important",
+                        },
 
-                        "&:hover": { borderColor: dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important" },
+                        "&:hover": {
+                          borderColor: dropdownOpen
+                            ? "1px solid rgba(152, 183, 32, 1) !important"
+                            : "none !important",
+                        },
                         "&.Mui-focused": {
-                          borderColor: dropdownOpen? "1px solid rgba(152, 183, 32, 1) !important": "none !important",
+                          borderColor: dropdownOpen
+                            ? "1px solid rgba(152, 183, 32, 1) !important"
+                            : "none !important",
                           borderWidth: 2,
                         },
                       },
@@ -802,91 +891,102 @@ const SearchBarWithDropdown = ({ location }) => {
                 )}
 
                 {/* Nhận phòng */}
-                
-                <Box sx={{flex: { md: 2 },display:"flex"}}>
 
-                <Box
-                  ref={checkInRef}
-                  sx={{ flex: { md: 1 }, cursor: "pointer",border:pickerOpen?"1px solid rgba(152, 183, 32, 1)":"1px solid transparent",borderRight:"none",borderRadius:"10px 0 0 10px" }}
-                  onClick={() => setPickerOpen(true)}>
+                <Box sx={{ flex: { md: 2 }, display: "flex" }}>
                   <Box
+                    ref={checkInRef}
                     sx={{
-                      height: { xs: 48, md: 45 },
-                      px: 2,
-                      display: "flex",
-                      alignItems: "center",
-
-                     
-                    }}>
-                    <img
-                      src={in_time}
-                      width={20}
-                      height={20}
-                      style={{ marginRight: "5px" }}
-                      alt=''
-                    />
-                    <Typography
+                      flex: { md: 1 },
+                      cursor: "pointer",
+                      border: pickerOpen
+                        ? "1px solid rgba(152, 183, 32, 1)"
+                        : "1px solid transparent",
+                      borderRight: "none",
+                      borderRadius: "10px 0 0 10px",
+                    }}
+                    onClick={() => setPickerOpen(true)}>
+                    <Box
                       sx={{
-                        flex: 1,
-                        color: checkIn ? "#333" : "#999",
-                        fontWeight: checkIn ? 500 : 400,
+                        height: { xs: 48, md: 45 },
+                        px: 2,
+                        display: "flex",
+                        alignItems: "center",
                       }}>
-                      {formatCheckIn()}
-                    </Typography>
-                    <KeyboardArrowDown
-                      sx={{
-                        fontSize: 18,
-                        color: "#999",
-                        transform: pickerOpen
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                        transition: "0.2s",
-                      }}
-                    />
+                      <img
+                        src={in_time}
+                        width={20}
+                        height={20}
+                        style={{ marginRight: "5px" }}
+                        alt=''
+                      />
+                      <Typography
+                        sx={{
+                          flex: 1,
+                          color: checkIn ? "#333" : "#999",
+                          fontWeight: checkIn ? 500 : 400,
+                        }}>
+                        {formatCheckIn()}
+                      </Typography>
+                      <KeyboardArrowDown
+                        sx={{
+                          fontSize: 18,
+                          color: "#999",
+                          transform: pickerOpen
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "0.2s",
+                        }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
 
-                {/* Trả phòng */}
-                <Box
-                  ref={checkOutRef}
-                  sx={{ flex: { md: 1 }, cursor: "pointer",border:pickerOpen?"1px solid rgba(152, 183, 32, 1)":"1px solid transparent",borderLeft:"none",borderRadius:"0 10px 10px 0" }}
-                  onClick={() => setPickerOpen(true)}>
+                  {/* Trả phòng */}
                   <Box
+                    ref={checkOutRef}
                     sx={{
-                      height: { xs: 48, md: 45 },
-                      px: 2,
-                      display: "flex",
-                      alignItems: "center",
-
-                      
-                    }}>
-                    <img
-                      src={out_time}
-                      width={20}
-                      height={20}
-                      style={{ marginRight: "5px" }}
-                      alt=''
-                    />
-                    <Typography
+                      flex: { md: 1 },
+                      cursor: "pointer",
+                      border: pickerOpen
+                        ? "1px solid rgba(152, 183, 32, 1)"
+                        : "1px solid transparent",
+                      borderLeft: "none",
+                      borderRadius: "0 10px 10px 0",
+                    }}
+                    onClick={() => setPickerOpen(true)}>
+                    <Box
                       sx={{
-                        flex: 1,
-                        color: checkOut ? "#333" : "#999",
-                        fontWeight: checkOut ? 500 : 400,
+                        height: { xs: 48, md: 45 },
+                        px: 2,
+                        display: "flex",
+                        alignItems: "center",
                       }}>
-                      {formatCheckOut()}
-                    </Typography>
-                    <KeyboardArrowDown
-                      sx={{
-                        fontSize: 18,
-                        color: "#999",
-                        transform: pickerOpen
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                        transition: "0.2s",
-                      }}
-                    />
+                      <img
+                        src={out_time}
+                        width={20}
+                        height={20}
+                        style={{ marginRight: "5px" }}
+                        alt=''
+                      />
+                      <Typography
+                        sx={{
+                          flex: 1,
+                          color: checkOut ? "#333" : "#999",
+                          fontWeight: checkOut ? 500 : 400,
+                        }}>
+                        {formatCheckOut()}
+                      </Typography>
+                      <KeyboardArrowDown
+                        sx={{
+                          fontSize: 18,
+                          color: "#999",
+                          transform: pickerOpen
+                            ? "rotate(180deg)"
+                            : "rotate(0deg)",
+                          transition: "0.2s",
+                        }}
+                      />
+                    </Box>
                   </Box>
-                </Box>
                 </Box>
 
                 {/* Popup duy nhất */}
@@ -911,7 +1011,6 @@ const SearchBarWithDropdown = ({ location }) => {
                 <Button
                   variant='contained'
                   onClick={handleSearch}
-                  disabled={!searchValue || !checkIn || !checkOut}
                   size='large'
                   startIcon={<Search sx={{ fontSize: 22 }} />}
                   sx={{
@@ -933,6 +1032,34 @@ const SearchBarWithDropdown = ({ location }) => {
           </Container>
         </Box>
       </ClickAwayListener>
+      <Modal open={loading}>
+        <Box
+          className='hidden-add-voice'
+          sx={{
+            width: { xs: "95%", md: "1000px" },
+
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            bgcolor: "white",
+            borderRadius: "18px",
+            transform: "translate(-50%, -50%)",
+            p: { xs: 2, md: 3 },
+
+            height: "max-content",
+          }}>
+          {/* HEADER */}
+          <Stack direction='row' justifyContent='space-between' mb={2}>
+            <Typography fontSize='1.4rem' fontWeight={700}>
+              Đang truy cập vị trí...
+            </Typography>
+
+            <IconButton onClick={() => setLoading(false)}>
+              <Close />
+            </IconButton>
+          </Stack>
+        </Box>
+      </Modal>
     </LocalizationProvider>
   );
 };
