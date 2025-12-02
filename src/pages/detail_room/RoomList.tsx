@@ -31,7 +31,7 @@ import Slider from "react-slick";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import vn from "../../images/VN - Vietnam.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useBookingContext } from "../../App";
 import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
@@ -62,7 +62,8 @@ const RoomCard = ({
   setOpenModal,
   setSelectedRoom,
   setOpenDetail,
-  booking
+  booking,
+  searchParams
 }: {
   room: Room;
   loading: boolean;
@@ -116,7 +117,19 @@ const RoomCard = ({
 
   const isSoldOut = room.remaining === null;
   const isLowStock = room.remaining === 1;
-
+  const handleOpenModal = ()=>{
+    if(!searchParams.get("checkIn")|| !searchParams.get("checkOut")){
+      toast.warning("Vui lòng chọn ngày giờ!")
+    }else{
+      if(Object.keys(context.state.user).length > 0){
+        setSelectedRoom(room)
+        setOpenDetail(true)
+      }else{
+        setOpenModal(true)
+      }
+    }
+    
+  }
   return (
     <Paper
       elevation={0}
@@ -278,9 +291,9 @@ const RoomCard = ({
                 fontSize='1.1rem'
                 color='rgba(234, 106, 0, 1)'>
                   
-                {booking.type == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
-                {booking.type == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
-                {booking.type == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
+                {searchParams.get("type") == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
+                {searchParams.get("type") == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
+                {searchParams.get("type") == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
               </Typography>
             </Stack>
           )}
@@ -288,12 +301,7 @@ const RoomCard = ({
           {!isSoldOut && (
             <Button
               variant='contained'
-              onClick={Object.keys(context.state.user).length > 0 ? () => {
-                setSelectedRoom(room)
-                setOpenDetail(true)
-              } : () => {
-                setOpenModal(true)
-              }}
+              onClick={handleOpenModal}
               sx={{
                 bgcolor: "#98b720",
                 color: "white",
@@ -331,6 +339,8 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
   const [openDetail, setOpenDetail] = useState(false)
   const [touched, setTouched] = useState(false);
   const [password, setPassword] = useState(false)
+  const [searchParams] = useSearchParams();
+  console.log("AAAA searchParams", searchParams.get("type"))
   const navigate = useNavigate()
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
@@ -506,7 +516,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
             </>}
           </Box>
         </Modal>
-        <RoomDetailModal open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} room={selectedRoom} />
+        <RoomDetailModal open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} searchParams={searchParams} room={selectedRoom} />
 
         {loading ? <>
           <Box display={"flex"} justifyContent={"space-between"} gap={3}>
@@ -561,6 +571,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                     setOpenDetail={setOpenDetail}
                     setSelectedRoom={setSelectedRoom}
                     booking={booking}
+                    searchParams={searchParams}
                   />
                 </Grid>
               ))}
@@ -577,7 +588,7 @@ export default RoomList;
 
 
 
-const RoomDetailModal = ({ open, onClose, room, hotel ,booking}) => {
+const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams}) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate()
@@ -605,25 +616,28 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking}) => {
   if (!room) return null;
 
   const handleBooking = () => {
-    if (localStorage.getItem("booking")) {
-      localStorage.setItem("booking", JSON.stringify({
-        ...JSON.parse(localStorage.getItem("booking")),
-        hotel_id: hotel.id,
-        rooms: [
-          {
-            quantity: 1,
-            room_type_id: room.id
-          }
-        ],
-        price: room.price_daily,
-        address: hotel?.address?.en,
-        name: hotel?.name?.en,
-        image: hotel?.images?.[0]
-      }))
-      setTimeout(() => {
-        navigate("/check-out")
-      }, 300)
-    }
+  
+      if (localStorage.getItem("booking")) {
+        localStorage.setItem("booking", JSON.stringify({
+          hotel_id: hotel.id,
+          rooms: [
+            {
+              quantity: 1,
+              room_type_id: room.id
+            }
+          ],
+          price: room.price_daily,
+          address: hotel?.address?.en || hotel?.address?.vi,
+          name: hotel?.name?.en ||hotel?.name?.vi,
+          image: hotel?.images?.[0],
+          ...Object.fromEntries([...searchParams])
+        }))
+        setTimeout(() => {
+          navigate("/check-out")
+        }, 300)
+      }
+
+    
   }
   return (
     <Modal open={open} onClose={onClose}>
@@ -848,9 +862,9 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking}) => {
                 color="rgba(234, 106, 0, 1)"
                 fontSize="1.3rem"
               >
-               {booking.type == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
-                {booking.type == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
-                {booking.type == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
+               {searchParams.get("type") == "hourly" &&room.price_hourly.toLocaleString("vi-VN")+"đ"}
+                {searchParams.get("type") == "daily" &&room.price_daily.toLocaleString("vi-VN")+"đ"}
+                {searchParams.get("type") == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
               </Typography>
 
               <Button

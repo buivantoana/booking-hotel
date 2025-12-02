@@ -125,17 +125,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
   const [time, setTime] = useState<string>(initialTime || "10:00");
   const [duration, setDuration] = useState<number>(initialDuration || 2);
-
-  const hours = [
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-  ];
+  const now = dayjs();
+  const hours = Array.from({ length: 24 }, (_, i) =>
+  String(i).padStart(2, "0") + ":00"
+);
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
 
   const hourIndex = hours.indexOf(time);
@@ -161,6 +154,15 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setDuration(2);
   };
 
+  const isToday =
+  checkIn && checkIn.isSame(now, "day");
+
+const disabledHours = isToday
+  ? hours.filter((h) => {
+      const hourNum = parseInt(h.split(":")[0]);
+      return hourNum <= now.hour();   // disable những giờ đã qua
+    })
+  : [];
   const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
     if (bookingType === "overnight") {
       setCheckIn(date);
@@ -217,7 +219,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
               <Typography fontWeight={600} color='#333'>
-                {checkIn?.format("Tháng MM, YYYY") || "Tháng 11, 2025"}
+              {  dayjs().format("[Tháng] MM, YYYY") }
               </Typography>
             </Box>
 
@@ -298,9 +300,24 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                           .map((h) => (
                             <Button
                               key={h}
+                              disabled={disabledHours.includes(h)}
                               variant={time === h ? "contained" : "text"}
                               size='small'
-                              onClick={() => setTime(h)}
+                              onClick={() => {
+                                const hourNum = parseInt(h.split(":")[0]);
+                              
+                                if (isToday) {
+                                  if (hourNum <= now.hour()) {
+                                    const next = hours[now.hour() + 1] || hours[hours.length - 1];
+                                    setTime(next);
+                                  } else {
+                                    setTime(h);
+                                  }
+                                } else {
+                                  setTime(h);
+                                }
+                              }}
+                              
                               sx={{
                                 minWidth: 60,
                                 borderRadius: "12px",
@@ -584,7 +601,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const [checkInDuration, setCheckInDuration] = useState<number>(2);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
-
+  const [name, setName] = useState<string>("");
   const [searchParams] = useSearchParams();
   useEffect(() => {
     // Lấy query từ URL
@@ -594,11 +611,12 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     const durationParam = searchParams.get("duration") || 2;
     const checkInParam = searchParams.get("checkIn");
     const checkOutParam = searchParams.get("checkOut");
-
+    const name = searchParams.get("name");
+    setName(name)
 
     setBookingType(typeParam);
     setSearchValue(
-      locationAddress?.find((item) => item.id == locationParam)?.name?.vi || ""
+      name||locationAddress?.find((item) => item.id == locationParam)?.name?.vi || ""
     );
     setCheckInTime(checkInTimeParam);
     setCheckInDuration(Number(durationParam));
@@ -606,7 +624,39 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     // Chuyển string → Dayjs
     setCheckIn(checkInParam ? dayjs(checkInParam) : null);
     setCheckOut(checkOutParam ? dayjs(checkOutParam) : null);
-  }, [location.pathname, searchParams, locationAddress]);
+  }, [location.pathname, locationAddress]);
+
+
+  const updateParams = (newParams: Record<string, any>) => {
+    const current = Object.fromEntries([...searchParams]);
+    console.log("AAA newParams",newParams)
+    const updated = {
+      ...current,
+      ...newParams,
+    };
+    console.log("AAA updated",updated)
+    navigate(`?${new URLSearchParams(updated).toString()}`, { replace: true });
+  };
+  useEffect(() => {
+    updateParams({ type: bookingType });
+  }, [bookingType]);
+
+  useEffect(() => {
+    const locId = locationAddress.find(i => i.name.vi === searchValue)?.id;
+    updateParams({ location: locId || "" });
+  }, [searchValue]);
+
+  useEffect(() => {
+    updateParams({
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime,
+      duration: checkInDuration
+    });
+  }, [checkIn,checkOut,checkInTime,checkInDuration]);
+
+  
+ 
   const inputRef = useRef<HTMLInputElement>(null);
   const typeRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
@@ -643,30 +693,42 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const isLocationSelected = !!selectedLocation;
   const handleSearch = () => {
     if (!checkIn) return toast.warning("Vui lòng chọn ngày giờ!")
-    const searchParams = {
-      location: locationAddress.find((item) => item.name.vi == searchValue)?.id,
-      type: bookingType,
-      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-      checkInTime: checkInTime || "",
-      duration: checkInDuration || "",
-    };
-    localStorage.setItem(
-      "booking",
-      JSON.stringify({
-        location: locationAddress.find((item) => item.name.vi == searchValue)
-          ?.id,
+    let params
+    if(name){
+      const current = Object.fromEntries([...searchParams]);
+
+       params = {
+        ...current,
+        search :searchParams.get("search")?Number(searchParams.get("search"))+1 :1
+      };
+    }else{
+       params = {
+        location: locationAddress.find((item) => item.name.vi == searchValue)?.id,
         type: bookingType,
         checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
         checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
         checkInTime: checkInTime || "",
         duration: checkInDuration || "",
-      })
-    );
-    const queryString = new URLSearchParams(searchParams).toString();
+        search :searchParams.get("search")?Number(searchParams.get("search"))+1 :1
+      };
+
+    }
+    // localStorage.setItem(
+    //   "booking",
+    //   JSON.stringify({
+    //     location: locationAddress.find((item) => item.name.vi == searchValue)
+    //       ?.id,
+    //     type: bookingType,
+    //     checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+    //     checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+    //     checkInTime: checkInTime || "",
+    //     duration: checkInDuration || "",
+    //   })
+    // );
+    const queryString = new URLSearchParams(params).toString();
 
     setTimeout(() => {
-      navigate(`/rooms?${queryString}`);
+      navigate(`?${queryString}`);
     }, 300);
   };
   return (
@@ -674,7 +736,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       <ClickAwayListener
         onClickAway={(e: any) => {
           if (inputRef.current && !inputRef.current.contains(e.target))
-             setDropdownOpen(false);
+            setDropdownOpen(false);
           if (typeRef.current && !typeRef.current.contains(e.target))
             setTypeDropdownOpen(false);
           if (dateRef.current && !dateRef.current.contains(e.target))
@@ -697,6 +759,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 <Box sx={{ flex: "300px 0 0", position: "relative" }}>
                   <TextField
                     fullWidth
+                    disabled={name}
                     placeholder='Bạn muốn đi đâu?'
                     variant='outlined'
                     value={searchValue}
@@ -727,7 +790,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   <Popper
                     open={dropdownOpen}
                     anchorEl={inputRef.current}
-                    
+
                     placement='bottom-start'
                     sx={{ zIndex: 20, padding: "0px !important" }}>
                     {filteredLocations.length == 0 ? (
@@ -753,14 +816,16 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                           borderRadius: "16px",
                           maxHeight: 300,
                           overflow: "auto",
-                          padding:.5
+                          padding: .5
                         }}>
                         <List disablePadding>
                           {filteredLocations.map((loc, i) => (
                             <ListItemButton
                               key={i}
-                              onClick={() => {setSearchValue(loc.name.vi)
-                                setDropdownOpen(false)}}
+                              onClick={() => {
+                                setSearchValue(loc.name.vi)
+                                setDropdownOpen(false)
+                              }}
                               sx={{
                                 py: 1.5,
                                 borderBottom:
@@ -792,7 +857,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 {/* Loại đặt phòng */}
                 <Box
                   ref={typeRef}
-                  sx={{ cursor: "pointer", flex: "0 0 200px", mx: 1 }}
+                  sx={{ cursor: "pointer", flex: "0 0 170px", mx: 1 }}
                   onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}>
                   <Box
                     sx={{
@@ -804,13 +869,13 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   >
                     <Box
                       sx={{
-                        height:"100%",
+                        height: "100%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        gap: 0.5,
-                        border:typeDropdownOpen?"1px solid #98b720":"1px solid transparent",
-                        borderRadius:"7px"
+                        gap: 1,
+                        border: typeDropdownOpen ? "1px solid #98b720" : "1px solid transparent",
+                        borderRadius: "7px"
 
                       }}>
                       {bookingType === "hourly" ? (
@@ -845,7 +910,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 {/* Ngày giờ */}
                 <Box
                   ref={dateRef}
-                  sx={{ flex: 1, cursor: "pointer",mr:1 }}
+                  sx={{ flex: 1, cursor: "pointer", mr: 1 }}
                   onClick={() => setPickerOpen(true)}>
                   <Box
                     sx={{
@@ -853,9 +918,11 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       px: 2,
                       display: "flex",
                       alignItems: "center",
-                     border:pickerOpen? "1px solid #98b720" :"1px solid transparent",
-                     borderRadius:"7px"
+                      border: pickerOpen ? "1px solid #98b720" : "1px solid transparent",
+                      borderRadius: "7px",
+                      gap:1
                     }}>
+                       <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
                     <Typography
                       sx={{
                         flex: 1,
@@ -863,7 +930,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                         fontWeight: 500,
                         fontSize: "0.9rem",
                       }}>
-                      {formatDateDisplay()}
+                      {formatDateDisplay() || "Chọn ngày giờ"}
                     </Typography>
                   </Box>
                 </Box>
@@ -882,7 +949,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                     height: 40,
                     "&:hover": { bgcolor: "#7a8f1a" },
                   }}>
-                  <Search sx={{ fontSize: 22 }} />
+                 {name?"Cập nhật" : <Search sx={{ fontSize: 22 }} />}
                 </Button>
               </Stack>
             </Paper>

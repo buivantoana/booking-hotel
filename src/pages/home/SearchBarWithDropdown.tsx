@@ -42,6 +42,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import in_time from "../../images/login.png";
 import out_time from "../../images/logout.png";
+import query from "../../images/location-load.gif";
 import { useNavigate } from "react-router-dom";
 import { getLocation } from "../../service/hotel";
 // === POPUP CHUNG ===
@@ -78,16 +79,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [time, setTime] = useState<string>(initialTime || "10:00");
   const [duration, setDuration] = useState<number>(initialDuration || 2);
 
-  const hours = [
-    "10:00",
-    "11:00",
-    "12:00",
-    "13:00",
-    "14:00",
-    "15:00",
-    "16:00",
-    "17:00",
-  ];
+  const hours = Array.from({ length: 24 }, (_, i) =>
+  String(i).padStart(2, "0") + ":00"
+);
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
 
   const hourIndex = hours.indexOf(time);
@@ -169,7 +163,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
               <Typography fontWeight={600} color='#333'>
-                {checkIn?.format("Tháng MM, YYYY") || "Tháng 11, 2025"}
+              {  dayjs().format("[Tháng] MM, YYYY") }
               </Typography>
             </Box>
 
@@ -547,6 +541,7 @@ const SearchBarWithDropdown = ({ location }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [coords, setCoords] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
+  const geoResolveRef = useRef(null);
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
   );
@@ -594,61 +589,69 @@ const SearchBarWithDropdown = ({ location }) => {
 
  // Get location + reverse geocode -> return cityKey
  const getLocation = async () => {
-   if (!("geolocation" in navigator)) return null;
+  if (!("geolocation" in navigator)) return null;
 
-   setLoading(true);
+  setLoading(true);
 
-   return new Promise((resolve) => {
-     navigator.geolocation.getCurrentPosition(
-       async (position) => {
-         try {
-           const { latitude, longitude } = position.coords;
+  return new Promise((resolve) => {
+    geoResolveRef.current = resolve; // <-- LƯU LẠI ĐỂ CLOSE MODAL GỌI ĐƯỢC
 
-           const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
-           const res = await fetch(url, {
-             headers: { "Accept-Language": "vi" },
-           });
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
 
-           if (!res.ok) {
-             setLoading(false);
-             return resolve(null);
-           }
+          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+          const res = await fetch(url, {
+            headers: { "Accept-Language": "vi" },
+          });
 
-           const data = await res.json();
-           const addr = data.address || {};
+          if (!res.ok) {
+            setLoading(false);
+            geoResolveRef.current?.(null);
+            return;
+          }
 
-           const detectedCity =
-             addr.city ||
-             addr.town ||
-             addr.village ||
-             addr.county ||
-             addr.state ||
-             null;
+          const data = await res.json();
+          const addr = data.address || {};
 
-           setLoading(false);
-           resolve(toCityKey(detectedCity));
-         } catch (e) {
-           console.log("Reverse error:", e);
-           setLoading(false);
-           resolve(null);
-         }
-       },
+          const detectedCity =
+            addr.city ||
+            addr.town ||
+            addr.village ||
+            addr.county ||
+            addr.state ||
+            null;
 
-       // 👉 USER CHỌN CHẶN HOẶC LỖI
-       (err) => {
-         console.log("Geo error:", err);
-         setLoading(false); // <--- TẮT LOADING
-         resolve(null);
-       },
+          setLoading(false);
+          geoResolveRef.current?.(toCityKey(detectedCity));
+        } catch (e) {
+          console.log("Reverse error:", e);
+          setLoading(false);
+          geoResolveRef.current?.(null);
+        }
+      },
 
-       {
-         enableHighAccuracy: true,
-         timeout: 10000,
-         maximumAge: 60000,
-       }
-     );
-   });
- };
+      (err) => {
+        console.log("Geo error:", err);
+        setLoading(false);
+        geoResolveRef.current?.(null);
+      },
+
+      {
+        enableHighAccuracy: true,
+        timeout: 60000,
+        maximumAge: 60000,
+      }
+    );
+  });
+};
+
+const cancelGeo = () => {
+  setLoading(false);
+  geoResolveRef.current?.(null);  // <-- Gửi null như “bị chặn”
+};
+
 
  // -------------------------------------
  // HANDLE SEARCH
@@ -1036,7 +1039,7 @@ const SearchBarWithDropdown = ({ location }) => {
         <Box
           className='hidden-add-voice'
           sx={{
-            width: { xs: "95%", md: "1000px" },
+            width: { xs: "95%", md: "400px" },
 
             position: "absolute",
             top: "50%",
@@ -1050,14 +1053,15 @@ const SearchBarWithDropdown = ({ location }) => {
           }}>
           {/* HEADER */}
           <Stack direction='row' justifyContent='space-between' mb={2}>
-            <Typography fontSize='1.4rem' fontWeight={700}>
+            <Typography fontSize='1.2rem' fontWeight={700}>
               Đang truy cập vị trí...
             </Typography>
 
-            <IconButton onClick={() => setLoading(false)}>
+            <IconButton onClick={() => cancelGeo()}>
               <Close />
             </IconButton>
           </Stack>
+          <img src={query} width={"100%"} alt="" />
         </Box>
       </Modal>
     </LocalizationProvider>

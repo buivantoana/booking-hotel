@@ -142,10 +142,10 @@ const AccountSettingsPage = () => {
             </ListItemButton>
           </ListItem>
 
-          <Divider sx={{ mx: 3 }} />
+          {/* <Divider sx={{ mx: 3 }} /> */}
 
           {/* Liên kết tài khoản */}
-          <ListItem disablePadding>
+          {/* <ListItem disablePadding>
             <ListItemButton sx={{ py: 3, px: 3 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <LinkOutlined sx={{ color: "#6c757d" }} />
@@ -163,10 +163,10 @@ const AccountSettingsPage = () => {
                 </Typography>
               </Box>
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
 
           {/* Google */}
-          <ListItem disablePadding>
+          {/* <ListItem disablePadding>
             <ListItemButton sx={{ py: 3, px: 3 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <img src={google} alt='' />
@@ -184,10 +184,10 @@ const AccountSettingsPage = () => {
                 Liên kết
               </Typography>
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
 
           {/* Apple */}
-          <ListItem disablePadding>
+          {/* <ListItem disablePadding>
             <ListItemButton sx={{ py: 3, px: 3 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <img src={apple} alt='' />
@@ -205,7 +205,7 @@ const AccountSettingsPage = () => {
                 Liên kết
               </Typography>
             </ListItemButton>
-          </ListItem>
+          </ListItem> */}
         </List>
       </Box>
       <Modal open={openModal} onClose={() => {

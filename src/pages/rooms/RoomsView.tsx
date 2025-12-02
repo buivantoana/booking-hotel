@@ -151,6 +151,7 @@ const RoomsView = ({
   amenities,
   queryHotel,
   setQueryHotel,
+  searchParams
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -267,6 +268,7 @@ const RoomsView = ({
           isTablet={isTablet}
           loading={loading}
           total={total}
+          searchParams={searchParams}
         />
       ) : (
         <Stack spacing={3} sx={{}}>
@@ -589,6 +591,7 @@ const RoomsView = ({
                 isTablet={isTablet}
                 loading={loading}
                 total={total}
+                searchParams={searchParams}
               />
             </Grid>
           </Grid>
@@ -612,6 +615,7 @@ const FilterMap = ({
   center,
   setActiveMap,
   getHotel,
+  searchParams
 }) => {
   const containerStyle = {
     width: "100%",
@@ -683,6 +687,7 @@ const FilterMap = ({
               loading={loading}
               total={total}
               isMap={true}
+              searchParams={searchParams}
             />
           </Box>
         </Grid>
@@ -793,6 +798,7 @@ const ItemHotel = ({
   setPage,
   isMap,
   setActiveHotel,
+  searchParams
 }) => {
   const navigate = useNavigate();
   return (
@@ -874,9 +880,19 @@ const ItemHotel = ({
                 <Paper
                   key={i}
                   onClick={() =>
-                    isMap
-                      ? setActiveHotel(hotel)
-                      : navigate(`/room/${hotel.id}`)
+                    {
+
+                      if(isMap){
+                        setActiveHotel(hotel)
+                      }else{
+                        const current = Object.fromEntries([...searchParams]);
+                      
+                        navigate(`/room/${hotel.id}?${new URLSearchParams(current).toString()}&name=${JSON.parse(hotel.name).vi||JSON.parse(hotel.name).en}`);
+                      
+                      }
+                    
+                    }
+                   
                   }
                   elevation={0}
                   sx={{
@@ -936,7 +952,7 @@ const ItemHotel = ({
                         justifyContent='space-between'>
                         <Box>
                           <Typography fontWeight={600} fontSize='1.1rem'>
-                            {JSON.parse(hotel.name).vi}
+                            {JSON.parse(hotel.name).vi||JSON.parse(hotel.name).en}
                           </Typography>
                           <Typography fontSize='0.85rem' color='#999' mt={0.5}>
                             {JSON.parse(hotel.address).en}

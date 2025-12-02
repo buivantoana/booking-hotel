@@ -141,7 +141,7 @@ const DetailRoomView = ({
                 fontWeight={700}
                 fontSize={{ xs: "1.25rem", md: "1.5rem" }}
                 color='#333'>
-                {detailHotel?.hotel?.name?.vi}
+                {detailHotel?.hotel?.name?.vi|| detailHotel?.hotel?.name?.en}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />
@@ -200,7 +200,7 @@ const DetailRoomView = ({
                 top: 80,
                 background: "#f9f9f9",
                 borderBottom: "1px solid #ccc",
-                zIndex: "100",
+                zIndex: "35",
                 "& .MuiTabs-indicator": {
                   bgcolor: "#98b720",
                   height: 3,

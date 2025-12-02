@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DetailRoomView from "./DetailRoomView";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   getDetailHotelApi,
   getReviewHotel,
@@ -18,6 +18,7 @@ const DetailRoomController = (props: Props) => {
   const [reviews, setReviews] = useState([]);
   const [hastag, setHastag] = useState([]);
   const [idHotel,setIdHotel] = useState(null);
+  
   useEffect(()=>{
     if(idPrams){
       setIdHotel(idPrams)
@@ -60,7 +61,7 @@ const DetailRoomController = (props: Props) => {
     }
    
   };
-
+  
   const getHashtagsReview = async () => {
     try {
       let hastag = await getHashtags();

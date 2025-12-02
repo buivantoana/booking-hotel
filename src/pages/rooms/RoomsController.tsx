@@ -30,7 +30,7 @@ const RoomsController = (props: Props) => {
       limit,
       page,
     });
-  }, [location.pathname, searchParams, page]);
+  }, [location.pathname, searchParams.get("search") , page]);
   useEffect(() => {
     (async () => {
       try {
@@ -97,6 +97,7 @@ const RoomsController = (props: Props) => {
       setLoading={setLoading}
       queryHotel={queryHotel}
       setQueryHotel={setQueryHotel}
+      searchParams={searchParams}
     />
   );
 };
