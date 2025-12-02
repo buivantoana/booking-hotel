@@ -29,7 +29,7 @@ const Router = () => {
           <Route path='/rooms' element={<RoomsController />} />
           <Route path='/login' element={<GuestRoute ><LoginController /></GuestRoute>} />
           <Route path='/profile' element={ <PrivateRouter user={context.state.user}><ProfileController /></PrivateRouter>} />
-          <Route path='/check-out' element={<PrivateRouter user={context.state.user}><CheckOutController /></PrivateRouter>} />
+          <Route path='/check-out' element={<CheckOutController />} />
           <Route path='' element={<HomeController />} />
           <Route path='/room/:id' element={<DetailRoomController />} />
         </Route>

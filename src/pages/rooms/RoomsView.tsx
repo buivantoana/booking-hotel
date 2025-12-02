@@ -151,7 +151,8 @@ const RoomsView = ({
   amenities,
   queryHotel,
   setQueryHotel,
-  searchParams
+  searchParams,
+  loadingScroll
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -592,6 +593,7 @@ const RoomsView = ({
                 loading={loading}
                 total={total}
                 searchParams={searchParams}
+                loadingScroll={loadingScroll}
               />
             </Grid>
           </Grid>
@@ -621,7 +623,7 @@ const FilterMap = ({
     width: "100%",
     height: "50vh",
   };
-
+  const itemRefs = useRef({});
   const mapRef = useRef(null);
 
   const [activeHotel, setActiveHotel] = useState(null);
@@ -688,6 +690,8 @@ const FilterMap = ({
               total={total}
               isMap={true}
               searchParams={searchParams}
+              activeHotel={activeHotel}
+              itemRefs={itemRefs}
             />
           </Box>
         </Grid>
@@ -798,9 +802,50 @@ const ItemHotel = ({
   setPage,
   isMap,
   setActiveHotel,
-  searchParams
+  searchParams,
+  activeHotel,
+  itemRefs,
+  loadingScroll
 }) => {
   const navigate = useNavigate();
+  const loadMoreRef = useRef(null);
+  const isRequesting = useRef(false);
+  useEffect(() => {
+    if (!activeHotel) return;
+  
+    const el = itemRefs.current[activeHotel.id];
+    if (!el) return;
+  
+    // scroll vào giữa
+    el.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [activeHotel, dataHotel]);
+  useEffect(() => {
+    const node = loadMoreRef.current;
+    if (!node) return;
+  
+    const observer = new IntersectionObserver((entries) => {
+      const target = entries[0];
+  
+      if (target.isIntersecting && !loading && !isRequesting.current) {
+        if (page < total) {
+          isRequesting.current = true;
+          setPage((prev) => prev + 1);
+        }
+      }
+    });
+  
+    observer.observe(node);
+  
+    return () => observer.unobserve(node);
+  }, [loadMoreRef.current, loading, page, total]);
+  useEffect(() => {
+  if (!loadingScroll) {
+    isRequesting.current = false;  // 🔓 mở khóa để cho phép load tiếp trang sau
+  }
+}, [loadingScroll]);
   return (
     <>
       {loading ? (
@@ -879,6 +924,7 @@ const ItemHotel = ({
               {dataHotel.map((hotel, i) => (
                 <Paper
                   key={i}
+                  ref={(el) => isMap&&(itemRefs.current[hotel.id] = el)}
                   onClick={() =>
                     {
 
@@ -903,6 +949,7 @@ const ItemHotel = ({
                     "&:hover": { boxShadow: 3 },
                     height: { xs: 200, sm: isMap ? "160px" : "200px" },
                     cursor: "pointer",
+                    border:isMap && activeHotel?.id == hotel.id?"1px solid #98b720":"unset" 
                   }}>
                   <Grid container>
                     {/* Ảnh */}
@@ -1025,9 +1072,75 @@ const ItemHotel = ({
                   </Grid>
                 </Paper>
               ))}
+              {loadingScroll&&<>
+                <Stack spacing={3} width='100%'>
+            {[...Array(isMobile ? 1 : isTablet ? 2 : 3)].map((_, i) => (
+              <Paper
+                key={i}
+                elevation={0}
+                sx={{
+                  borderRadius: "16px",
+                  overflow: "hidden",
+                  bgcolor: "white",
+                  height: { xs: 200, sm: isMap ? 160 : 200 },
+                }}>
+                <Grid container>
+                  {/* Ảnh + tag */}
+                  <Grid item xs={12} sm={5} md={4}>
+                    <Box sx={{ position: "relative", height: "100%" }}>
+                      <Skeleton
+                        variant='rectangular'
+                        width='100%'
+                        height={isMap ? "80%" : "100%"}
+                        sx={{ borderRadius: "20px" }}
+                      />
+                      {/* <Box
+                              sx={{
+                                position: "absolute",
+                                top: 12,
+                                left: 12,
+                                width: 80,
+                                height: 24,
+                                borderRadius: "4px",
+                              }}>
+                              <Skeleton width='100%' height='100%' />
+                            </Box> */}
+                    </Box>
+                  </Grid>
+
+                  {/* Nội dung */}
+                  <Grid item xs={12} sm={7} md={8}>
+                    <Stack
+                      p={2}
+                      spacing={1.5}
+                      height='100%'
+                      justifyContent='space-between'>
+                      <Box>
+                        <Skeleton width='80%' height={28} />
+                        <Skeleton width='60%' height={20} mt={0.5} />
+                        <Skeleton width='50%' height={20} mt={0.5} />
+                      </Box>
+
+                      <Stack alignItems='flex-end'>
+                        <Skeleton width='40%' height={20} />
+                        <Skeleton width='60%' height={32} mt={1} />
+                        <Skeleton
+                          width='50%'
+                          height={36}
+                          mt={1}
+                          sx={{ borderRadius: "6px" }}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
+          </Stack>
+              </>}
               {!isMap && (
                 <Box display={"flex"} justifyContent={"center"}>
-                  <Pagination
+                  {/* <Pagination
                     page={page}
                     onChange={(e, value) => setPage(value)}
                     sx={{
@@ -1043,7 +1156,8 @@ const ItemHotel = ({
                       },
                     }}
                     count={total}
-                  />
+                  /> */}
+                  <div ref={loadMoreRef} style={{ height: "1px" }} />
                 </Box>
               )}
             </Stack>

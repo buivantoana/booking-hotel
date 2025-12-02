@@ -26,10 +26,11 @@ const HomeController = (props: Props) => {
     }
   }, [searchParams]);
   useEffect(() => {
+    
     (async () => {
       setLoading(true);
       try {
-        let result = await getLocation();
+       
         let featured = await searchHotel({ category: "featured" });
         let recommend = await searchHotel({ category: "recommend" });
         let toprated = await searchHotel({ category: "toprated" });
@@ -47,16 +48,27 @@ const HomeController = (props: Props) => {
           setNewHotel(newHotel?.hotels);
         }
 
-        console.log("AAA location", result);
-        if (result?.locations) {
-          setLocation(result?.locations);
-        }
+       
       } catch (error) {
         console.log(error);
       }
       setLoading(false);
     })();
   }, []);
+  useEffect(()=>{
+    getLocationAddess()
+  },[])
+  const getLocationAddess = async()=>{
+    try {
+      let result = await getLocation();
+      console.log("AAA location", result);
+      if (result?.locations) {
+        setLocation(result?.locations);
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <>
     <HomeView

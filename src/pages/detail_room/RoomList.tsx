@@ -63,14 +63,15 @@ const RoomCard = ({
   setSelectedRoom,
   setOpenDetail,
   booking,
-  searchParams
+  searchParams,
+  isNotLogin
 }: {
   room: Room;
   loading: boolean;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
- 
+  
   const context = useBookingContext()
   const sliderRef = useRef<any>(null);
   const settings = {
@@ -118,11 +119,11 @@ const RoomCard = ({
   const isSoldOut = room.remaining === null;
   const isLowStock = room.remaining === 1;
   const handleOpenModal = ()=>{
+    setSelectedRoom(room)
     if(!searchParams.get("checkIn")|| !searchParams.get("checkOut")){
       toast.warning("Vui lòng chọn ngày giờ!")
     }else{
-      if(Object.keys(context.state.user).length > 0){
-        setSelectedRoom(room)
+      if((Object.keys(context.state.user).length > 0)||isNotLogin){
         setOpenDetail(true)
       }else{
         setOpenModal(true)
@@ -334,6 +335,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
   let booking = localStorage.getItem("booking") ? JSON.parse(localStorage.getItem("booking")): {}
   const [openModal, setOpenModal] = useState(false);
   const [lodingLogin, setLoadingLogin] = useState(false);
+  const [isNotLogin,setIsNotLogin] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [openDetail, setOpenDetail] = useState(false)
@@ -472,7 +474,12 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                     if (result.code == "OK") {
                       setPassword(true)
                     } else {
-                      toast.error(result.message)
+                      // toast.error(result.message)
+                      console.log("AAAA toan")
+
+                      setOpenDetail(true)
+                      setIsNotLogin(true)
+                      setOpenModal(false)
                     }
                   } catch (error) {
                     console.log(error)
@@ -516,7 +523,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
             </>}
           </Box>
         </Modal>
-        <RoomDetailModal open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} searchParams={searchParams} room={selectedRoom} />
+        <RoomDetailModal phoneNumber={phoneNumber} open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} searchParams={searchParams} room={selectedRoom} />
 
         {loading ? <>
           <Box display={"flex"} justifyContent={"space-between"} gap={3}>
@@ -572,6 +579,8 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                     setSelectedRoom={setSelectedRoom}
                     booking={booking}
                     searchParams={searchParams}
+                    isNotLogin={isNotLogin}
+                    
                   />
                 </Grid>
               ))}
@@ -588,7 +597,7 @@ export default RoomList;
 
 
 
-const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams}) => {
+const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phoneNumber}) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate()
@@ -630,7 +639,8 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams}) =>
           address: hotel?.address?.en || hotel?.address?.vi,
           name: hotel?.name?.en ||hotel?.name?.vi,
           image: hotel?.images?.[0],
-          ...Object.fromEntries([...searchParams])
+          ...Object.fromEntries([...searchParams]),
+          phone:'+84'+phoneNumber
         }))
         setTimeout(() => {
           navigate("/check-out")

@@ -120,9 +120,7 @@ const Account = ({ context }) => {
                         svg
                         style={{ width: 24, height: 24 }}
                       />
-                      <Typography variant='body1' fontWeight={500}>
-                        +84
-                      </Typography>
+                      
                     </Box>
                   </InputAdornment>
                 ),

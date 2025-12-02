@@ -21,7 +21,7 @@ import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
 import vn from "../../images/VN - Vietnam.png";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import { Login, LoginGoogle, checkUser } from "../../service/admin";
+import { Login, LoginGoogle, checkUser, sendOtp, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
@@ -32,22 +32,193 @@ const LoginView = () => {
   const theme = useTheme();
   const [currentStep, setCurrentStep] = useState("register"); // 'register' or 'pin'
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
+  const [dataUser, setDataUser] = useState(null);
+  const [timer, setTimer] = useState(55);
+  const [isResendEnabled, setIsResendEnabled] = useState(false);
+  const [dataLoginGoogle, setDataLoginGoogle] = useState(null);
+  const [isLoginGoogle, setIsLoginGoogle] = useState(false);
+  const context = useBookingContext()
+  const navigate = useNavigate()
+  const goToPin = (result) => {
+    localStorage.setItem("access_token",result.access_token)
+    localStorage.setItem("refresh_token",result.refresh_token)
+    localStorage.setItem("user",JSON.stringify(result.user))
+    context.dispatch({
+      type: "LOGIN",
+      payload: {
+        ...context.state,
+        user: { ...result.user },
+      },
+    });
+    toast.success("Login success")
+    setTimeout(()=>{
+      navigate("/")
+    },300)
+  };
+  const goBack = () => {
+    setIsLoginGoogle(false)
+    setCurrentStep("register")
+  };
 
-
+  const handleResend = () => {
+    setTimer(55);
+    setIsResendEnabled(false);
+    setOtp("");
+  };
 
 
   return (
     <>
-      {currentStep === "register" && <RegistrationForm setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
+      {currentStep === "register" && <RegistrationForm dataLoginGoogle={dataLoginGoogle} setDataLoginGoogle={setDataLoginGoogle}setIsLoginGoogle={setIsLoginGoogle} isLoginGoogle={isLoginGoogle} setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
 
       {currentStep === "pin" && <PinCreation phoneNumber={phoneNumber} />}
+      {currentStep === "otp" && (
+        <OtpVerification
+          phoneNumber={phoneNumber}
+          otp={otp}
+          setOtp={setOtp}
+          timer={timer}
+          isResendEnabled={isResendEnabled}
+          onResend={handleResend}
+          onSuccess={goToPin}
+          onBack={goBack}
+          dataLoginGoogle={dataLoginGoogle}
+          
+        />
+      )}
+
     </>)
 };
 
 export default LoginView;
-const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
+
+const OtpVerification = ({
+  phoneNumber,
+  otp,
+  setOtp,
+  timer,
+  isResendEnabled,
+  onResend,
+  onSuccess,
+  onBack,
+  dataLoginGoogle
+}) => {
+  const [loading, setLoading] = useState(false);
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    setLoading(true);
+    e.preventDefault();
+    if (otp.length === 4) {
+      try {
+        let result = await verifyOtp({
+          platform: "ios",
+          type: "phone",
+          value: "+84" + phoneNumber,
+          otp: otp,
+        },dataLoginGoogle.access_token);
+        if (result.access_token) {
+          onSuccess(result);
+        }
+
+      } catch (error) {
+        console.log(error)
+      }
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+      <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
+        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
+          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        </Grid>
+
+        <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
+          <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
+            <Typography sx={{ fontSize: { xs: "26px", md: "30px" }, fontWeight: 700, mb: 1, display: "flex", alignItems: "center", gap: 2 }}>
+              <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />
+              Nhập mã xác nhận
+            </Typography>
+
+            <Typography sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
+              Mã xác nhận đã được gửi đến số <b>+84{phoneNumber}</b>
+            </Typography>
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <Box sx={{ mb: 2 }}>
+                <MuiOtpInput
+                  value={otp}
+                  onChange={setOtp}
+                  length={4}
+                  sx={{
+                    gap: 2,
+                    "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
+                      width: { xs: 50, sm: 60 },
+                      height: { xs: 50, sm: 60 },
+                      borderRadius: "0px",
+                      backgroundColor: "#fff",
+                      "& fieldset": { borderColor: "#9AC700" },
+                      "&:hover fieldset": { borderColor: "#7cb400" },
+                      "&.Mui-focused fieldset": { borderColor: "#9AC700" },
+                    },
+                    "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  }}
+                />
+              </Box>
+
+              <Typography sx={{ mb: 4, color: "#FF7A00", fontSize: "14px", fontWeight: 500 }}>
+                {isResendEnabled ? (
+                  <Link onClick={onResend} sx={{ cursor: "pointer" }}>Gửi lại mã</Link>
+                ) : (
+                  `Gửi lại mã trong (${formatTime(timer)})`
+                )}
+              </Typography>
+
+              <Button
+                type="submit"
+                fullWidth
+                disabled={otp.length !== 4 || loading}
+                sx={{
+                  py: 1.6,
+                  borderRadius: "30px",
+                  backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#9AC700",
+                  color: (otp.length !== 4 || loading) ? "#888" : "#fff",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "18px",
+                  height: "56px",
+                  "&:hover": { backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#7cb400" },
+                  position: "relative",
+                }}
+              >
+                {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Đang xác nhận...
+                  </>
+                ) : (
+                  "Xác nhận OTP"
+                )}
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Container>
+  );
+};
+const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoogle,setIsLoginGoogle,dataLoginGoogle,setDataLoginGoogle}) => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+ 
+ 
   const context = useBookingContext()
   const navigate = useNavigate()
   const handleRegister = async () => {
@@ -77,6 +248,11 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
         "id_token": credentialResponse?.access_token,
         "location": "hanoi"
     })
+    if(!result?.user?.phone){
+      setIsLoginGoogle(true)
+      setDataLoginGoogle(result)
+      return
+    }
     if(result.access_token){
       localStorage.setItem("access_token",result.access_token)
       localStorage.setItem("refresh_token",result.refresh_token)
@@ -105,6 +281,21 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
   const handleGoogleError = () => {
     toast.error("Google login failed");
   };
+  const handleUpdatePhoneGoogle = async()=>{
+    try {
+      let result = await sendOtp({
+        platform: "ios",
+        type: "phone",
+        value: "+84" + phoneNumber,
+      });
+      if (result.success) {
+        setCurrentStep("otp")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+   
+  }
   return (
     <Container
       maxWidth='lg'
@@ -151,12 +342,14 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
               sx={{ fontSize: { xs: "28px", md: "32px" } }}
               fontWeight={700}
               mb={1}>
-              Hotel Booking xin chào!
+               {isLoginGoogle?<><ArrowBackIosNewIcon sx={{cursor:"pointer"}} onClick={()=>setIsLoginGoogle(false)}/> Số điện thoại của bạn</> :  'Hotel Booking xin chào!'}
             </Typography>
-
+            {isLoginGoogle ? <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
+            Nhập số điện thoại của bạn để tiếp tục.
+            </Typography>:
             <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
               Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
-            </Typography>
+            </Typography>}
 
             <Box  >
               {/* SỐ ĐIỆN THOẠI */}
@@ -247,7 +440,39 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
 
 
               {/* REGISTER BUTTON */}
-              <Button
+             {isLoginGoogle? <Button
+               onClick={handleUpdatePhoneGoogle}
+                variant='contained'
+                fullWidth
+                disabled={!phoneNumber || !isValidPhone(phoneNumber)}
+                sx={{
+                  mb: 3,
+                  py: 1.5,
+                  borderRadius: "16px",
+                  backgroundColor:
+                    !phoneNumber ? "#e0e0e0" : "#98b720",
+                  color: !phoneNumber ? "#888" : "#fff",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "18px",
+                  height: "56px",
+                  "&:hover": {
+                    backgroundColor:
+                      !phoneNumber
+                        ? "#e0e0e0"
+                        : "#98b720",
+                  },
+                  boxShadow: "none",
+                }}>
+                 {loading ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    Tiếp tục...
+                  </>
+                ) : (
+                  "Tiếp tục"
+                )}
+              </Button> : <Button
                onClick={handleRegister}
                 variant='contained'
                 fullWidth
@@ -279,8 +504,10 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                 ) : (
                   "Đăng nhập"
                 )}
-              </Button>
-
+              </Button>}
+                {!isLoginGoogle &&  <>
+                  
+                  
               <Typography
                 variant='body2'
                 align='center'
@@ -338,6 +565,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber}) => {
                   Đăng ký ngay
                 </Link>
               </Typography>
+                  </>}
             </Box>
           </Box>
         </Grid>
@@ -650,3 +878,4 @@ interface GoogleCustomButtonProps {
                   </Button>
   );
 }
+

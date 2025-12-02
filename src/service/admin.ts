@@ -84,9 +84,13 @@ export async function sendOtp(body: any) {
   }
 }
 
-export async function verifyOtp(body: any) {
+export async function verifyOtp(body: any,accessToken) {
   try {
-    const response = await api.post(`/user/verify-otp`, body);
+    const response = await api.post(`/user/verify-otp`, body, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     return response.data;
   } catch (error: any) {
     if (error.response) {

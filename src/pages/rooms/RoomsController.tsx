@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import RoomsView from "./RoomsView";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useSearchParams } from "react-router-dom";
@@ -16,12 +16,14 @@ const RoomsController = (props: Props) => {
   const [total, setTotal] = useState(1);
   const [totalAll, setTotalAll] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadingScroll, setLoadingScroll] = useState(false);
   const limit = 5;
   useEffect(() => {
     console.log("AAAAAA toan tesst")
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
     const category = searchParams.get("category") ;
+    
     setQueryHotel({
       ...queryHotel,
       city: locationParam,
@@ -51,24 +53,62 @@ const RoomsController = (props: Props) => {
       }
     })();
   }, []);
+  const prevQueryRef = useRef(queryHotel);
   useEffect(() => {
-    if (Object.keys(queryHotel).length > 0) {
+    if (Object.keys(queryHotel).length === 0) return;
+  
+    const prevQuery = prevQueryRef.current;
+    
+    // Kiểm tra xem chỉ page thay đổi
+    const onlyPageChanged =
+      queryHotel.page !== prevQuery.page &&
+      Object.keys(queryHotel).every(
+        key => key === 'page' || queryHotel[key] === prevQuery[key]
+      );
+  
+    if (onlyPageChanged) {
+      // chỉ load thêm, không reset dataHotel
+      getHotel(queryHotel);
+    } else {
+      // reset dataHotel nếu có field khác thay đổi
+      setDataHotel([]);
+      setPage(1)
       getHotel();
     }
+  
+    // lưu lại queryHotel hiện tại cho lần sau
+    prevQueryRef.current = queryHotel;
   }, [queryHotel]);
   const getHotel = async (query) => {
-    setLoading(true);
+    if(dataHotel.length == 0){
+      setLoading(true);
+    }else{
+      setLoadingScroll(true)
+    }
+     
     try {
       let result = await searchHotel(query || queryHotel);
       if (result?.hotels) {
-        setDataHotel(result?.hotels);
+        setDataHotel((prev) => {
+          // Nếu page = 1 (làm mới), return new
+          if ((query?.page || queryHotel.page) === 1) {
+            return result.hotels;
+          }
+          // Nếu page > 1, append thêm
+          return [...prev, ...result.hotels];
+        });
         setTotal(result?.total_pages);
         setTotalAll(result?.total);
       }
     } catch (error) {
       console.log(error);
     }
-    setLoading(false);
+    if(dataHotel.length == 0){
+      setLoading(false);
+    }else{
+      setLoadingScroll(false)
+    }
+    
   };
   const getHotelLatLon = async (query) => {
     setLoading(true);
@@ -98,6 +138,7 @@ const RoomsController = (props: Props) => {
       queryHotel={queryHotel}
       setQueryHotel={setQueryHotel}
       searchParams={searchParams}
+      loadingScroll={loadingScroll}
     />
   );
 };

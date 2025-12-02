@@ -326,7 +326,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
             </Typography>
 
             <Typography sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              Mã xác nhận đã được gửi đến số <b>{phoneNumber}</b>
+              Mã xác nhận đã được gửi đến số <b>+84{phoneNumber}</b>
             </Typography>
 
             <Box component="form" onSubmit={handleSubmit}>

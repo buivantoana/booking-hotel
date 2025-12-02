@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -44,6 +44,12 @@ const HomeView = ({
   const [address, setAddress] = useState(null);
   const [bookingType, setBookingType] = useState("hourly");
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(localStorage.getItem("location")){
+      setAddress(location.find((item)=>item.id == localStorage.getItem("location")))
+    }
+  },[location])
   const handleBookingType = (event, newType) => {
     if (newType !== null) {
       setBookingType(newType);
