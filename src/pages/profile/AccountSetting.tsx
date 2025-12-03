@@ -49,7 +49,7 @@ const AccountSettingsPage = () => {
       let result = await Login({
         "platform": "ios",
         "type": "phone",
-        "value":"+84"+ context?.state?.user?.phone,
+        "value": context?.state?.user?.phone,
         "password": pin
     })
     if(result.access_token){
