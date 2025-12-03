@@ -43,6 +43,7 @@ import remove from "../../images/delete.png";
 import { editReviewBooking, reviewDelete } from "../../service/booking";
 import { toast } from "react-toastify";
 import { useBookingContext } from "../../App";
+import { getErrorMessage } from "../../utils/utils";
 interface Review {
   id: number;
   author: string;
@@ -96,7 +97,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
         setDeleteDialogOpen(false);
         setReviewDetail(null);
       } else {
-        toast.error(result?.message);
+        toast.error(getErrorMessage(result.code)|| result.message)
       }
     } catch (error) {
       console.log(error);
@@ -849,7 +850,7 @@ function ReviewModal({
         setFileObjects([]);
         onClose();
       } else {
-        toast.error(res.message);
+        toast.error(getErrorMessage(res.code)|| res.message)
       }
       console.log("Cập nhật thành công:", res);
       

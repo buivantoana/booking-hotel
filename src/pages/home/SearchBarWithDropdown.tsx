@@ -76,12 +76,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn);
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
-  const [time, setTime] = useState<string>(initialTime || "10:00");
+  const [time, setTime] = useState<string>(initialTime );
   const [duration, setDuration] = useState<number>(initialDuration || 2);
-
+  const now = dayjs();
   const hours = Array.from({ length: 24 }, (_, i) =>
-  String(i).padStart(2, "0") + ":00"
-);
+    String(i).padStart(2, "0") + ":00"
+  );
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
 
   const hourIndex = hours.indexOf(time);
@@ -106,7 +106,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setTime("10:00");
     setDuration(2);
   };
-
+  const isToday =
+    checkIn && checkIn.isSame(now, "day");
+  const disabledHours = isToday
+    ? hours.filter((h) => {
+      const hourNum = parseInt(h.split(":")[0]);
+      return hourNum <= now.hour();   // disable những giờ đã qua
+    })
+    : [];
   const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
     if (bookingType === "overnight") {
       setCheckIn(date);
@@ -123,6 +130,21 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       }
     } else if (bookingType === "hourly") {
       setCheckIn(date);
+
+
+      const selectedIsToday = date.isSame(now, "day");
+
+
+      if (selectedIsToday) {
+        const nextHour = now.hour() + 1;
+        const nextHourStr = hours[nextHour] || hours[hours.length - 1];
+        setTime(nextHourStr);
+      } else {
+        setTime("00:00"); // ngày khác → active 00:00
+      }
+
+
+      setDuration(2); // mặc định luôn chọn 2h
     }
   };
 
@@ -130,9 +152,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const endTime = checkIn
     ? checkIn
-        .hour(parseInt(time.split(":")[0]))
-        .minute(0)
-        .add(duration, "hour")
+      .hour(parseInt(time.split(":")[0]))
+      .minute(0)
+      .add(duration, "hour")
     : null;
 
   return (
@@ -153,8 +175,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                ? 680
-                : 380,
+                  ? 680
+                  : 380,
           },
           bgcolor: "white",
         }}>
@@ -163,7 +185,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
               <Typography fontWeight={600} color='#333'>
-              {  dayjs().format("[Tháng] MM, YYYY") }
+                {dayjs().format("[Tháng] MM, YYYY")}
               </Typography>
             </Box>
 
@@ -174,7 +196,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disablePast
                     sx={{
                       width: "100%",
@@ -244,6 +266,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                           .map((h) => (
                             <Button
                               key={h}
+                              disabled={disabledHours.includes(h)}
                               variant={time === h ? "contained" : "text"}
                               size='small'
                               onClick={() => setTime(h)}
@@ -339,7 +362,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         onClick={() =>
                           setDuration(
                             durations[
-                              Math.min(durations.length - 1, durationIndex + 1)
+                            Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -377,7 +400,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disablePast
                     sx={{
                       width: "100%",
@@ -411,8 +434,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                  ? "#f0f8f0"
-                                  : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
                               "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
@@ -429,7 +452,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
                       value={checkIn}
-                      onChange={() => {}}
+                      onChange={() => { }}
                       disablePast
                       sx={{
                         width: "100%",
@@ -463,8 +486,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                      ? "#f0f8f0"
+                                      : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
                                 "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
@@ -576,118 +599,118 @@ const SearchBarWithDropdown = ({ location }) => {
   };
 
   // Hàm convert "Hà Nội" -> "hanoi"
- function toCityKey(text) {
-   if (!text) return "";
-   return text
-     .normalize("NFD")
-     .replace(/[\u0300-\u036f]/g, "")
-     .replace(/đ/g, "d")
-     .replace(/Đ/g, "D")
-     .replace(/\s+/g, "")
-     .toLowerCase();
- }
+  function toCityKey(text) {
+    if (!text) return "";
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+  }
 
- // Get location + reverse geocode -> return cityKey
- const getLocation = async () => {
-  if (!("geolocation" in navigator)) return null;
+  // Get location + reverse geocode -> return cityKey
+  const getLocation = async () => {
+    if (!("geolocation" in navigator)) return null;
 
-  setLoading(true);
+    setLoading(true);
 
-  return new Promise((resolve) => {
-    geoResolveRef.current = resolve; // <-- LƯU LẠI ĐỂ CLOSE MODAL GỌI ĐƯỢC
+    return new Promise((resolve) => {
+      geoResolveRef.current = resolve; // <-- LƯU LẠI ĐỂ CLOSE MODAL GỌI ĐƯỢC
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const { latitude, longitude } = position.coords;
 
-          const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
-          const res = await fetch(url, {
-            headers: { "Accept-Language": "vi" },
-          });
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+            const res = await fetch(url, {
+              headers: { "Accept-Language": "vi" },
+            });
 
-          if (!res.ok) {
+            if (!res.ok) {
+              setLoading(false);
+              geoResolveRef.current?.(null);
+              return;
+            }
+
+            const data = await res.json();
+            const addr = data.address || {};
+
+            const detectedCity =
+              addr.city ||
+              addr.town ||
+              addr.village ||
+              addr.county ||
+              addr.state ||
+              null;
+
+            setLoading(false);
+            geoResolveRef.current?.(toCityKey(detectedCity));
+          } catch (e) {
+            console.log("Reverse error:", e);
             setLoading(false);
             geoResolveRef.current?.(null);
-            return;
           }
+        },
 
-          const data = await res.json();
-          const addr = data.address || {};
-
-          const detectedCity =
-            addr.city ||
-            addr.town ||
-            addr.village ||
-            addr.county ||
-            addr.state ||
-            null;
-
-          setLoading(false);
-          geoResolveRef.current?.(toCityKey(detectedCity));
-        } catch (e) {
-          console.log("Reverse error:", e);
+        (err) => {
+          console.log("Geo error:", err);
           setLoading(false);
           geoResolveRef.current?.(null);
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 60000,
+          maximumAge: 60000,
         }
-      },
+      );
+    });
+  };
 
-      (err) => {
-        console.log("Geo error:", err);
-        setLoading(false);
-        geoResolveRef.current?.(null);
-      },
-
-      {
-        enableHighAccuracy: true,
-        timeout: 60000,
-        maximumAge: 60000,
-      }
-    );
-  });
-};
-
-const cancelGeo = () => {
-  setLoading(false);
-  geoResolveRef.current?.(null);  // <-- Gửi null như “bị chặn”
-};
+  const cancelGeo = () => {
+    setLoading(false);
+    geoResolveRef.current?.(null);  // <-- Gửi null như “bị chặn”
+  };
 
 
- // -------------------------------------
- // HANDLE SEARCH
- // -------------------------------------
- const handleSearch = async () => {
-   console.log("AAA AsearchValue", searchValue);
+  // -------------------------------------
+  // HANDLE SEARCH
+  // -------------------------------------
+  const handleSearch = async () => {
+    console.log("AAA AsearchValue", searchValue);
 
-   let city = null;
+    let city = null;
 
-   // Nếu không searchValue thì mới lấy vị trí
-   if (!searchValue) {
-     city = await getLocation(); // <--- giờ sẽ đồng bộ + loading chuẩn
-   }
+    // Nếu không searchValue thì mới lấy vị trí
+    if (!searchValue) {
+      city = await getLocation(); // <--- giờ sẽ đồng bộ + loading chuẩn
+    }
 
-   // Lấy ID location từ searchValue nếu có
-   const locationId = searchValue
-     ? location.find((item) => item.name.vi === searchValue)?.id
-     : city;
+    // Lấy ID location từ searchValue nếu có
+    const locationId = searchValue
+      ? location.find((item) => item.name.vi === searchValue)?.id
+      : city;
 
-   const searchParams = {
-     location: locationId || localStorage.getItem("location"),
-     type: bookingType,
-     checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
-     checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
-     checkInTime: checkInTime || "",
-     duration: checkInDuration || "",
-   };
+    const searchParams = {
+      location: locationId || localStorage.getItem("location"),
+      type: bookingType,
+      checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
+      checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
+      checkInTime: checkInTime || "",
+      duration: checkInDuration || "",
+    };
 
-   console.log("AAAA searchParams", searchParams);
+    console.log("AAAA searchParams", searchParams);
 
-   localStorage.setItem("booking", JSON.stringify(searchParams));
+    localStorage.setItem("booking", JSON.stringify(searchParams));
 
-   const queryString = new URLSearchParams(searchParams).toString();
+    const queryString = new URLSearchParams(searchParams).toString();
 
-   navigate(`/rooms?${queryString}`);
- };
+    navigate(`/rooms?${queryString}`);
+  };
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener onClickAway={handleClickAway}>

@@ -37,6 +37,7 @@ import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import no_room from "../../images/Calendar.svg"
+import { getErrorMessage } from "../../utils/utils";
 interface Room {
   id: number;
   name: string;
@@ -344,8 +345,20 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
   const [searchParams] = useSearchParams();
   console.log("AAAA searchParams", searchParams.get("type"))
   const navigate = useNavigate()
-  const isValidPhone = (phoneNumber) => {
-    return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+    if (p.startsWith("84")) p = p.slice(2);   // bỏ 84 đầu nếu nhập +84
+    if (p.startsWith("0")) p = p.slice(1);    // bỏ số 0 đầu nếu người dùng nhập
+    return p;
+  };
+  const isValidVietnamPhone = (phone) => {
+    if (!phone) return false;
+    if (phone.length > 9) return false;
+    const normalized = normalizePhone(phone);
+    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
+    if (normalized.length < 9 ) return false; // độ dài
+    return true;
   };
   console.log("AAA data", data)
   return (
@@ -396,11 +409,17 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                 placeholder="Nhập số điện thoại"
                 variant="outlined"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+                  // loại bỏ 0 đầu tiên
+                  if (val.length > 20) val = val.slice(0, 20);
+                  if (val.startsWith("0")) val = val.slice(1);
+                  setPhoneNumber(val)
+                }}
                 onBlur={() => setTouched(true)}   // chỉ validate khi blur
-                error={touched && !isValidPhone(phoneNumber)}
+                error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
-                  touched && !isValidPhone(phoneNumber)
+                  touched && !isValidVietnamPhone(phoneNumber)
                     ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
                     : ""
                 }
@@ -443,7 +462,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                     </InputAdornment>
                   ),
                   endAdornment:
-                    touched && !isValidPhone(phoneNumber) ? (
+                    touched && !isValidVietnamPhone(phoneNumber) ? (
                       <InputAdornment position="end">
                         <Box
                           sx={{
@@ -487,7 +506,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                   setLoadingLogin(false)
                 }}
                 variant='outlined'
-                disabled={!phoneNumber || !isValidPhone(phoneNumber)}
+                disabled={!phoneNumber || !isValidVietnamPhone(phoneNumber)}
                 sx={{
                   mt: 2,
                   borderColor: "#98b720",
@@ -510,7 +529,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                 Bạn chưa có tài khoản Booking Hotel?{" "}
                 <Typography
                   onClick={() => {
-                    navigate("/regisger")
+                    navigate("/register")
                   }}
                   fontSize={"14px"}
                   variant='span'
@@ -932,7 +951,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
         toast.success("Login success")
         setOpenModal(false)
       } else {
-        toast.error(result.message)
+        toast.error(getErrorMessage(result.code)|| result.message)
       }
 
     }

@@ -123,7 +123,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn);
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
-  const [time, setTime] = useState<string>(initialTime || "10:00");
+  const [time, setTime] = useState<string>(initialTime );
   const [duration, setDuration] = useState<number>(initialDuration || 2);
   const now = dayjs();
   const hours = Array.from({ length: 24 }, (_, i) =>
@@ -179,7 +179,22 @@ const disabledHours = isToday
       }
     } else if (bookingType === "hourly") {
       setCheckIn(date);
-    }
+      
+      
+      const selectedIsToday = date.isSame(now, "day");
+      
+      
+      if (selectedIsToday) {
+      const nextHour = now.hour() + 1;
+      const nextHourStr = hours[nextHour] || hours[hours.length - 1];
+      setTime(nextHourStr);
+      } else {
+      setTime("00:00"); // ngày khác → active 00:00
+      }
+      
+      
+      setDuration(2); // mặc định luôn chọn 2h
+      }
   };
 
   if (!open || !anchorEl) return null;
@@ -590,14 +605,26 @@ const disabledHours = isToday
     </Popper>
   );
 };
+const getNextHour = () => {
+  const now = new Date();
+  let hour = now.getHours();
+  const minute = now.getMinutes();
 
+  // nếu phút > 0, tăng lên giờ tiếp theo
+  if (minute > 0) hour += 1;
+
+  // đảm bảo 2 chữ số
+  const hh = hour.toString().padStart(2, "0");
+
+  return `${hh}:00`;
+};
 // === MAIN COMPONENT ===
 export default function SearchBarWithDropdown({ locationAddress }) {
   const [bookingType, setBookingType] = useState("hourly");
   const [searchValue, setSearchValue] = useState("");
   const [checkIn, setCheckIn] = useState<Dayjs | null>(dayjs());
   const [checkOut, setCheckOut] = useState<Dayjs | null>(null);
-  const [checkInTime, setCheckInTime] = useState<string>("10:00");
+  const [checkInTime, setCheckInTime] = useState<string>(getNextHour());
   const [checkInDuration, setCheckInDuration] = useState<number>(2);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
@@ -607,7 +634,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     // Lấy query từ URL
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
-    const checkInTimeParam = searchParams.get("checkInTime") || "10:00";
+    const checkInTimeParam = searchParams.get("checkInTime");
     const durationParam = searchParams.get("duration") || 2;
     const checkInParam = searchParams.get("checkIn");
     const checkOutParam = searchParams.get("checkOut");
@@ -752,9 +779,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 overflow: "hidden",
                 bgcolor: "white",
                 border: "1px solid #ddd",
-                p: 1,
+                p: .5,
               }}>
-              <Stack direction='row' alignItems='stretch'>
+              <Stack direction='row' alignItems='center'>
                 {/* Địa điểm */}
                 <Box sx={{ flex: "300px 0 0", position: "relative" }}>
                   <TextField
@@ -943,10 +970,10 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   sx={{
                     bgcolor: "#98b720",
                     color: "white",
-                    px: 1.5,
-
+                    px: 1,
+                    mr:1,
                     minWidth: "auto",
-                    height: 40,
+                    height: 35,
                     "&:hover": { bgcolor: "#7a8f1a" },
                   }}>
                  {name?"Cập nhật" : <Search sx={{ fontSize: 22 }} />}

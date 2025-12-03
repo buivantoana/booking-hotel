@@ -26,6 +26,7 @@ import {
 import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
 import { useLocation, useNavigate } from "react-router-dom";
 import DehazeIcon from "@mui/icons-material/Dehaze";
+import logo from "../../src/images/Frame 1321318033.png"
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -79,7 +80,7 @@ const Header = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                width: "200px",
+                width: "400px",
               }}>
               {isMobile ? (
                 <IconButton edge='start' onClick={handleMenuOpen}>
@@ -95,8 +96,9 @@ const Header = () => {
                     fontWeight={700}
                     color='#333'
                     sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
-                    Logo
+                    <img src={logo} width={200} alt="" />
                   </Typography>
+                  
                   <Typography
                     variant='body2'
                     color='#666'

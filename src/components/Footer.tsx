@@ -26,6 +26,7 @@ import ins from "../../src/images/Logos.png"
 import fb from "../../src/images/Logos (1).png"
 import tiktok from "../../src/images/Logos (2).png"
 import youtube from "../../src/images/Logos (3).png"
+import logo from "../../src/images/Frame 1321318033.png"
 const Footer = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -38,7 +39,7 @@ const Footer = () => {
           <Grid item xs={12} md={5.5}>
             <Stack spacing={2}>
               <Typography fontWeight={700} fontSize='1.5rem' color='#333'>
-                Logo
+                <img src={logo} width={200} alt="" />
               </Typography>
               <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
                 Địa chỉ: Lorem Ipsum is simply dummy text of the printing and

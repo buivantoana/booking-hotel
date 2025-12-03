@@ -130,3 +130,23 @@ export function formattedDateHHMMDDMMYYYY(data) {
   });
   return formatted
 }
+
+const ERROR_MESSAGES = {
+  USER_NOT_FOUND: "Không tìm thấy tài khoản",
+  USER_NOT_PW: "Tài khoản chưa cấu hình mã pin",
+  WRONG_PW: "Sai mật khẩu",
+  UPDATE_ERROR: "Cập nhật thất bại",
+  UNAUTHORIZED: "Lỗi đăng nhập",
+  INVALID_DATETIME_FORMAT: "Sai định dạng thời gian",
+  ROOM_TYPE_NOT_FOUND: "Không tìm thấy hạng phòng",
+  ROOM_NOT_FREE: "Phòng không còn trống hoặc mới bị giữ chỗ",
+  EMAIL_USED: "Email đã được sử dụng",
+  INVALID_BODY: "Vui lòng điền đầy đủ các thông tin cần thiết",
+  INVALID_PARTNER: "Đối tác không hợp lệ hoặc bị khoá",
+  ACCOUNT_LOCKED: "Tài khoản bị khoá",
+};
+
+// Hàm lấy message từ code lỗi
+export const getErrorMessage = (errorCode) => {
+  return ERROR_MESSAGES[errorCode] || "Đã có lỗi xảy ra";
+};

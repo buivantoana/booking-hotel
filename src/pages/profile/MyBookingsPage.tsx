@@ -642,7 +642,7 @@ function ReviewModal({
         setSelectedTags([]);
         
       } else {
-        toast.error(res.message);
+        toast.error(getErrorMessage(res.code)|| res.message)
       }
       console.log("AAA res", res);
     } catch (err) {
@@ -896,6 +896,7 @@ export default function MyBookingsPage({
 }
 
 import { Card, Skeleton } from "@mui/material";
+import { getErrorMessage } from "../../utils/utils";
 
 const BookingCardSkeleton = () => {
   return (

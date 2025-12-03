@@ -15,11 +15,14 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import Flag from "react-country-flag";
 import { userUpdate } from "../../service/admin";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../../utils/utils";
 
 const Account = ({ context }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loading,setLoading] = useState(false)
+  const [touchedDate, setTouchedDate] = useState(false);
+  const [touchedName, setTouchedName] = useState(false);
   // Lấy dữ liệu ban đầu từ context
   const initialData = {
     name: context?.state?.user?.name || "",
@@ -73,7 +76,7 @@ const Account = ({ context }) => {
         });
         toast.success(result.message);
       } else {
-        toast.error(result.message);
+        toast.error(getErrorMessage(result.code)|| result.message)
       }
     } catch (error) {
       console.error("Lỗi cập nhật:", error);
@@ -81,7 +84,22 @@ const Account = ({ context }) => {
     }
     setLoading(false)
   };
-
+  const isValidBirthDate = (dateStr) => {
+    if (!dateStr) return false; // bắt buộc nhập
+    const today = new Date();
+    const birthDate = new Date(dateStr);
+    const ageDifMs = today - birthDate;
+    const ageDate = new Date(ageDifMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    return age >= 18;
+  };
+  const isValidName = (name) => {
+    if (!name) return false; // bắt buộc nhập
+    if (name.length > 100) return false; // tối đa 100 ký tự
+    // regex: chỉ chữ cái (có dấu) và khoảng trắng, không khoảng trắng đầu/cuối
+    if (!/^[A-Za-zÀ-ỹ]+(?: [A-Za-zÀ-ỹ]+)*$/.test(name.trim())) return false;
+    return true;
+  };
   return (
     <Box sx={{ backgroundColor: "#f8f9fa" }}>
       <Typography
@@ -148,25 +166,34 @@ const Account = ({ context }) => {
               Ngày sinh của bạn
             </Typography>
             <TextField
-              fullWidth
-              type='date'
-              name='birthday'
-              value={formData.birthday}
-              onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-              sx={{
-                mb: 3,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-
-                  backgroundColor: "#fff",
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#98b720",
-                    borderWidth: 1.5,
+                fullWidth
+                name='birthday'
+                type="date"
+                value={formData.birthday}
+                onChange={handleChange}
+                onBlur={() => setTouchedDate(true)}
+                error={touchedDate && !isValidBirthDate(formData.birthday)}
+                helperText={
+                  touchedDate && !isValidBirthDate(formData.birthday)
+                    ? "Bạn phải từ 18 tuổi trở lên."
+                    : ""
+                }
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#98b720",
+                      borderWidth: 1.5,
+                    },
                   },
-                },
-              }}
-            />
+                }}
+              
+              />
+           
           </Grid>
 
           {/* Tên - CHO SỬA */}
@@ -175,28 +202,29 @@ const Account = ({ context }) => {
               Tên của bạn
             </Typography>
             <TextField
-              fullWidth
-              name='name'
-              value={formData.name}
-              onChange={handleChange}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "16px",
-
-                  backgroundColor: "#fff",
-                  "& fieldset": {
-                    borderColor: "#e0e0e0",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#98b720",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#98b720",
-                    borderWidth: 1.5,
-                  },
-                },
-              }}
-            />
+            name='name'
+                fullWidth
+                placeholder="Nhập tên của bạn"
+                value={formData.name}
+                onChange={handleChange}
+                onBlur={() => setTouchedName(true)}
+                error={touchedName && !isValidName(formData.name)}
+                helperText={
+                  touchedName && !isValidName(formData.name)
+                    ? "Tên không hợp lệ. Chỉ chữ cái và khoảng trắng giữa các từ, không dấu cách đầu/cuối."
+                    : ""
+                }
+                sx={{
+                  mb: 3, "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                      borderColor: "#98b720",
+                      borderWidth: 1.5,
+                    },
+                  }
+                }}
+               
+              />
+          
           </Grid>
 
           {/* Email - CHO SỬA */}

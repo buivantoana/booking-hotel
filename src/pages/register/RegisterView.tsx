@@ -50,6 +50,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   onNext,
 }) => {
   const [touched, setTouched] = useState(false);
+  const [touchedName, setTouchedName] = useState(false);
+  const [touchedDate, setTouchedDate] = useState(false);
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
@@ -72,10 +74,38 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 
     };
   };
-  const isValidPhone = (phoneNumber) => {
-    return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+    if (p.startsWith("84")) p = p.slice(2);   // bỏ 84 đầu nếu nhập +84
+    if (p.startsWith("0")) p = p.slice(1);    // bỏ số 0 đầu nếu người dùng nhập
+    return p;
   };
-  const isDisabled = !phoneNumber || !name || !birthDate || !isValidPhone(phoneNumber) || loading;
+  const isValidVietnamPhone = (phone) => {
+    if (!phone) return false;
+    if (phone.length > 9) return false;
+    const normalized = normalizePhone(phone);
+    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
+    if (normalized.length < 9) return false; // độ dài
+    return true;
+  };
+  const isValidName = (name) => {
+    if (!name) return false; // bắt buộc nhập
+    if (name.length > 100) return false; // tối đa 100 ký tự
+    // regex: chỉ chữ cái (có dấu) và khoảng trắng, không khoảng trắng đầu/cuối
+    if (!/^[A-Za-zÀ-ỹ]+(?: [A-Za-zÀ-ỹ]+)*$/.test(name.trim())) return false;
+    return true;
+  };
+  const isValidBirthDate = (dateStr) => {
+    if (!dateStr) return false; // bắt buộc nhập
+    const today = new Date();
+    const birthDate = new Date(dateStr);
+    const ageDifMs = today - birthDate;
+    const ageDate = new Date(ageDifMs);
+    const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+    return age >= 18;
+  };
+  const isDisabled = !phoneNumber || !name || !birthDate || !isValidVietnamPhone(phoneNumber) || loading;
   return (
     <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
@@ -102,11 +132,17 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 placeholder="Nhập số điện thoại"
                 variant="outlined"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+                  // loại bỏ 0 đầu tiên
+                  if (val.length > 20) val = val.slice(0, 20);
+                  if (val.startsWith("0")) val = val.slice(1);
+                  setPhoneNumber(val)
+                }}
                 onBlur={() => setTouched(true)}   // chỉ validate khi blur
-                error={touched && !isValidPhone(phoneNumber)}
+                error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
-                  touched && !isValidPhone(phoneNumber)
+                  touched && !isValidVietnamPhone(phoneNumber)
                     ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
                     : ""
                 }
@@ -149,7 +185,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     </InputAdornment>
                   ),
                   endAdornment:
-                    touched && !isValidPhone(phoneNumber) ? (
+                    touched && !isValidVietnamPhone(phoneNumber) ? (
                       <InputAdornment position="end">
                         <Box
                           sx={{
@@ -176,6 +212,13 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 placeholder="Nhập tên của bạn"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onBlur={() => setTouchedName(true)}
+                error={touchedName && !isValidName(name)}
+                helperText={
+                  touchedName && !isValidName(name)
+                    ? "Tên không hợp lệ. Chỉ chữ cái và khoảng trắng giữa các từ, không dấu cách đầu/cuối."
+                    : ""
+                }
                 sx={{
                   mb: 3, "& .MuiOutlinedInput-root": {
                     borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
@@ -183,6 +226,23 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                       borderWidth: 1.5,
                     },
                   }
+                }}
+                InputProps={{
+                  endAdornment:
+                    touchedName && !isValidName(name) ? (
+                      <InputAdornment position="end">
+                        <Box
+                          sx={{ cursor: "pointer", fontSize: 22, color: "#999" }}
+                          onClick={() => {
+                            setName("");
+                            setTouchedName(false);
+
+                          }}
+                        >
+                          ✕
+                        </Box>
+                      </InputAdornment>
+                    ) : null,
                 }}
               />
 
@@ -192,16 +252,28 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 fullWidth
                 type="date"
                 value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
+                onChange={(e)=> setBirthDate(e.target.value)}
+                onBlur={() => setTouchedDate(true)}
+                error={touchedDate && !isValidBirthDate(birthDate)}
+                helperText={
+                  touchedDate && !isValidBirthDate(birthDate)
+                    ? "Bạn phải từ 18 tuổi trở lên."
+                    : ""
+                }
                 InputLabelProps={{ shrink: true }}
                 sx={{
-                  mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
-                  }
+                  },
                 }}
+              
               />
 
               {/* Agreement + Button + Social + Login link giữ nguyên như cũ */}
@@ -528,7 +600,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
       }
       setLoading(false);
 
-    }else{
+    } else {
       setShowConfirm(true)
     }
   };

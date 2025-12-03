@@ -30,6 +30,7 @@ import { MuiOtpInput } from "mui-one-time-password-input";
 import { Login, userUpdate } from "../../service/admin";
 import { useBookingContext } from "../../App";
 import { toast } from "react-toastify";
+import { getErrorMessage } from "../../utils/utils";
 
 const AccountSettingsPage = () => {
   const theme = useTheme();
@@ -55,7 +56,7 @@ const AccountSettingsPage = () => {
         setPin("")
         setState("create")
     }else{
-      toast.error("Mã pin không hợp lệ");
+      toast.error(getErrorMessage(result.code)|| result.message)
     }
      
     }
@@ -76,7 +77,7 @@ const AccountSettingsPage = () => {
           setPinConfirm("");
           setOpenModal(false)
         }else{
-          toast.error(result.message)
+          toast.error(getErrorMessage(result.code)|| result.message)
         }
 
       } catch (error) {

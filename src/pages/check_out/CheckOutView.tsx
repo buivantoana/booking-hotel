@@ -47,7 +47,7 @@ const CheckOutView = ({ dataCheckout }) => {
   const [openCancelPolicyModal, setOpenCancelPolicyModal] = useState(false);
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [phone, setPhone] = useState(JSON.parse(localStorage.getItem("user"))?.phone);
+  const [phone, setPhone] = useState(JSON.parse(localStorage.getItem("user"))?.phone||JSON.parse(localStorage.getItem("booking"))?.phone);
   const [name, setName] = useState(JSON.parse(localStorage.getItem("user"))?.name);
   const [loading,setLoading] = useState(false)
   const navigate = useNavigate()
@@ -164,7 +164,7 @@ const CheckOutView = ({ dataCheckout }) => {
         rent_type: dataCheckout.type, // hourly | overnight | daily
         payment_method: paymentMethod, // momo | vnpay | hotel
         contact_info: {
-          full_name: name.trim() || "Khách lẻ",
+          full_name:(name&& name.trim() )|| "Khách lẻ",
           phone: phone.replace(/[^0-9]/g, ""), // chỉ lấy số
           email: "khachle@gmail.com", // nếu có thì thêm sau
         },
@@ -193,7 +193,7 @@ const CheckOutView = ({ dataCheckout }) => {
       <Container maxWidth="lg">
         <Stack spacing={3}>
           {/* HEADER */}
-          <Stack direction="row" alignItems="center" spacing={1}>
+          <Stack direction="row" sx={{cursor:"pointer"}} onClick={()=>navigate(-1)} alignItems="center" spacing={1}>
             <IconButton size="small">
               <ArrowBackIcon sx={{ fontSize: 20 }} />
             </IconButton>

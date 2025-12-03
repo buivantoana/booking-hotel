@@ -41,9 +41,9 @@ const LoginView = () => {
   const context = useBookingContext()
   const navigate = useNavigate()
   const goToPin = (result) => {
-    localStorage.setItem("access_token",result.access_token)
-    localStorage.setItem("refresh_token",result.refresh_token)
-    localStorage.setItem("user",JSON.stringify(result.user))
+    localStorage.setItem("access_token", result.access_token)
+    localStorage.setItem("refresh_token", result.refresh_token)
+    localStorage.setItem("user", JSON.stringify(result.user))
     context.dispatch({
       type: "LOGIN",
       payload: {
@@ -52,9 +52,9 @@ const LoginView = () => {
       },
     });
     toast.success("Login success")
-    setTimeout(()=>{
+    setTimeout(() => {
       navigate("/")
-    },300)
+    }, 300)
   };
   const goBack = () => {
     setIsLoginGoogle(false)
@@ -70,9 +70,9 @@ const LoginView = () => {
 
   return (
     <>
-      {currentStep === "register" && <RegistrationForm dataLoginGoogle={dataLoginGoogle} setDataLoginGoogle={setDataLoginGoogle}setIsLoginGoogle={setIsLoginGoogle} isLoginGoogle={isLoginGoogle} setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
+      {currentStep === "register" && <RegistrationForm dataLoginGoogle={dataLoginGoogle} setDataLoginGoogle={setDataLoginGoogle} setIsLoginGoogle={setIsLoginGoogle} isLoginGoogle={isLoginGoogle} setPhoneNumber={setPhoneNumber} phoneNumber={phoneNumber} setCurrentStep={setCurrentStep} />}
 
-      {currentStep === "pin" && <PinCreation phoneNumber={phoneNumber} />}
+      {currentStep === "pin" && <PinCreation setCurrentStep={setCurrentStep} phoneNumber={phoneNumber} />}
       {currentStep === "otp" && (
         <OtpVerification
           phoneNumber={phoneNumber}
@@ -84,7 +84,7 @@ const LoginView = () => {
           onSuccess={goToPin}
           onBack={goBack}
           dataLoginGoogle={dataLoginGoogle}
-          
+
         />
       )}
 
@@ -121,7 +121,7 @@ const OtpVerification = ({
           type: "phone",
           value: "+84" + phoneNumber,
           otp: otp,
-        },dataLoginGoogle.access_token);
+        }, dataLoginGoogle.access_token);
         if (result.access_token) {
           onSuccess(result);
         }
@@ -214,11 +214,11 @@ const OtpVerification = ({
     </Container>
   );
 };
-const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoogle,setIsLoginGoogle,dataLoginGoogle,setDataLoginGoogle}) => {
+const RegistrationForm = ({ setCurrentStep, setPhoneNumber, phoneNumber, isLoginGoogle, setIsLoginGoogle, dataLoginGoogle, setDataLoginGoogle }) => {
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
- 
- 
+
+
   const context = useBookingContext()
   const navigate = useNavigate()
   const handleRegister = async () => {
@@ -226,13 +226,13 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
     try {
       let result = await checkUser({
         "type": "phone",
-        "value": "+84"+phoneNumber
-    })
-    if(result.code == "OK"){
-      setCurrentStep("pin")
-    }else{
-      toast.error(result.message)
-    }
+        "value": "+84" + phoneNumber
+      })
+      if (result.code == "OK") {
+        setCurrentStep("pin")
+      } else {
+        toast.error(getErrorMessage(result.code)|| result.message)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -241,36 +241,36 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
   const isValidPhone = (phoneNumber) => {
     return /^[1-9][0-9]{8,9}$/.test(phoneNumber);
   };
-  const handleGoogleSuccess = async(credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       let result = await LoginGoogle({
         "platform": "ios",
         "id_token": credentialResponse?.access_token,
         "location": "hanoi"
-    })
-    if(!result?.user?.phone){
-      setIsLoginGoogle(true)
-      setDataLoginGoogle(result)
-      return
-    }
-    if(result.access_token){
-      localStorage.setItem("access_token",result.access_token)
-      localStorage.setItem("refresh_token",result.refresh_token)
-      localStorage.setItem("user",JSON.stringify(result.user))
-      context.dispatch({
-        type: "LOGIN",
-        payload: {
-          ...context.state,
-          user: { ...result.user },
-        },
-      });
-      toast.success("Login success")
-      setTimeout(()=>{
-        navigate("/")
-      },300)
-    }else{
-      toast.error(result.message)
-    }
+      })
+      if (!result?.user?.phone) {
+        setIsLoginGoogle(true)
+        setDataLoginGoogle(result)
+        return
+      }
+      if (result.access_token) {
+        localStorage.setItem("access_token", result.access_token)
+        localStorage.setItem("refresh_token", result.refresh_token)
+        localStorage.setItem("user", JSON.stringify(result.user))
+        context.dispatch({
+          type: "LOGIN",
+          payload: {
+            ...context.state,
+            user: { ...result.user },
+          },
+        });
+        toast.success("Login success")
+        setTimeout(() => {
+          navigate("/")
+        }, 300)
+      } else {
+        toast.error(getErrorMessage(result.code)|| result.message)
+      }
     } catch (error) {
       console.log(error)
     }
@@ -281,7 +281,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
   const handleGoogleError = () => {
     toast.error("Google login failed");
   };
-  const handleUpdatePhoneGoogle = async()=>{
+  const handleUpdatePhoneGoogle = async () => {
     try {
       let result = await sendOtp({
         platform: "ios",
@@ -294,8 +294,23 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
     } catch (error) {
       console.log(error)
     }
-   
+
   }
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+    if (p.startsWith("84")) p = p.slice(2);   // bỏ 84 đầu nếu nhập +84
+    if (p.startsWith("0")) p = p.slice(1);    // bỏ số 0 đầu nếu người dùng nhập
+    return p;
+  };
+  const isValidVietnamPhone = (phone) => {
+    if (!phone) return false;
+    if (phone.length > 9) return false;
+    const normalized = normalizePhone(phone);
+    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
+    if (normalized.length < 9 ) return false; // độ dài
+    return true;
+  };
   return (
     <Container
       maxWidth='lg'
@@ -342,14 +357,14 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
               sx={{ fontSize: { xs: "28px", md: "32px" } }}
               fontWeight={700}
               mb={1}>
-               {isLoginGoogle?<><ArrowBackIosNewIcon sx={{cursor:"pointer"}} onClick={()=>setIsLoginGoogle(false)}/> Số điện thoại của bạn</> :  'Hotel Booking xin chào!'}
+              {isLoginGoogle ? <><ArrowBackIosNewIcon sx={{ cursor: "pointer" }} onClick={() => setIsLoginGoogle(false)} /> Số điện thoại của bạn</> : 'Hotel Booking xin chào!'}
             </Typography>
             {isLoginGoogle ? <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
-            Nhập số điện thoại của bạn để tiếp tục.
-            </Typography>:
-            <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
-              Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
-            </Typography>}
+              Nhập số điện thoại của bạn để tiếp tục.
+            </Typography> :
+              <Typography sx={{ fontSize: "16px" }} mb={4} color='text.secondary'>
+                Đăng nhập để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
+              </Typography>}
 
             <Box  >
               {/* SỐ ĐIỆN THOẠI */}
@@ -361,11 +376,17 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                 placeholder="Nhập số điện thoại"
                 variant="outlined"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+                  // loại bỏ 0 đầu tiên
+                  if (val.length > 20) val = val.slice(0, 20);
+                  if (val.startsWith("0")) val = val.slice(1);
+                  setPhoneNumber(val)
+                }}
                 onBlur={() => setTouched(true)}   // chỉ validate khi blur
-                error={touched && !isValidPhone(phoneNumber)}
+                error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
-                  touched && !isValidPhone(phoneNumber)
+                  touched && !isValidVietnamPhone(phoneNumber)
                     ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
                     : ""
                 }
@@ -408,7 +429,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                     </InputAdornment>
                   ),
                   endAdornment:
-                    touched && !isValidPhone(phoneNumber) ? (
+                    touched && !isValidVietnamPhone(phoneNumber) ? (
                       <InputAdornment position="end">
                         <Box
                           sx={{
@@ -440,8 +461,8 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
 
 
               {/* REGISTER BUTTON */}
-             {isLoginGoogle? <Button
-               onClick={handleUpdatePhoneGoogle}
+              {isLoginGoogle ? <Button
+                onClick={handleUpdatePhoneGoogle}
                 variant='contained'
                 fullWidth
                 disabled={!phoneNumber || !isValidPhone(phoneNumber)}
@@ -464,7 +485,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                   },
                   boxShadow: "none",
                 }}>
-                 {loading ? (
+                {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
                     Tiếp tục...
@@ -473,10 +494,10 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                   "Tiếp tục"
                 )}
               </Button> : <Button
-               onClick={handleRegister}
+                onClick={handleRegister}
                 variant='contained'
                 fullWidth
-                disabled={!phoneNumber || !isValidPhone(phoneNumber)}
+                disabled={!phoneNumber || !isValidVietnamPhone(phoneNumber)}
                 sx={{
                   mb: 3,
                   py: 1.5,
@@ -496,7 +517,7 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                   },
                   boxShadow: "none",
                 }}>
-                 {loading ? (
+                {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
                     Đăng nhập...
@@ -505,67 +526,68 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
                   "Đăng nhập"
                 )}
               </Button>}
-                {!isLoginGoogle &&  <>
-                  
-                  
-              <Typography
-                variant='body2'
-                align='center'
-                mb={2}
-                color='text.secondary'>
-                Hoặc
-              </Typography>
+              {!isLoginGoogle && <>
 
-              {/* SOCIAL BUTTONS */}
-              <Grid container spacing={2} mb={3}>
-                <Grid item xs={12} sm={6}>
-                  <Button
-                    variant='outlined'
-                    fullWidth
+
+                <Typography
+                  variant='body2'
+                  align='center'
+                  mb={2}
+                  color='text.secondary'>
+                  Hoặc
+                </Typography>
+
+                {/* SOCIAL BUTTONS */}
+                <Grid container spacing={2} mb={3}>
+                  <Grid item xs={12} sm={6}>
+                    <Button
+                      variant='outlined'
+                      fullWidth
+                      sx={{
+                        py: 1.2,
+                        textTransform: "none",
+                        fontWeight: 500,
+                        borderRadius: 3,
+                        borderColor: "#e0e0e0",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        "&:hover": { borderColor: "#bdbdbd" },
+                      }}>
+                      <Box
+                        component='img'
+                        src={apple}
+                        alt='Apple'
+                        sx={{ width: 20 }}
+                      />
+                      Sign up with Apple
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                      <GoogleCustomButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+                    </GoogleOAuthProvider>
+
+                  </Grid>
+                </Grid>
+
+                {/* LOGIN LINK */}
+                <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
+                  Bạn chưa có tài khoản Booking Hotel?
+                  <Link
+                    onClick={() => navigate("/register")}
                     sx={{
-                      py: 1.2,
-                      textTransform: "none",
+                      color: "#ff7a00",
                       fontWeight: 500,
-                      borderRadius: 3,
-                      borderColor: "#e0e0e0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1,
-                      "&:hover": { borderColor: "#bdbdbd" },
+                      textDecoration: "underline",
+                      "&:hover": { textDecoration: "underline" },
+                      cursor: 'pointer'
                     }}>
-                    <Box
-                      component='img'
-                      src={apple}
-                      alt='Apple'
-                      sx={{ width: 20 }}
-                    />
-                    Sign up with Apple
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-         <GoogleCustomButton onSuccess={handleGoogleSuccess} onError={handleGoogleError}/>
-        </GoogleOAuthProvider>
-                 
-                </Grid>
-              </Grid>
-
-              {/* LOGIN LINK */}
-              <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
-                Bạn chưa có tài khoản Booking Hotel?
-                <Link
-                  href='#'
-                  sx={{
-                    color: "#ff7a00",
-                    fontWeight: 500,
-                    textDecoration: "underline",
-                    "&:hover": { textDecoration: "underline" },
-                  }}>
-                  Đăng ký ngay
-                </Link>
-              </Typography>
-                  </>}
+                    Đăng ký ngay
+                  </Link>
+                </Typography>
+              </>}
             </Box>
           </Box>
         </Grid>
@@ -574,41 +596,41 @@ const RegistrationForm = ({setCurrentStep,setPhoneNumber,phoneNumber,isLoginGoog
   )
 };
 
-const PinCreation = ({phoneNumber}) => {
+const PinCreation = ({ phoneNumber,setCurrentStep }) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate()
   const context = useBookingContext()
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     setLoading(true)
     e.preventDefault();
-    if (pin.length === 6 ) {
+    if (pin.length === 6) {
       let result = await Login({
         platform: "ios",
         type: "phone",
         value: "+84" + phoneNumber,
         password: pin,
       });
-    if(result.access_token){
-      localStorage.setItem("access_token",result.access_token)
-      localStorage.setItem("refresh_token",result.refresh_token)
-      localStorage.setItem("user",JSON.stringify(result.user))
-      context.dispatch({
-        type: "LOGIN",
-        payload: {
-          ...context.state,
-          user: { ...result.user },
-        },
-      });
-      toast.success("Login success")
-      setTimeout(()=>{
-        navigate("/")
-      },300)
-    }else{
-      toast.error(result.message)
-    }
-     
+      if (result.access_token) {
+        localStorage.setItem("access_token", result.access_token)
+        localStorage.setItem("refresh_token", result.refresh_token)
+        localStorage.setItem("user", JSON.stringify(result.user))
+        context.dispatch({
+          type: "LOGIN",
+          payload: {
+            ...context.state,
+            user: { ...result.user },
+          },
+        });
+        toast.success("Login success")
+        setTimeout(() => {
+          navigate("/")
+        }, 300)
+      } else {
+        toast.error(getErrorMessage(result.code)|| result.message)
+      }
+
     }
     setLoading(false)
   };
@@ -618,7 +640,7 @@ const PinCreation = ({phoneNumber}) => {
   return (
     <Container
       maxWidth="lg"
-      sx={{ display: "flex", alignItems: "center",py:8 }}
+      sx={{ display: "flex", alignItems: "center", py: 8 }}
     >
       <Grid
         container
@@ -654,16 +676,16 @@ const PinCreation = ({phoneNumber}) => {
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
           <Box
             sx={{
-              
+
               display: "flex",
               flexDirection: "column",
               width: { xs: "100%", sm: "400px", md: "486px" },
-              
+
             }}
           >
             {/* TITLE */}
 
-            <Box>
+            <Box >
               <Typography
                 sx={{
                   fontSize: { xs: "26px", md: "30px" },
@@ -674,8 +696,8 @@ const PinCreation = ({phoneNumber}) => {
                   gap: 2,
                 }}
               >
-                <ArrowBackIosNewIcon />
-               Hi,+84{phoneNumber}
+                <ArrowBackIosNewIcon sx={{cursor:"pointer"}} onClick={()=>{setCurrentStep("register")}} />
+                Hi,+84{phoneNumber}
               </Typography>
             </Box>
 
@@ -783,29 +805,29 @@ const PinCreation = ({phoneNumber}) => {
                 </Link>
               </Typography>
 
-            
+
 
 
               <Button
                 type="submit"
                 fullWidth
-                disabled={pin.length !== 6 }
+                disabled={pin.length !== 6}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
                   backgroundColor:
-                    pin.length === 6 
+                    pin.length === 6
                       ? "#9AC700"
                       : "#e0e0e0",
                   color:
-                    pin.length === 6  ? "#fff" : "#888",
+                    pin.length === 6 ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
                     backgroundColor:
-                      pin.length === 6 
+                      pin.length === 6
                         ? "#7cb400"
                         : "#e0e0e0",
                   },
@@ -831,13 +853,14 @@ const PinCreation = ({phoneNumber}) => {
 
 // GoogleCustomButton.tsx
 import { useGoogleLogin } from '@react-oauth/google';
+import { getErrorMessage } from "../../utils/utils";
 
 interface GoogleCustomButtonProps {
   onSuccess: (response: any) => void;
   onError: () => void;
 }
 
- function GoogleCustomButton({ onSuccess, onError }: GoogleCustomButtonProps) {
+function GoogleCustomButton({ onSuccess, onError }: GoogleCustomButtonProps) {
   const login = useGoogleLogin({
     onSuccess: (codeResponse) => {
       console.log('Google Login Success:', codeResponse);
@@ -851,31 +874,31 @@ interface GoogleCustomButtonProps {
 
   return (
     <Button
-                    variant='outlined'
-                    onClick={()=>{
-                      login()
-                    }}
-                    fullWidth
-                    sx={{
-                      py: 1.2,
-                      textTransform: "none",
-                      fontWeight: 500,
-                      borderRadius: 3,
-                      borderColor: "#e0e0e0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: 1,
-                      "&:hover": { borderColor: "#bdbdbd" },
-                    }}>
-                    <Box
-                      component='img'
-                      src={google}
-                      alt='Google'
-                      sx={{ width: 23 }}
-                    />
-                    Sign up with Google
-                  </Button>
+      variant='outlined'
+      onClick={() => {
+        login()
+      }}
+      fullWidth
+      sx={{
+        py: 1.2,
+        textTransform: "none",
+        fontWeight: 500,
+        borderRadius: 3,
+        borderColor: "#e0e0e0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 1,
+        "&:hover": { borderColor: "#bdbdbd" },
+      }}>
+      <Box
+        component='img'
+        src={google}
+        alt='Google'
+        sx={{ width: 23 }}
+      />
+      Sign up with Google
+    </Button>
   );
 }
 
