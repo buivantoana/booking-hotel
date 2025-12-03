@@ -783,7 +783,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
               }}>
               <Stack direction='row' alignItems='center'>
                 {/* Địa điểm */}
-                <Box sx={{ flex: "300px 0 0", position: "relative" }}>
+                <Box sx={{ flex: "250px 0 0", position: "relative" }}>
                   <TextField
                     fullWidth
                     disabled={name}

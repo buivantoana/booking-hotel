@@ -3,11 +3,15 @@ import api from "../core/api";
 export async function createBooking(body: any) {
   try {
     let token = localStorage.getItem("access_token");
-    const response = await api.post(`/booking/create`, body, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    let headers = {}
+    if(token){
+      headers =  {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    }
+    const response = await api.post(`/booking/create`, body, headers);
     return response.data;
   } catch (error: any) {
     if (error.response) {

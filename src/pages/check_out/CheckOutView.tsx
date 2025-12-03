@@ -293,6 +293,7 @@ const CheckOutView = ({ dataCheckout }) => {
                       <TextField
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        placeholder="Nhập tên"
                         variant="outlined"
                         size="small"
                         disabled={!isEditing}

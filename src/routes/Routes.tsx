@@ -33,7 +33,7 @@ const Router = () => {
           <Route path='' element={<HomeController />} />
           <Route path='/room/:id' element={<DetailRoomController />} />
         </Route>
-        <Route path='/payment-result' element={<PrivateRouter user={context.state.user}><PaymentResultController /></PrivateRouter>} />
+        <Route path='/payment-result' element={<PaymentResultController />} />
       </Routes>
     </>
   );
