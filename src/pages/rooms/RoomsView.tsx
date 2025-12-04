@@ -134,9 +134,9 @@ const amenities: Amenity[] = [
 ];
 
 const ratings = [
-  { label: "≥ 3.5", active: false,value:3.5 },
-  { label: "≥ 4.0", active: false ,value:4},
-  { label: "≥ 4.5", active: false ,value:4.5},
+  { label: "≥ 3.5", active: false, value: 3.5 },
+  { label: "≥ 4.0", active: false, value: 4 },
+  { label: "≥ 4.5", active: false, value: 4.5 },
 ];
 
 const RoomsView = ({
@@ -152,7 +152,7 @@ const RoomsView = ({
   queryHotel,
   setQueryHotel,
   searchParams,
-  loadingScroll
+  loadingScroll,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -193,21 +193,28 @@ const RoomsView = ({
   };
 
   const handleRatingToggle = (index: number) => {
-    const newList = ratingList.map((item,i)=>{
-      if(index == i){
+    const newList = ratingList.map((item, i) => {
+      if (index == i) {
         return {
           ...item,
-          active:true
-        }
+          active: true,
+        };
       }
       return {
         ...item,
-        active:false
-      }
+        active: false,
+      };
     });
-    
+
     setRatingList(newList);
-    setQueryHotel({...queryHotel,page:1,min_rating:newList.filter((item)=>item.active).map((item)=>item.value).join(",")})
+    setQueryHotel({
+      ...queryHotel,
+      page: 1,
+      min_rating: newList
+        .filter((item) => item.active)
+        .map((item) => item.value)
+        .join(","),
+    });
   };
 
   const formatPrice = (value: number): string => {
@@ -216,30 +223,37 @@ const RoomsView = ({
       const billions = value / 1_000_000;
       // Làm tròn xuống để tránh 10.000.001đ+ thành 10.000.001đ+
       const floored = Math.floor(billions * 10) / 10; // giữ 1 chữ số thập phân nếu cần
-      return `${floored.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}.000.000đ+`;
+      return `${floored
+        .toFixed(0)
+        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}.000.000đ+`;
     }
-  
+
     // Các trường hợp còn lại: thêm dấu chấm ngăn cách và chữ đ
-    const formatted = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const formatted = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     return `${formatted}đ`;
   };
 
   const handlePriceChange = (_: Event, newValue: number | number[]) => {
     const value = newValue as [number, number];
     setPriceRange(value);
-  
+
     // Xóa timeout cũ
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
-  
+
     // Đặt timeout mới: sau 1s mới gọi API
     debounceTimeout.current = setTimeout(() => {
-      console.log('Gọi API sau 1s dừng kéo:', value);
-     setQueryHotel({...queryHotel,min_price:newValue[0],max_price:newValue[1],page:1})
+      console.log("Gọi API sau 1s dừng kéo:", value);
+      setQueryHotel({
+        ...queryHotel,
+        min_price: newValue[0],
+        max_price: newValue[1],
+        page: 1,
+      });
     }, 1000);
   };
-  
+
   // Đừng quên cleanup khi component unmount
   useEffect(() => {
     return () => {
@@ -582,7 +596,10 @@ const RoomsView = ({
                   </Typography>
                 </Stack>
 
-                <SortButton queryHotel={queryHotel} setQueryHotel={setQueryHotel} />
+                <SortButton
+                  queryHotel={queryHotel}
+                  setQueryHotel={setQueryHotel}
+                />
               </Box>
               <ItemHotel
                 dataHotel={dataHotel}
@@ -617,7 +634,7 @@ const FilterMap = ({
   center,
   setActiveMap,
   getHotel,
-  searchParams
+  searchParams,
 }) => {
   const containerStyle = {
     width: "100%",
@@ -805,17 +822,17 @@ const ItemHotel = ({
   searchParams,
   activeHotel,
   itemRefs,
-  loadingScroll
+  loadingScroll,
 }) => {
   const navigate = useNavigate();
   const loadMoreRef = useRef(null);
   const isRequesting = useRef(false);
   useEffect(() => {
     if (!activeHotel) return;
-  
+
     const el = itemRefs.current[activeHotel.id];
     if (!el) return;
-  
+
     // scroll vào giữa
     el.scrollIntoView({
       behavior: "smooth",
@@ -825,10 +842,10 @@ const ItemHotel = ({
   useEffect(() => {
     const node = loadMoreRef.current;
     if (!node) return;
-  
+
     const observer = new IntersectionObserver((entries) => {
       const target = entries[0];
-  
+
       if (target.isIntersecting && !loading && !isRequesting.current) {
         if (page < total) {
           isRequesting.current = true;
@@ -836,16 +853,17 @@ const ItemHotel = ({
         }
       }
     });
-  
+
     observer.observe(node);
-  
+
     return () => observer.unobserve(node);
   }, [loadMoreRef.current, loading, page, total]);
   useEffect(() => {
-  if (!loadingScroll) {
-    isRequesting.current = false;  // 🔓 mở khóa để cho phép load tiếp trang sau
-  }
-}, [loadingScroll]);
+    if (!loadingScroll) {
+      isRequesting.current = false; // 🔓 mở khóa để cho phép load tiếp trang sau
+    }
+  }, [loadingScroll]);
+
   return (
     <>
       {loading ? (
@@ -924,22 +942,48 @@ const ItemHotel = ({
               {dataHotel.map((hotel, i) => (
                 <Paper
                   key={i}
-                  ref={(el) => isMap&&(itemRefs.current[hotel.id] = el)}
-                  onClick={() =>
-                    {
+                  ref={(el) => isMap && (itemRefs.current[hotel.id] = el)}
+                  onClick={() => {
+                    if (isMap) {
+                      setActiveHotel(hotel);
+                    } else {
+                      const current = Object.fromEntries([...searchParams]);
 
-                      if(isMap){
-                        setActiveHotel(hotel)
-                      }else{
-                        const current = Object.fromEntries([...searchParams]);
-                      
-                        navigate(`/room/${hotel.id}?${new URLSearchParams(current).toString()}&name=${JSON.parse(hotel.name).vi||JSON.parse(hotel.name).en}`);
-                      
-                      }
-                    
+                      // ---- xử lý mặc định ---- //
+                      const now = new Date();
+
+                      // format yyyy-MM-dd
+                      const formatDate = (d) => d.toISOString().split("T")[0];
+
+                      // format lên giờ chẵn
+                      const formatHour = (d) => {
+                        let hour = d.getHours();
+                        let minute = d.getMinutes();
+
+                        // round up: nếu phút > 0 thì cộng 1 giờ
+                        if (minute > 0) hour++;
+
+                        // format HH:00 (VD: 09:00, 20:00)
+                        return `${String(hour).padStart(2, "0")}:00`;
+                      };
+
+                      // Set mặc định nếu param không có
+                      current.checkIn = current.checkIn || formatDate(now);
+                      current.checkOut = current.checkOut || formatDate(now);
+                      current.checkInTime =
+                        current.checkInTime || formatHour(now);
+                      current.duration = current.duration || 2;
+
+                      // ---- build URL ---- //
+                      navigate(
+                        `/room/${hotel.id}?${new URLSearchParams(
+                          current
+                        ).toString()}&name=${
+                          JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
+                        }`
+                      );
                     }
-                   
-                  }
+                  }}
                   elevation={0}
                   sx={{
                     borderRadius: "16px",
@@ -949,7 +993,10 @@ const ItemHotel = ({
                     "&:hover": { boxShadow: 3 },
                     height: { xs: 200, sm: isMap ? "160px" : "200px" },
                     cursor: "pointer",
-                    border:isMap && activeHotel?.id == hotel.id?"1px solid #98b720":"unset" 
+                    border:
+                      isMap && activeHotel?.id == hotel.id
+                        ? "1px solid #98b720"
+                        : "unset",
                   }}>
                   <Grid container>
                     {/* Ảnh */}
@@ -999,7 +1046,8 @@ const ItemHotel = ({
                         justifyContent='space-between'>
                         <Box>
                           <Typography fontWeight={600} fontSize='1.1rem'>
-                            {JSON.parse(hotel.name).vi||JSON.parse(hotel.name).en}
+                            {JSON.parse(hotel.name).vi ||
+                              JSON.parse(hotel.name).en}
                           </Typography>
                           <Typography fontSize='0.85rem' color='#999' mt={0.5}>
                             {JSON.parse(hotel.address).en}
@@ -1072,29 +1120,30 @@ const ItemHotel = ({
                   </Grid>
                 </Paper>
               ))}
-              {loadingScroll&&<>
-                <Stack spacing={3} width='100%'>
-            {[...Array(isMobile ? 1 : isTablet ? 2 : 3)].map((_, i) => (
-              <Paper
-                key={i}
-                elevation={0}
-                sx={{
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  bgcolor: "white",
-                  height: { xs: 200, sm: isMap ? 160 : 200 },
-                }}>
-                <Grid container>
-                  {/* Ảnh + tag */}
-                  <Grid item xs={12} sm={5} md={4}>
-                    <Box sx={{ position: "relative", height: "100%" }}>
-                      <Skeleton
-                        variant='rectangular'
-                        width='100%'
-                        height={isMap ? "80%" : "100%"}
-                        sx={{ borderRadius: "20px" }}
-                      />
-                      {/* <Box
+              {loadingScroll && (
+                <>
+                  <Stack spacing={3} width='100%'>
+                    {[...Array(isMobile ? 1 : isTablet ? 2 : 3)].map((_, i) => (
+                      <Paper
+                        key={i}
+                        elevation={0}
+                        sx={{
+                          borderRadius: "16px",
+                          overflow: "hidden",
+                          bgcolor: "white",
+                          height: { xs: 200, sm: isMap ? 160 : 200 },
+                        }}>
+                        <Grid container>
+                          {/* Ảnh + tag */}
+                          <Grid item xs={12} sm={5} md={4}>
+                            <Box sx={{ position: "relative", height: "100%" }}>
+                              <Skeleton
+                                variant='rectangular'
+                                width='100%'
+                                height={isMap ? "80%" : "100%"}
+                                sx={{ borderRadius: "20px" }}
+                              />
+                              {/* <Box
                               sx={{
                                 position: "absolute",
                                 top: 12,
@@ -1105,39 +1154,40 @@ const ItemHotel = ({
                               }}>
                               <Skeleton width='100%' height='100%' />
                             </Box> */}
-                    </Box>
-                  </Grid>
+                            </Box>
+                          </Grid>
 
-                  {/* Nội dung */}
-                  <Grid item xs={12} sm={7} md={8}>
-                    <Stack
-                      p={2}
-                      spacing={1.5}
-                      height='100%'
-                      justifyContent='space-between'>
-                      <Box>
-                        <Skeleton width='80%' height={28} />
-                        <Skeleton width='60%' height={20} mt={0.5} />
-                        <Skeleton width='50%' height={20} mt={0.5} />
-                      </Box>
+                          {/* Nội dung */}
+                          <Grid item xs={12} sm={7} md={8}>
+                            <Stack
+                              p={2}
+                              spacing={1.5}
+                              height='100%'
+                              justifyContent='space-between'>
+                              <Box>
+                                <Skeleton width='80%' height={28} />
+                                <Skeleton width='60%' height={20} mt={0.5} />
+                                <Skeleton width='50%' height={20} mt={0.5} />
+                              </Box>
 
-                      <Stack alignItems='flex-end'>
-                        <Skeleton width='40%' height={20} />
-                        <Skeleton width='60%' height={32} mt={1} />
-                        <Skeleton
-                          width='50%'
-                          height={36}
-                          mt={1}
-                          sx={{ borderRadius: "6px" }}
-                        />
-                      </Stack>
-                    </Stack>
-                  </Grid>
-                </Grid>
-              </Paper>
-            ))}
-          </Stack>
-              </>}
+                              <Stack alignItems='flex-end'>
+                                <Skeleton width='40%' height={20} />
+                                <Skeleton width='60%' height={32} mt={1} />
+                                <Skeleton
+                                  width='50%'
+                                  height={36}
+                                  mt={1}
+                                  sx={{ borderRadius: "6px" }}
+                                />
+                              </Stack>
+                            </Stack>
+                          </Grid>
+                        </Grid>
+                      </Paper>
+                    ))}
+                  </Stack>
+                </>
+              )}
               {!isMap && (
                 <Box display={"flex"} justifyContent={"center"}>
                   {/* <Pagination
@@ -1200,7 +1250,7 @@ const sortOptions = [
   { label: "Giá từ cao đến thấp", value: "price_desc" },
 ];
 
-const SortButton = ({queryHotel,setQueryHotel}) => {
+const SortButton = ({ queryHotel, setQueryHotel }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selected, setSelected] = useState(sortOptions[0].value);
 
@@ -1217,7 +1267,7 @@ const SortButton = ({queryHotel,setQueryHotel}) => {
   const handleSelect = (value: string) => {
     setSelected(value);
     handleClose();
-    setQueryHotel({...queryHotel,page:1,sort_by:value})
+    setQueryHotel({ ...queryHotel, page: 1, sort_by: value });
   };
 
   const selectedLabel = sortOptions.find(

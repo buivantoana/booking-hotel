@@ -40,7 +40,11 @@ import no_room from "../../images/No Navigation.svg";
 import building from "../../images/building.png";
 import remove from "../../images/delete.png";
 import { format } from "date-fns";
-import { deleteBooking, reviewBooking } from "../../service/booking";
+import {
+  deleteBooking,
+  issueBooking,
+  reviewBooking,
+} from "../../service/booking";
 import { toast } from "react-toastify";
 
 // ==================== HELPER FUNCTIONS ====================
@@ -119,6 +123,7 @@ const BookingCard = ({
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [issueModalOpen, setIssueModalOpen] = useState(false);
 
   const statusConfig = getBookingStatus(booking);
   const hotelName = parseJsonField(booking.hotel_name);
@@ -144,6 +149,15 @@ const BookingCard = ({
   };
   return (
     <>
+      <IssueBooking
+        open={issueModalOpen}
+        onClose={() => {
+          setIssueModalOpen(false);
+        }}
+        id={booking.booking_id}
+        title={`Mã đặt phòng ${booking.booking_code}`}
+        setDeleteDialogOpen={setDeleteDialogOpen}
+      />
       <ReviewModal
         open={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
@@ -153,6 +167,7 @@ const BookingCard = ({
         id={booking.booking_id}
         hastag={hastag}
         getHistoryBooking={getHistoryBooking}
+        setIssueModalOpen={setIssueModalOpen}
       />
 
       <Box
@@ -286,20 +301,21 @@ const BookingCard = ({
           <Stack direction='row' justifyContent='flex-end' spacing={1}>
             {isCompleted && (
               <>
-              {!booking?.review && 
-                <Button
-                  onClick={() => setReviewModalOpen(true)}
-                  variant='outlined'
-                  sx={{
-                    borderRadius: "24px",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    color: "#666",
-                    borderColor: "#ddd",
-                    minWidth: 120,
-                  }}>
-                  Đánh giá
-                </Button>}
+                {!booking?.review && (
+                  <Button
+                    onClick={() => setReviewModalOpen(true)}
+                    variant='outlined'
+                    sx={{
+                      borderRadius: "24px",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      color: "#666",
+                      borderColor: "#ddd",
+                      minWidth: 120,
+                    }}>
+                    Đánh giá
+                  </Button>
+                )}
                 <Button
                   variant='contained'
                   sx={{
@@ -355,7 +371,7 @@ const BookingCard = ({
         <MenuItem
           onClick={() => {
             setMenuAnchor(null);
-            setDeleteDialogOpen(true);
+            setIssueModalOpen(true);
           }}>
           <ListItemIcon>
             <DeleteIcon
@@ -554,7 +570,7 @@ function ReviewModal({
   onClose,
   id,
   hastag,
-  getHistoryBooking
+  getHistoryBooking,
 }: {
   open: boolean;
   onClose: () => void;
@@ -635,14 +651,14 @@ function ReviewModal({
       const res = await reviewBooking(formData);
       if (res?.id) {
         toast.success("Tạo review thành công");
-        getHistoryBooking()
+
+        getHistoryBooking();
         setUploadedImages([]);
         setRating(0);
         setReviewText("");
         setSelectedTags([]);
-        
       } else {
-        toast.error(getErrorMessage(res.code)|| res.message)
+        toast.error(getErrorMessage(res.code) || res.message);
       }
       console.log("AAA res", res);
     } catch (err) {
@@ -730,7 +746,16 @@ function ReviewModal({
           variant='outlined'
           inputProps={{ maxLength: 1000 }}
           helperText={`${reviewText.length}/1000`}
-          sx={{ mb: 3, "& .MuiOutlinedInput-root": { borderRadius: "12px" } }}
+          sx={{
+            mb: 3,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              "&.Mui-focused fieldset": {
+                borderColor: "#98b720",
+                borderWidth: 1.5,
+              },
+            },
+          }}
         />
 
         <Box>
@@ -952,3 +977,153 @@ const BookingCardSkeleton = () => {
     </Card>
   );
 };
+
+function IssueBooking({
+  open,
+  onClose,
+  id,
+  title,
+  setDeleteDialogOpen,
+}: {
+  open: boolean;
+  onClose: () => void;
+  hotelName: string;
+  roomType: string;
+  bookingTime: string;
+}) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [issueText, setIssueText] = useState("");
+  const [issueTitle, setIssueTitle] = useState(title);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    if (issueText.trim() === "") return;
+
+    const formData = new FormData();
+    formData.append("title", issueTitle.trim());
+    formData.append("description", issueText.trim());
+
+    try {
+      const res = await issueBooking(id, formData);
+      if (res?.message) {
+        onClose();
+        setDeleteDialogOpen(true);
+        toast.success(res?.message);
+        setIssueTitle("");
+        setIssueText("");
+      } else {
+        toast.error(getErrorMessage(res.code) || res.message);
+      }
+      console.log("AAA res", res);
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi mạng");
+    }
+    setLoading(false);
+  };
+
+  const isSubmitDisabled = issueText.trim().length === 0 || loading;
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth='sm'
+      fullWidth
+      fullScreen={isMobile}
+      PaperProps={{
+        sx: { borderRadius: isMobile ? 0 : "24px", overflow: "hidden" },
+      }}>
+      <DialogTitle sx={{ pb: 1, position: "relative" }}>
+        <Typography variant='h6' fontWeight={700}>
+          Báo cáo lỗi
+        </Typography>
+
+        <IconButton
+          onClick={onClose}
+          sx={{ position: "absolute", right: 8, top: 8, color: "#999" }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      <DialogContent>
+        <Typography fontWeight={600} mb={2}>
+          Tiêu đề
+        </Typography>
+        <TextField
+          placeholder='Viết suy nghĩ cảm nhận của bạn'
+          value={issueTitle}
+          onChange={(e) => setIssueTitle(e.target.value)}
+          fullWidth
+          variant='outlined'
+          inputProps={{ maxLength: 1000 }}
+          sx={{
+            mb: 3,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              "&.Mui-focused fieldset": {
+                borderColor: "#98b720",
+                borderWidth: 1.5,
+              },
+            },
+          }}
+        />
+        <Typography fontWeight={600} mb={2}>
+          Viết đánh giá
+        </Typography>
+
+        <TextField
+          multiline
+          rows={4}
+          placeholder='Viết suy nghĩ cảm nhận của bạn'
+          value={issueText}
+          onChange={(e) => setIssueText(e.target.value)}
+          fullWidth
+          variant='outlined'
+          inputProps={{ maxLength: 1000 }}
+          helperText={`${issueText.length}/1000`}
+          sx={{
+            mb: 3,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              "&.Mui-focused fieldset": {
+                borderColor: "#98b720",
+                borderWidth: 1.5,
+              },
+            },
+          }}
+        />
+      </DialogContent>
+
+      <Box sx={{ px: 3 }}>
+        <Button
+          fullWidth
+          variant='contained'
+          size='large'
+          onClick={handleSubmit}
+          disabled={isSubmitDisabled}
+          sx={{
+            borderRadius: "30px",
+            py: 1.8,
+            fontSize: "16px",
+            fontWeight: 600,
+            textTransform: "none",
+            bgcolor: "#98b720",
+            "&:hover": { bgcolor: "#8ab020" },
+            "&.Mui-disabled": { bgcolor: "#ccc", color: "#999" },
+          }}>
+          {loading ? (
+            <>
+              <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+              Gửi báo cáo...
+            </>
+          ) : (
+            "Gửi báo cáo"
+          )}
+        </Button>
+      </Box>
+    </Dialog>
+  );
+}

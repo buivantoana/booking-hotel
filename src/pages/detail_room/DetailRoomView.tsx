@@ -56,6 +56,7 @@ const DetailRoomView = ({
   reviews,
   getReviewHotel,
   hastag,
+  rooms,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -71,32 +72,31 @@ const DetailRoomView = ({
   const section5Ref = useRef(null);
   const section6Ref = useRef(null);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    let ref
+    let ref;
     switch (newValue) {
       case 0:
-        ref = section1Ref
+        ref = section1Ref;
         break;
       case 1:
-        ref = section2Ref
+        ref = section2Ref;
         break;
       case 2:
-        ref = section3Ref
+        ref = section3Ref;
         break;
       case 3:
-        ref = section4Ref
+        ref = section4Ref;
         break;
       case 4:
-        ref = section5Ref
+        ref = section5Ref;
         break;
       case 5:
-        ref = section6Ref
+        ref = section6Ref;
         break;
-
 
       default:
         break;
     }
-    handleScroll(ref)
+    handleScroll(ref);
     setTabValue(newValue);
   };
 
@@ -111,12 +111,12 @@ const DetailRoomView = ({
   const handleScroll = (ref) => {
     if (!ref.current) return;
 
-  const top = ref.current.getBoundingClientRect().top + window.pageYOffset;
+    const top = ref.current.getBoundingClientRect().top + window.pageYOffset;
 
-  window.scrollTo({
-    top: top - 150,   // ⬅️ lùi lên 200px
-    behavior: "smooth",
-  });
+    window.scrollTo({
+      top: top - 150, // ⬅️ lùi lên 200px
+      behavior: "smooth",
+    });
   };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
@@ -141,7 +141,7 @@ const DetailRoomView = ({
                 fontWeight={700}
                 fontSize={{ xs: "1.25rem", md: "1.5rem" }}
                 color='#333'>
-                {detailHotel?.hotel?.name?.vi|| detailHotel?.hotel?.name?.en}
+                {detailHotel?.hotel?.name?.vi || detailHotel?.hotel?.name?.en}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />
@@ -362,7 +362,7 @@ const DetailRoomView = ({
           <RoomList
             loading={loading}
             hotel={detailHotel?.hotel || {}}
-            data={detailHotel?.room_types || []}
+            data={rooms || []}
             section1Ref={section1Ref}
           />
           <HotelDetailInfo

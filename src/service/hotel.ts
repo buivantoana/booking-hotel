@@ -53,6 +53,23 @@ export async function getAmenities() {
     }
   }
 }
+export async function getAvailableRooms(id, query) {
+  try {
+    const qs = new URLSearchParams(query).toString();
+    const response = await api.get(`/hotel/available_rooms/${id}?${qs}`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
 
 export async function getDetailHotelApi(id) {
   try {
