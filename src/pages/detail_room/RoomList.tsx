@@ -65,7 +65,9 @@ const RoomCard = ({
   setOpenDetail,
   booking,
   searchParams,
-  isNotLogin
+  isNotLogin,
+  openModalDetail,
+  setOpenModalDetail
 }: {
   room: Room;
   loading: boolean;
@@ -245,6 +247,9 @@ const RoomCard = ({
             </Typography>
           </Box>
           <Typography
+            onClick={()=>{
+              setSelectedRoom(room)
+              setOpenModalDetail(true)}}
             fontSize='0.8rem'
             color='#98b720'
             sx={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -335,6 +340,7 @@ const RoomCard = ({
 const RoomList = ({ loading, data, hotel,section1Ref }) => {
   let booking = localStorage.getItem("booking") ? JSON.parse(localStorage.getItem("booking")): {}
   const [openModal, setOpenModal] = useState(false);
+  const [openModalDetail, setOpenModalDetail] = useState(false);
   const [lodingLogin, setLoadingLogin] = useState(false);
   const [isNotLogin,setIsNotLogin] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -542,7 +548,7 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
             </>}
           </Box>
         </Modal>
-        <RoomDetailModal phoneNumber={phoneNumber} open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} searchParams={searchParams} room={selectedRoom} />
+        <RoomDetailModal setOpenModalDetail={setOpenModalDetail} openModalDetail={openModalDetail} phoneNumber={phoneNumber} open={openDetail} hotel={hotel} booking={booking} onClose={() => setOpenDetail(false)} searchParams={searchParams} room={selectedRoom} />
 
         {loading ? <>
           <Box display={"flex"} justifyContent={"space-between"} gap={3}>
@@ -599,6 +605,8 @@ const RoomList = ({ loading, data, hotel,section1Ref }) => {
                     booking={booking}
                     searchParams={searchParams}
                     isNotLogin={isNotLogin}
+                    setOpenModalDetail={setOpenModalDetail}
+                    openModalDetail={openModalDetail}
                     
                   />
                 </Grid>
@@ -616,7 +624,7 @@ export default RoomList;
 
 
 
-const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phoneNumber}) => {
+const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phoneNumber ,openModalDetail,setOpenModalDetail}) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate()
@@ -669,7 +677,7 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phon
     
   }
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open||openModalDetail} onClose={openModalDetail?()=>setOpenModalDetail(false) :onClose}>
       <Box
         className="hidden-add-voice"
         sx={{
@@ -693,7 +701,7 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phon
             {room.name}
           </Typography>
 
-          <IconButton onClick={onClose}>
+          <IconButton onClick={openModalDetail?()=>setOpenModalDetail(false) :onClose}>
             <CloseIcon />
           </IconButton>
         </Stack>
@@ -896,7 +904,7 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phon
                 {searchParams.get("type") == "overnight" &&room.price_overnight.toLocaleString("vi-VN")+"đ"}
               </Typography>
 
-              <Button
+             {!openModalDetail&& <Button
                 onClick={handleBooking}
                 variant="contained"
                 sx={{
@@ -909,7 +917,7 @@ const RoomDetailModal = ({ open, onClose, room, hotel ,booking,searchParams,phon
                 }}
               >
                 Đặt phòng
-              </Button>
+              </Button>}
             </Stack>
           </Box>
         </Stack>

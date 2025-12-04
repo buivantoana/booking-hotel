@@ -106,6 +106,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     return age >= 18;
   };
   const isDisabled = !phoneNumber || !name || !birthDate || !isValidVietnamPhone(phoneNumber) || loading;
+  const today = new Date();
+const minAge = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+const maxDate = minAge.toISOString().split("T")[0];
   return (
     <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
@@ -252,7 +255,20 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 fullWidth
                 type="date"
                 value={birthDate}
-                onChange={(e)=> setBirthDate(e.target.value)}
+                // inputProps={{
+                //   max: maxDate,      // Không cho chọn quá năm hiện tại - 18 tuổi
+                //   min: "1900-01-01", // Chặn date quá nhỏ
+                // }}
+                onChange={(e) => {
+                  const val = e.target.value;
+                
+                  // Regex kiểm tra đúng format yyyy-mm-dd
+                  const valid = /^\d{4}-\d{2}-\d{2}$/.test(val);
+                
+                  if (valid || val === "") {
+                    setBirthDate(val);
+                  }
+                }}
                 onBlur={() => setTouchedDate(true)}
                 error={touchedDate && !isValidBirthDate(birthDate)}
                 helperText={
@@ -598,11 +614,12 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
       } catch (error) {
         console.log(error)
       }
-      setLoading(false);
-
+     
     } else {
       setShowConfirm(true)
     }
+    setLoading(false);
+
   };
 
   return (

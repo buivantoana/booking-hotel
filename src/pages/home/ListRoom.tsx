@@ -91,6 +91,7 @@ const HotelCard = ({
   rating,
   price,
   id,
+  reviewCount
 }: any) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -172,7 +173,7 @@ const HotelCard = ({
               variant='caption'
               color='#999'
               sx={{ ml: 0.5, fontSize: "0.8rem" }}>
-              (100)
+              ({reviewCount})
             </Typography>
           </Stack>
 
@@ -193,7 +194,7 @@ const HotelCard = ({
                 fontSize: { xs: "1.1rem", sm: "1.3rem" },
                 lineHeight: 1,
               }}>
-              {price ? `${price.toLocaleString("vi-VN")}.000đ` : "160.000đ"}
+              {price ? `${price.toLocaleString("vi-VN")}đ` : "160.000đ"}
             </Typography>
             <Typography variant='body2' color='#666'>
               / 2 giờ
@@ -304,6 +305,7 @@ const ListRoom = ({
                         rating={hotel.rating}
                         price={hotel.price_min}
                         id={hotel.id}
+                        reviewCount={hotel.review_count}
                       />
                     </Box>
                   </Box>

@@ -100,7 +100,7 @@ const HomeView = ({
             Tìm khách sạn lý tưởng – Chạm một lần, ở thoải mái mãi
           </Typography>
         </Container>
-        <SearchBarWithDropdown location={location} />
+        <SearchBarWithDropdown address={address} location={location} />
       </Box>
 
       {/* Booking Options Section */}

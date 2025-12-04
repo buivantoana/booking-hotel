@@ -544,7 +544,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 };
 
 // === MAIN COMPONENT ===
-const SearchBarWithDropdown = ({ location }) => {
+const SearchBarWithDropdown = ({ location,address }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
@@ -568,12 +568,18 @@ const SearchBarWithDropdown = ({ location }) => {
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
   );
-
+  console.log("AAAA address",address)
+  useEffect(()=>{
+    if(address){
+      let name  = location.find((item)=>item.id == address.id)?.name.vi;
+      setSearchValue(name)
+    }
+  },[address])
   const handleLocationClick = (loc: string) => {
     setSearchValue(loc);
     setDropdownOpen(false);
   };
-
+ 
   const handleClickAway = (e: any) => {
     if (inputRef.current && !inputRef.current.contains(e.target))
       setDropdownOpen(false);

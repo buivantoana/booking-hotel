@@ -67,6 +67,7 @@ const ProfileView = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+ 
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
@@ -307,16 +308,34 @@ const ProfileView = ({
       setLoadingSubmit(true);
       try {
         if (getBookingNameStatus(detailBooking) == "Hủy đặt phòng") {
-          let result = await cancelBooking(detailBooking.booking_id);
-          if (result?.code == "OK") {
-            toast.success(result?.message);
-            getHistoryBooking();
-          }
+          setOpenReason(true)
+          // let result = await cancelBooking(detailBooking.booking_id);
+          // if (result?.code == "OK") {
+          //   toast.success(result?.message);
+          //   getHistoryBooking();
+          // }
         }
       } catch (error) {
         console.log(error);
       }
       setLoadingSubmit(false);
+    };
+    const [openReason, setOpenReason] = React.useState(false);
+
+    const handleSubmitReason = async(value) => {
+      setLoadingSubmit(true);
+      console.log("Lý do:", value);
+      try {
+        let result = await cancelBooking({id:detailBooking.booking_id,reason:value});
+          if (result?.code == "OK") {
+            toast.success(result?.message);
+            getHistoryBooking();
+          }
+      } catch (error) {
+        console.log(error);
+      }
+      setLoadingSubmit(false);
+      setOpenReason(false);
     };
     return (
       <Stack spacing={3}>
@@ -337,7 +356,12 @@ const ProfileView = ({
             Đặt phòng của tôi
           </Typography>
         </Stack>
-
+        <ReasonModal
+        open={openReason}
+        onClose={() => setOpenReason(false)}
+        onSubmit={handleSubmitReason}
+        loadingSubmit={loadingSubmit}
+      />
         {/* BANNER HOÀN THÀNH */}
         {detailBooking.status === "checked_out" && (
           <Paper
@@ -863,3 +887,63 @@ const ProfileView = ({
 };
 
 export default ProfileView;
+
+
+
+import {
+  TextField,
+} from "@mui/material";
+
+const ReasonModal = ({ open, onClose, onSubmit,loadingSubmit }) => {
+  const [reason, setReason] = React.useState("");
+
+  const handleSubmit = () => {
+    onSubmit(reason);        // trả lý do về parent
+    setReason("");           // clear input
+  };
+
+  const handleClose = () => {
+    setReason("");
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+      <DialogTitle>Lý do</DialogTitle>
+
+      <DialogContent>
+      <TextField
+          multiline
+          rows={3}
+          placeholder='Viết suy nghĩ cảm nhận của bạn'
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          fullWidth
+          variant='outlined'
+          inputProps={{ maxLength: 1000 }}
+          helperText={`${reason.length}/1000`}
+          sx={{ mb: 3, "& .MuiOutlinedInput-root": { borderRadius: "12px" ,"&.Mui-focused fieldset": {
+            borderColor: "#98b720",
+            borderWidth: 1.5,
+          },} }}
+        />
+      </DialogContent>
+
+      <DialogActions>
+        <Button variant="outlined" sx={{borderColor:"#98b720",color:"#98b720"}} onClick={handleClose}>
+          Hủy
+        </Button>
+        <Button
+          variant="contained"
+          sx={{background:"#98b720",color:"white"}}
+          onClick={handleSubmit}
+          disabled={!reason.trim()}
+        >
+          {loadingSubmit ? <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />:"Đồng ý"}
+         
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+

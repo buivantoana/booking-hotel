@@ -165,7 +165,7 @@ const DetailRoomView = ({
                     {detailHotel?.hotel?.rating}
                   </Typography>
                   <Typography fontSize='0.85rem' color='#666'>
-                    ({detailHotel?.reviews?.length || 0} reviews)
+                    ({detailHotel?.hotel?.review_count || 0} reviews)
                   </Typography>
                 </Stack>
                 <Box sx={{ flex: 1 }} />

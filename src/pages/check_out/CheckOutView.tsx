@@ -198,7 +198,7 @@ const CheckOutView = ({ dataCheckout }) => {
               <ArrowBackIcon sx={{ fontSize: 20 }} />
             </IconButton>
             <Typography fontWeight={600} fontSize="1.1rem" color="#333">
-              Xác nhận thanh toán
+            Ẩn thay đổi thời gian
             </Typography>
           </Stack>
 

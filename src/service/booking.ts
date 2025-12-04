@@ -48,12 +48,12 @@ export async function deleteBooking(id: any) {
   }
 }
 
-export async function cancelBooking(id: any) {
+export async function cancelBooking(body: any) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.post(
-      `/booking/${id}/cancel`,
-      {},
+      `/booking/${body.id}/cancel`,
+      {reason:body.reason},
       {
         headers: {
           Authorization: `Bearer ${token}`,

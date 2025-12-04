@@ -1021,7 +1021,7 @@ const ItemHotel = ({
                               {hotel.rating}
                             </Typography>
                             <Typography fontSize='0.8rem' color='#666'>
-                              ({hotel.reviews || 100})
+                              ({hotel.review_count || 100})
                             </Typography>
                           </Stack>
                         </Box>
