@@ -162,7 +162,7 @@ const OtpVerification = ({
                     "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
                       width: { xs: 50, sm: 60 },
                       height: { xs: 50, sm: 60 },
-                      borderRadius: "0px",
+                      borderRadius: "16px",
                       backgroundColor: "#fff",
                       "& fieldset": { borderColor: "#9AC700" },
                       "&:hover fieldset": { borderColor: "#7cb400" },
@@ -794,7 +794,7 @@ const PinCreation = ({ phoneNumber,setCurrentStep }) => {
                 }}
               >
                 <Link
-                  href="#"
+                  href='/forgot-password'
                   sx={{
                     cursor: "pointer",
                     color: "#FF7A00",

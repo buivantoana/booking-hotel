@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import HomeView from "./HomeView";
 import { getLocation, searchHotel } from "../../service/hotel";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import { Close, Tune } from "@mui/icons-material";
 import success from "../../images/Capa_1.png"
 import { useLocation, useSearchParams } from "react-router-dom";
 type Props = {};
@@ -15,11 +15,18 @@ const HomeController = (props: Props) => {
   const [recommend, setRecommend] = useState([]);
   const [loading, setLoading] = useState(false);
   const [registerSuccessOpen, setRegisterSuccessOpen] = useState(false);
+  const [forgotSuccessOpen, setForgotSuccessOpen] = useState(false); 
   const [searchParams,setSearchParams] = useSearchParams();
   useEffect(() => {
-    if (searchParams.get("msg") === "success") {
+    if (searchParams.get("msg") === "success"&& searchParams.get("from") == "register") {
 
       setRegisterSuccessOpen(true)
+      searchParams.delete("msg");
+      searchParams.delete("from");
+      setSearchParams(searchParams, { replace: true });
+    }else if(searchParams.get("msg") === "success" && searchParams.get("from") == "forgot-password" ){
+      setRegisterSuccessOpen(true)
+      setForgotSuccessOpen(true)
       searchParams.delete("msg");
       searchParams.delete("from");
       setSearchParams(searchParams, { replace: true });
@@ -111,7 +118,7 @@ const HomeController = (props: Props) => {
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-          Tạo tài khoản thành công
+          {forgotSuccessOpen ? "Đổi mã PIN thành công":"Tạo tài khoản thành công"} 
           </Typography>
           <Typography fontSize='14px' color='#666'>
           Bạn có thể đùng mã PIN mới để đăng nhập tài khoản

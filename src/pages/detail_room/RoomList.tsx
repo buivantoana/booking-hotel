@@ -1141,7 +1141,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
             fontWeight: 500,
           }}>
           <Link
-            href='#'
+            href='/forgot-password'
             sx={{
               cursor: "pointer",
               color: "#FF7A00",

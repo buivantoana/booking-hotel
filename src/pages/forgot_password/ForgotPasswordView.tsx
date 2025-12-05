@@ -312,8 +312,6 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
           value: "+84" + phoneNumber,
           otp: otp,
           location: "hanoi",
-          name: name,
-          birthday: birthDate,
         });
         if (result.access_token) {
           onSuccess(result);
@@ -380,7 +378,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                     "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
                       width: { xs: 50, sm: 60 },
                       height: { xs: 50, sm: 60 },
-                      borderRadius: "0px",
+                      borderRadius: "16px",
                       backgroundColor: "#fff",
                       "& fieldset": { borderColor: "#9AC700" },
                       "&:hover fieldset": { borderColor: "#7cb400" },
@@ -813,7 +811,7 @@ const ForgotPasswordView = () => {
       )}
       {currentStep === "cofirm_pin" && (
         <PinCreationConfirm
-          onSuccess={() => navigate("/?from=register&msg=success")}
+          onSuccess={() => navigate("/?from=forgot-password&msg=success")}
           onBack={() => setCurrentStep("pin")}
           pinConfirm={pin}
           dataUser={dataUser}
