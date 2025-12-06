@@ -52,10 +52,18 @@ interface Review {
   content: string;
 }
 
-const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
+const HotelDetailInfo = ({
+  info,
+  reviews,
+  getReviewHotel,
+  hastag,
+  section2Ref,
   section3Ref,
   section4Ref,
-  section5Ref,section6Ref}) => {
+  section5Ref,
+  section6Ref,
+  amenities,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -64,7 +72,7 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
   const [openModal, setOpenModal] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<number[]>([]);
   const [loadingReview, setLoadingReview] = useState(false);
-  const context = useBookingContext()
+  const context = useBookingContext();
   const toggleExpand = (id: number) => {
     setExpandedReviews((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -97,20 +105,20 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
         setDeleteDialogOpen(false);
         setReviewDetail(null);
       } else {
-        toast.error(getErrorMessage(result.code)|| result.message)
+        toast.error(getErrorMessage(result.code) || result.message);
       }
     } catch (error) {
       console.log(error);
     }
     setLoadingReview(false);
   };
-  console.log("AAAA context",context)
+  console.log("AAAA context", context);
   return (
     <Box sx={{ py: { xs: 2, md: 4 } }}>
       <Stack spacing={5} sx={{ mx: "auto" }}>
         {/* === 1. GIỚI THIỆU KHÁCH SẠN === */}
-        <Stack ref={section2Ref}  spacing={2}>
-          <Typography  fontWeight={600} fontSize='1.1rem' color='#333'>
+        <Stack ref={section2Ref} spacing={2}>
+          <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Giới thiệu khách sạn
           </Typography>
           <Typography fontSize='0.95rem' color='#666' lineHeight={1.7}>
@@ -130,47 +138,47 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
             Tiện ích khách sạn
           </Typography>
           <Grid container spacing={2}>
-            {[
-              { icon: <AcIcon />, label: "Điều hòa" },
-              { icon: <WifiIcon />, label: "Wifi" },
-              { icon: <Bathtub />, label: "Bồn tắm" },
-              { icon: <SofaIcon />, label: "Thang máy" },
-              { icon: <PoolIcon />, label: "Bể bơi" },
-            ].map((item, i) => (
-              <Box display={"flex"} key={i}>
-                <Stack
-                  direction='row'
-                  alignItems='center'
-                  flexDirection={"column"}
-                  justifyContent={"center"}
-                  gap={"8px"}
-                  sx={{
-                    bgcolor: "#f9f9f9",
-                    borderRadius: "12px",
-                    p: i == 0 ? 0 : 2,
-                    pr: i == 0 ? 2 : 2,
-                  }}>
-                  <Box
-                    sx={{
-                      width: 50,
-                      height: 50,
-                      bgcolor: "white",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                    }}>
-                    {React.cloneElement(item.icon as React.ReactElement, {
-                      sx: { fontSize: 25, color: "#98b720" },
-                    })}
+            {amenities.map((item, i) => {
+              if (info?.amenities?.includes(item.id))
+                return (
+                  <Box display={"flex"} key={i}>
+                    <Stack
+                      direction='row'
+                      alignItems='center'
+                      flexDirection={"column"}
+                      justifyContent={"center"}
+                      gap={"8px"}
+                      sx={{
+                        bgcolor: "#f9f9f9",
+                        borderRadius: "12px",
+                        p: i == 0 ? 0 : 2,
+                        pr: i == 0 ? 2 : 2,
+                      }}>
+                      <Box
+                        sx={{
+                          width: 50,
+                          height: 50,
+                          bgcolor: "white",
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                        }}>
+                        <img
+                          src={item?.icon}
+                          width={"50%"}
+                          height={"50%"}
+                          alt=''
+                        />
+                      </Box>
+                      <Typography fontSize='0.9rem' color='#666'>
+                        {item?.name?.vi}
+                      </Typography>
+                    </Stack>
                   </Box>
-                  <Typography fontSize='0.9rem' color='#666'>
-                    {item.label}
-                  </Typography>
-                </Stack>
-              </Box>
-            ))}
+                );
+            })}
           </Grid>
         </Stack>
 
@@ -319,25 +327,30 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
                             <Typography fontSize='0.75rem' color='#999'>
                               {review.created_at}
                             </Typography>
-                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id &&
-                            <BorderColorIcon
-                              onClick={() => {
-                                setReviewDetail(review);
-                                setReviewModalOpen(true);
-                              }}
-                              sx={{ fontSize: "15px", cursor: "pointer" }}
-                            />}
-                            {Object.keys(context?.state?.user).length>0 && context?.state?.user?.id == review?.user_id && <DeleteForeverIcon
-                              onClick={() => {
-                                setReviewDetail(review);
-                                setDeleteDialogOpen(true);
-                              }}
-                              sx={{
-                                color: "red",
-                                fontSize: "18px",
-                                cursor: "pointer",
-                              }}
-                            />}
+                            {Object.keys(context?.state?.user).length > 0 &&
+                              context?.state?.user?.id == review?.user_id && (
+                                <BorderColorIcon
+                                  onClick={() => {
+                                    setReviewDetail(review);
+                                    setReviewModalOpen(true);
+                                  }}
+                                  sx={{ fontSize: "15px", cursor: "pointer" }}
+                                />
+                              )}
+                            {Object.keys(context?.state?.user).length > 0 &&
+                              context?.state?.user?.id == review?.user_id && (
+                                <DeleteForeverIcon
+                                  onClick={() => {
+                                    setReviewDetail(review);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                  sx={{
+                                    color: "red",
+                                    fontSize: "18px",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                              )}
                           </Box>
                         </Box>
                       </Stack>
@@ -586,24 +599,30 @@ const HotelDetailInfo = ({ info, reviews, getReviewHotel, hastag,section2Ref,
                       <Typography fontSize='0.8rem' color='#999'>
                         {review.created_at}
                       </Typography>
-                      { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&&  <BorderColorIcon
-                        onClick={() => {
-                          setReviewDetail(review);
-                          setReviewModalOpen(true);
-                        }}
-                        sx={{ fontSize: "14px", cursor: "pointer" }}
-                      />}
-                       { Object.keys(context?.state?.user).length>0 &&context?.state?.user?.id == review?.user_id&& <DeleteForeverIcon
-                        onClick={() => {
-                          setReviewDetail(review);
-                          setDeleteDialogOpen(true);
-                        }}
-                        sx={{
-                          color: "red",
-                          fontSize: "18px",
-                          cursor: "pointer",
-                        }}
-                      />}
+                      {Object.keys(context?.state?.user).length > 0 &&
+                        context?.state?.user?.id == review?.user_id && (
+                          <BorderColorIcon
+                            onClick={() => {
+                              setReviewDetail(review);
+                              setReviewModalOpen(true);
+                            }}
+                            sx={{ fontSize: "14px", cursor: "pointer" }}
+                          />
+                        )}
+                      {Object.keys(context?.state?.user).length > 0 &&
+                        context?.state?.user?.id == review?.user_id && (
+                          <DeleteForeverIcon
+                            onClick={() => {
+                              setReviewDetail(review);
+                              setDeleteDialogOpen(true);
+                            }}
+                            sx={{
+                              color: "red",
+                              fontSize: "18px",
+                              cursor: "pointer",
+                            }}
+                          />
+                        )}
                     </Box>
                   </Stack>
                   <Typography fontSize='0.9rem' color='#666' lineHeight={1.6}>
@@ -850,10 +869,9 @@ function ReviewModal({
         setFileObjects([]);
         onClose();
       } else {
-        toast.error(getErrorMessage(res.code)|| res.message)
+        toast.error(getErrorMessage(res.code) || res.message);
       }
       console.log("Cập nhật thành công:", res);
-      
     } catch (err) {
       console.error(err);
       alert("Lỗi mạng");

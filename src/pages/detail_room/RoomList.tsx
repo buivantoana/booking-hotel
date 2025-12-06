@@ -67,6 +67,7 @@ const RoomCard = ({
   isNotLogin,
   openModalDetail,
   setOpenModalDetail,
+  amenities,
 }: {
   room: Room;
   loading: boolean;
@@ -257,23 +258,33 @@ const RoomCard = ({
 
         {/* TIỆN ÍCH */}
         <Stack direction='row' gap={1} flexWrap='wrap'>
-          {["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"].map(
-            (amenity) => (
-              <Chip
-                key={amenity}
-                icon={amenityIcons[amenity]}
-                label={amenity}
-                size='small'
-                sx={{
-                  bgcolor: "#f0f8f0",
-                  color: "#98b720",
-                  fontSize: "0.75rem",
-                  height: 32,
-                  "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
-                }}
-              />
-            )
-          )}
+          {amenities.map((amenity) => {
+            if (room?.amenities?.includes(amenity.id)) {
+              return (
+                <Chip
+                  key={amenity?.name?.vi}
+                  icon={
+                    <img
+                      src={amenity.icon}
+                      width={"20px"}
+                      style={{ objectFit: "cover", borderRadius: "50%" }}
+                      height={20}
+                      alt=''
+                    />
+                  }
+                  label={amenity?.name?.vi}
+                  size='small'
+                  sx={{
+                    bgcolor: "#f0f8f0",
+                    color: "#98b720",
+                    fontSize: "0.75rem",
+                    height: 32,
+                    "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
+                  }}
+                />
+              );
+            }
+          })}
         </Stack>
         <Divider />
         {/* GIÁ + NÚT */}
@@ -339,7 +350,7 @@ const RoomCard = ({
   );
 };
 
-const RoomList = ({ loading, data, hotel, section1Ref }) => {
+const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
   let booking = localStorage.getItem("booking")
     ? JSON.parse(localStorage.getItem("booking"))
     : {};
@@ -508,7 +519,7 @@ const RoomList = ({ loading, data, hotel, section1Ref }) => {
                     try {
                       let result = await checkUser({
                         type: "phone",
-                        value: "0" + phoneNumber,
+                        value: "+84" + phoneNumber,
                       });
                       if (result.code == "OK") {
                         setPassword(true);
@@ -579,6 +590,7 @@ const RoomList = ({ loading, data, hotel, section1Ref }) => {
           onClose={() => setOpenDetail(false)}
           searchParams={searchParams}
           room={selectedRoom}
+          amenities={amenities}
         />
 
         {loading ? (
@@ -661,6 +673,7 @@ const RoomList = ({ loading, data, hotel, section1Ref }) => {
                       isNotLogin={isNotLogin}
                       setOpenModalDetail={setOpenModalDetail}
                       openModalDetail={openModalDetail}
+                      amenities={amenities}
                     />
                   </Grid>
                 ))}
@@ -685,6 +698,7 @@ const RoomDetailModal = ({
   phoneNumber,
   openModalDetail,
   setOpenModalDetail,
+  amenities,
 }) => {
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
@@ -924,23 +938,33 @@ const RoomDetailModal = ({
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
-              {["Wifi", "Điều hòa", "Smart TV", "Ghế tình yêu", "Bồn tắm"].map(
-                (amenity) => (
-                  <Chip
-                    key={amenity}
-                    icon={amenityIcons[amenity]}
-                    label={amenity}
-                    size='small'
-                    sx={{
-                      bgcolor: "#f0f8f0",
-                      color: "#98b720",
-                      fontSize: "0.75rem",
-                      height: 32,
-                      "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
-                    }}
-                  />
-                )
-              )}
+              {amenities.map((amenity) => {
+                if (room?.amenities?.includes(amenity.id)) {
+                  return (
+                    <Chip
+                      key={amenity?.name?.vi}
+                      icon={
+                        <img
+                          src={amenity.icon}
+                          width={"20px"}
+                          style={{ objectFit: "cover", borderRadius: "50%" }}
+                          height={20}
+                          alt=''
+                        />
+                      }
+                      label={amenity?.name?.vi}
+                      size='small'
+                      sx={{
+                        bgcolor: "#f0f8f0",
+                        color: "#98b720",
+                        fontSize: "0.75rem",
+                        height: 32,
+                        "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
+                      }}
+                    />
+                  );
+                }
+              })}
             </Stack>
 
             <Typography fontWeight={600} my={2}>

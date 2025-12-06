@@ -13,6 +13,7 @@ import PrivateRouter from "../components/PrivateRouter";
 import GuestRoute from "../components/GuestRoute";
 import { useEffect } from "react";
 import ForgotPasswordController from "../pages/forgot_password/ForgotPasswordController";
+import NotFound from "../components/NotFound";
 
 const Router = () => {
   const context: any = useBookingContext();
@@ -64,6 +65,7 @@ const Router = () => {
           <Route path='/room/:id' element={<DetailRoomController />} />
         </Route>
         <Route path='/payment-result' element={<PaymentResultController />} />
+        <Route path='*' element={<NotFound />} />
       </Routes>
     </>
   );

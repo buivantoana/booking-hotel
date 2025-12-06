@@ -56,6 +56,7 @@ const DetailRoomView = ({
   reviews,
   getReviewHotel,
   hastag,
+  amenities,
   rooms,
 }) => {
   const theme = useTheme();
@@ -118,6 +119,10 @@ const DetailRoomView = ({
       behavior: "smooth",
     });
   };
+  const openMap = (lat, lon) => {
+    const url = `https://www.google.com/maps?q=${lat},${lon}`;
+    window.open(url, "_blank");
+  };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
       <Lightbox
@@ -149,6 +154,12 @@ const DetailRoomView = ({
                   {detailHotel?.hotel?.address?.en}
                 </Typography>
                 <Typography
+                  onClick={() =>
+                    openMap(
+                      detailHotel?.hotel?.latitude,
+                      detailHotel?.hotel?.longitude
+                    )
+                  }
                   fontSize='0.85rem'
                   color='#98b720'
                   sx={{ cursor: "pointer", textDecoration: "underline" }}>
@@ -364,6 +375,7 @@ const DetailRoomView = ({
             hotel={detailHotel?.hotel || {}}
             data={rooms || []}
             section1Ref={section1Ref}
+            amenities={amenities}
           />
           <HotelDetailInfo
             info={detailHotel?.hotel || {}}
@@ -375,6 +387,7 @@ const DetailRoomView = ({
             section4Ref={section4Ref}
             section5Ref={section5Ref}
             section6Ref={section6Ref}
+            amenities={amenities}
           />
           <ListRoom
             loading={loading}

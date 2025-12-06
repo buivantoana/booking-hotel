@@ -26,6 +26,7 @@ import { sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
+import { getErrorMessage } from "../../utils/utils";
 
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
@@ -315,6 +316,8 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         });
         if (result.access_token) {
           onSuccess(result);
+        } else {
+          toast.error(getErrorMessage(result.code) || result.detail);
         }
       } catch (error) {
         console.log(error);

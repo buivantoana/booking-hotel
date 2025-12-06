@@ -91,7 +91,7 @@ const HotelCard = ({
   rating,
   price,
   id,
-  reviewCount
+  reviewCount,
 }: any) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -101,7 +101,38 @@ const HotelCard = ({
     <Card
       elevation={3}
       onClick={() => {
-        navigate(`/room/${id}`);
+        const current = Object.fromEntries([]);
+
+        // ---- xử lý mặc định ---- //
+        const now = new Date();
+
+        // format yyyy-MM-dd
+        const formatDate = (d) => d.toISOString().split("T")[0];
+
+        // format lên giờ chẵn
+        const formatHour = (d) => {
+          let hour = d.getHours();
+          let minute = d.getMinutes();
+
+          // round up: nếu phút > 0 thì cộng 1 giờ
+          if (minute > 0) hour++;
+
+          // format HH:00 (VD: 09:00, 20:00)
+          return `${String(hour).padStart(2, "0")}:00`;
+        };
+
+        // Set mặc định nếu param không có
+        current.checkIn = current.checkIn || formatDate(now);
+        current.checkOut = current.checkOut || formatDate(now);
+        current.checkInTime = current.checkInTime || formatHour(now);
+        current.duration = current.duration || 2;
+
+        // ---- build URL ---- //
+        navigate(
+          `/room/${id}?${new URLSearchParams(
+            current
+          ).toString()}&name=${hotelName}`
+        );
       }}
       sx={{
         borderRadius: "14px",
@@ -213,13 +244,13 @@ const ListRoom = ({
   data,
   loading,
   category,
-  location
+  location,
 }: {
   title: string;
   isDetail?: boolean;
   data: any[];
 }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const settings = {
     dots: false,
     infinite: true,
@@ -276,7 +307,13 @@ const ListRoom = ({
               </Typography>
             )}
             {!isDetail && (
-              <Typography onClick={()=>{navigate(`/rooms?catrgory=${category}&location=${location}`)}} sx={{cursor:"pointer"}} color='rgba(152, 159, 173, 1)' fontSize={"15px"}>
+              <Typography
+                onClick={() => {
+                  navigate(`/rooms?catrgory=${category}&location=${location}`);
+                }}
+                sx={{ cursor: "pointer" }}
+                color='rgba(152, 159, 173, 1)'
+                fontSize={"15px"}>
                 Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
               </Typography>
             )}

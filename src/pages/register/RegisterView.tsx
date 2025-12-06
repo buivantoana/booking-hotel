@@ -22,10 +22,11 @@ import image_left from "../../images/Frame 1321317999.png";
 import vn from "../../images/VN - Vietnam.png";
 import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
-import { sendOtp, userUpdate, verifyOtp } from "../../service/admin";
+import { checkUser, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
+import { getErrorMessage } from "../../utils/utils";
 
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
@@ -58,27 +59,34 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     e.preventDefault();
     if (phoneNumber && name && birthDate) {
       try {
+        let checkUserResult = await checkUser({
+          type: "phone",
+          value: "+84" + phoneNumber,
+        });
+        if (checkUserResult.code == "OK") {
+          toast.warning("Tài khoản đã tồn tại");
+          setLoading(false);
+          return;
+        }
         let result = await sendOtp({
           platform: "ios",
           type: "phone",
           value: "+84" + phoneNumber,
         });
         if (result.success) {
-          onNext()
+          onNext();
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       setLoading(false);
-
-    };
+    }
   };
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-    if (p.startsWith("84")) p = p.slice(2);   // bỏ 84 đầu nếu nhập +84
-    if (p.startsWith("0")) p = p.slice(1);    // bỏ số 0 đầu nếu người dùng nhập
+    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
+    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
     return p;
   };
   const isValidVietnamPhone = (phone) => {
@@ -105,44 +113,76 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);
     return age >= 18;
   };
-  const isDisabled = !phoneNumber || !name || !birthDate || !isValidVietnamPhone(phoneNumber) || loading;
+  const isDisabled =
+    !phoneNumber ||
+    !name ||
+    !birthDate ||
+    !isValidVietnamPhone(phoneNumber) ||
+    loading;
   const today = new Date();
-const minAge = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-const maxDate = minAge.toISOString().split("T")[0];
+  const minAge = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
+  const maxDate = minAge.toISOString().split("T")[0];
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
         {/* LEFT */}
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center", alignItems: "center" }}>
-          <Box component="img" src={image_left} alt="Hotel illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+            alignItems: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='Hotel illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
         {/* RIGHT */}
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
-            <Typography sx={{ fontSize: { xs: "28px", md: "32px" }, fontWeight: 700, mb: 1 }}>
+            <Typography
+              sx={{
+                fontSize: { xs: "28px", md: "32px" },
+                fontWeight: 700,
+                mb: 1,
+              }}>
               Đăng ký Hotel Booking
             </Typography>
-            <Typography sx={{ fontSize: "16px", mb: 4 }} color="text.secondary">
-              Đăng ký để đặt phòng với những ưu đãi độc quyền dành cho thành viên.
+            <Typography sx={{ fontSize: "16px", mb: 4 }} color='text.secondary'>
+              Đăng ký để đặt phòng với những ưu đãi độc quyền dành cho thành
+              viên.
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               {/* Phone */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Số điện thoại</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Số điện thoại
+              </Typography>
               <TextField
                 fullWidth
-                placeholder="Nhập số điện thoại"
-                variant="outlined"
+                placeholder='Nhập số điện thoại'
+                variant='outlined'
                 value={phoneNumber}
                 onChange={(e) => {
                   let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
                   // loại bỏ 0 đầu tiên
                   if (val.length > 20) val = val.slice(0, 20);
                   if (val.startsWith("0")) val = val.slice(1);
-                  setPhoneNumber(val)
+                  setPhoneNumber(val);
                 }}
-                onBlur={() => setTouched(true)}   // chỉ validate khi blur
+                onBlur={() => setTouched(true)} // chỉ validate khi blur
                 error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
                   touched && !isValidVietnamPhone(phoneNumber)
@@ -172,10 +212,10 @@ const maxDate = minAge.toISOString().split("T")[0];
                 }}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
+                    <InputAdornment position='start'>
                       <img
                         src={vn}
-                        alt="vn"
+                        alt='vn'
                         style={{
                           width: 28,
                           height: 20,
@@ -184,12 +224,14 @@ const maxDate = minAge.toISOString().split("T")[0];
                           marginRight: 8,
                         }}
                       />
-                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>+84</Typography>
+                      <Typography sx={{ fontSize: 14, marginRight: 1 }}>
+                        +84
+                      </Typography>
                     </InputAdornment>
                   ),
                   endAdornment:
                     touched && !isValidVietnamPhone(phoneNumber) ? (
-                      <InputAdornment position="end">
+                      <InputAdornment position='end'>
                         <Box
                           sx={{
                             cursor: "pointer",
@@ -199,8 +241,7 @@ const maxDate = minAge.toISOString().split("T")[0];
                           onClick={() => {
                             setPhoneNumber("");
                             setTouched(false); // reset error khi xóa
-                          }}
-                        >
+                          }}>
                           ✕
                         </Box>
                       </InputAdornment>
@@ -209,10 +250,12 @@ const maxDate = minAge.toISOString().split("T")[0];
               />
 
               {/* Name */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Tên của bạn</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Tên của bạn
+              </Typography>
               <TextField
                 fullWidth
-                placeholder="Nhập tên của bạn"
+                placeholder='Nhập tên của bạn'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={() => setTouchedName(true)}
@@ -223,25 +266,31 @@ const maxDate = minAge.toISOString().split("T")[0];
                     : ""
                 }
                 sx={{
-                  mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "16px",
+                    height: "60px",
+                    backgroundColor: "#fff",
+                    "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
-                  }
+                  },
                 }}
                 InputProps={{
                   endAdornment:
                     touchedName && !isValidName(name) ? (
-                      <InputAdornment position="end">
+                      <InputAdornment position='end'>
                         <Box
-                          sx={{ cursor: "pointer", fontSize: 22, color: "#999" }}
+                          sx={{
+                            cursor: "pointer",
+                            fontSize: 22,
+                            color: "#999",
+                          }}
                           onClick={() => {
                             setName("");
                             setTouchedName(false);
-
-                          }}
-                        >
+                          }}>
                           ✕
                         </Box>
                       </InputAdornment>
@@ -250,10 +299,12 @@ const maxDate = minAge.toISOString().split("T")[0];
               />
 
               {/* Birth date */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>Ngày sinh của bạn</Typography>
+              <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                Ngày sinh của bạn
+              </Typography>
               <TextField
                 fullWidth
-                type="date"
+                type='date'
                 value={birthDate}
                 // inputProps={{
                 //   max: maxDate,      // Không cho chọn quá năm hiện tại - 18 tuổi
@@ -261,10 +312,10 @@ const maxDate = minAge.toISOString().split("T")[0];
                 // }}
                 onChange={(e) => {
                   const val = e.target.value;
-                
+
                   // Regex kiểm tra đúng format yyyy-mm-dd
                   const valid = /^\d{4}-\d{2}-\d{2}$/.test(val);
-                
+
                   if (valid || val === "") {
                     setBirthDate(val);
                   }
@@ -289,21 +340,28 @@ const maxDate = minAge.toISOString().split("T")[0];
                     },
                   },
                 }}
-              
               />
 
               {/* Agreement + Button + Social + Login link giữ nguyên như cũ */}
               {/* (đoạn này quá dài nên mình giữ nguyên copy từ code gốc của bạn) */}
-              <Typography sx={{ fontSize: "14px", mb: 3 }} color="text.secondary">
+              <Typography
+                sx={{ fontSize: "14px", mb: 3 }}
+                color='text.secondary'>
                 Bằng việc đăng kí tài khoản, tôi đồng ý với{" "}
-                <Link href="#" sx={{ color: "#9AC700", fontWeight: 500, textDecoration: "underline" }}>
+                <Link
+                  href='#'
+                  sx={{
+                    color: "#9AC700",
+                    fontWeight: 500,
+                    textDecoration: "underline",
+                  }}>
                   điều khoản và chính sách bảo mật
                 </Link>{" "}
                 của Hotel Booking
               </Typography>
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={isDisabled}
                 sx={{
@@ -317,9 +375,10 @@ const maxDate = minAge.toISOString().split("T")[0];
                   fontSize: "18px",
                   height: "56px",
                   position: "relative",
-                  "&:hover": { backgroundColor: isDisabled ? "#e0e0e0" : "#98b720" },
-                }}
-              >
+                  "&:hover": {
+                    backgroundColor: isDisabled ? "#e0e0e0" : "#98b720",
+                  },
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -365,7 +424,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   onSuccess,
   onBack,
   name,
-  birthDate
+  birthDate,
 }) => {
   const [loading, setLoading] = useState(false);
   const formatTime = (seconds: number) => {
@@ -390,34 +449,61 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         });
         if (result.access_token) {
           onSuccess(result);
+        } else {
+          toast.error(getErrorMessage(result.code) || result.detail);
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
-            <Typography sx={{ fontSize: { xs: "26px", md: "30px" }, fontWeight: 700, mb: 1, display: "flex", alignItems: "center", gap: 2 }}>
-              <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />
+            <Typography
+              sx={{
+                fontSize: { xs: "26px", md: "30px" },
+                fontWeight: 700,
+                mb: 1,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}>
+              <ArrowBackIosNewIcon
+                onClick={onBack}
+                sx={{ cursor: "pointer" }}
+              />
               Nhập mã xác nhận
             </Typography>
 
-            <Typography sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
+            <Typography
+              sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
               Mã xác nhận đã được gửi đến số <b>+84{phoneNumber}</b>
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <Box sx={{ mb: 2 }}>
                 <MuiOtpInput
                   value={otp}
@@ -434,36 +520,52 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                       "&:hover fieldset": { borderColor: "#7cb400" },
                       "&.Mui-focused fieldset": { borderColor: "#9AC700" },
                     },
-                    "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                    "& input": {
+                      textAlign: "center",
+                      fontSize: "24px",
+                      fontWeight: 700,
+                      color: "#9AC700",
+                    },
                   }}
                 />
               </Box>
 
-              <Typography sx={{ mb: 4, color: "#FF7A00", fontSize: "14px", fontWeight: 500 }}>
+              <Typography
+                sx={{
+                  mb: 4,
+                  color: "#FF7A00",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}>
                 {isResendEnabled ? (
-                  <Link onClick={onResend} sx={{ cursor: "pointer" }}>Gửi lại mã</Link>
+                  <Link onClick={onResend} sx={{ cursor: "pointer" }}>
+                    Gửi lại mã
+                  </Link>
                 ) : (
                   `Gửi lại mã trong (${formatTime(timer)})`
                 )}
               </Typography>
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={otp.length !== 4 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#9AC700",
-                  color: (otp.length !== 4 || loading) ? "#888" : "#fff",
+                  backgroundColor:
+                    otp.length !== 4 || loading ? "#e0e0e0" : "#9AC700",
+                  color: otp.length !== 4 || loading ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: (otp.length !== 4 || loading) ? "#e0e0e0" : "#7cb400" },
+                  "&:hover": {
+                    backgroundColor:
+                      otp.length !== 4 || loading ? "#e0e0e0" : "#7cb400",
+                  },
                   position: "relative",
-                }}
-              >
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -486,9 +588,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 // ──────────────────────────────────────────────────────────────
 
 const PinCreation = ({ onNext, onBack, pin, setPin }) => {
-
   const [showPin, setShowPin] = useState(false);
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -498,10 +598,24 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
@@ -514,25 +628,29 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              {onBack && <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />}
+              }}>
+              {onBack && (
+                <ArrowBackIosNewIcon
+                  onClick={onBack}
+                  sx={{ cursor: "pointer" }}
+                />
+              )}
               Tạo mã PIN của bạn
             </Typography>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Typography fontSize={14} color="#5D6679" fontWeight={500}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Typography fontSize={14} color='#5D6679' fontWeight={500}>
                 Mã PIN sẽ được dùng để đăng nhập
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
-                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}
-              >
+                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
                 {showPin ? "Ẩn" : "Hiện"}
               </Typography>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
@@ -549,14 +667,17 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
 
-
-
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={pin.length !== 6}
                 sx={{
@@ -571,8 +692,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
                   "&:hover": {
                     backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
-                }}
-              >
+                }}>
                 Tiếp tục
               </Button>
             </Box>
@@ -588,19 +708,22 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
-  const context = useBookingContext()
+  const context = useBookingContext();
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
     e.preventDefault();
     if (pin.length === 6 && pinConfirm == pin) {
       try {
-        let result = await userUpdate({
-          "password": pin,
-        }, dataUser?.access_token)
+        let result = await userUpdate(
+          {
+            password: pin,
+          },
+          dataUser?.access_token
+        );
         if (result.code == "OK") {
-          localStorage.setItem("access_token", dataUser.access_token)
-          localStorage.setItem("refresh_token", dataUser.refresh_token)
-          localStorage.setItem("user", JSON.stringify(dataUser.user))
+          localStorage.setItem("access_token", dataUser.access_token);
+          localStorage.setItem("refresh_token", dataUser.refresh_token);
+          localStorage.setItem("user", JSON.stringify(dataUser.user));
           context.dispatch({
             type: "LOGIN",
             payload: {
@@ -610,23 +733,34 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
           });
           onSuccess();
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-     
     } else {
-      setShowConfirm(true)
+      setShowConfirm(true);
     }
     setLoading(false);
-
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
         <Grid item xs={12} display={"flex"} justifyContent={"end"} md={6}>
@@ -639,25 +773,29 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              {onBack && <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />}
+              }}>
+              {onBack && (
+                <ArrowBackIosNewIcon
+                  onClick={onBack}
+                  sx={{ cursor: "pointer" }}
+                />
+              )}
               Xác nhận lại mã PIN
             </Typography>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Typography fontSize={14} color="#5D6679" fontWeight={500}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Typography fontSize={14} color='#5D6679' fontWeight={500}>
                 Mã PIN sẽ được dùng để đăng nhập
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
-                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}
-              >
+                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
                 {showPin ? "Ẩn" : "Hiện"}
               </Typography>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
@@ -674,7 +812,12 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
 
@@ -685,29 +828,31 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                     fontSize: "14px",
                     mb: 2,
                     fontWeight: 500,
-                  }}
-                >
+                  }}>
                   Mã PIN không khớp. Vui lòng nhập lại.
                 </Typography>
               )}
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: (pin.length !== 6 || loading) ? "#e0e0e0" : "#9AC700",
-                  color: (pin.length !== 6 || loading) ? "#888" : "#fff",
+                  backgroundColor:
+                    pin.length !== 6 || loading ? "#e0e0e0" : "#9AC700",
+                  color: pin.length !== 6 || loading ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: (pin.length !== 6 || loading) ? "#e0e0e0" : "#7cb400" },
+                  "&:hover": {
+                    backgroundColor:
+                      pin.length !== 6 || loading ? "#e0e0e0" : "#7cb400",
+                  },
                   position: "relative",
-                }}
-              >
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -728,7 +873,9 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
 // 4. Main RegisterView (giữ toàn bộ state & điều khiển step)
 // ──────────────────────────────────────────────────────────────
 const RegisterView = () => {
-  const [currentStep, setCurrentStep] = useState<"register" | "otp" | "pin" | "confirm_pin">("register");
+  const [currentStep, setCurrentStep] = useState<
+    "register" | "otp" | "pin" | "confirm_pin"
+  >("register");
   const [pin, setPin] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
@@ -737,7 +884,7 @@ const RegisterView = () => {
   const [dataUser, setDataUser] = useState(null);
   const [timer, setTimer] = useState(55);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   // Timer
   useEffect(() => {
     if (timer > 0 && currentStep === "otp") {
@@ -748,7 +895,8 @@ const RegisterView = () => {
     }
   }, [timer, currentStep]);
 
-  const formatPhoneNumber = (phone: string) => phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
+  const formatPhoneNumber = (phone: string) =>
+    phone.replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
 
   const goToOtp = () => {
     setCurrentStep("otp");
@@ -757,8 +905,8 @@ const RegisterView = () => {
   };
 
   const goToPin = (user) => {
-    setDataUser(user)
-    setCurrentStep("pin")
+    setDataUser(user);
+    setCurrentStep("pin");
   };
   const goBack = () => setCurrentStep("register");
 

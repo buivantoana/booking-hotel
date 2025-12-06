@@ -638,11 +638,12 @@ const FilterMap = ({
 }) => {
   const containerStyle = {
     width: "100%",
-    height: "50vh",
+    height: "60vh",
+    borderRadius: "10px",
   };
   const itemRefs = useRef({});
   const mapRef = useRef(null);
-
+  const navigate = useNavigate();
   const [activeHotel, setActiveHotel] = useState(null);
   const onLoad = useCallback((map) => {
     mapRef.current = map;
@@ -769,7 +770,48 @@ const FilterMap = ({
                       const hotelAddress = addressObj.vi || addressObj.en || "";
 
                       return (
-                        <>
+                        <Box
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => {
+                            const current = Object.fromEntries([
+                              ...searchParams,
+                            ]);
+
+                            // ---- xử lý mặc định ---- //
+                            const now = new Date();
+
+                            // format yyyy-MM-dd
+                            const formatDate = (d) =>
+                              d.toISOString().split("T")[0];
+
+                            // format lên giờ chẵn
+                            const formatHour = (d) => {
+                              let hour = d.getHours();
+                              let minute = d.getMinutes();
+
+                              // round up: nếu phút > 0 thì cộng 1 giờ
+                              if (minute > 0) hour++;
+
+                              // format HH:00 (VD: 09:00, 20:00)
+                              return `${String(hour).padStart(2, "0")}:00`;
+                            };
+
+                            // Set mặc định nếu param không có
+                            current.checkIn =
+                              current.checkIn || formatDate(now);
+                            current.checkOut =
+                              current.checkOut || formatDate(now);
+                            current.checkInTime =
+                              current.checkInTime || formatHour(now);
+                            current.duration = current.duration || 2;
+
+                            // ---- build URL ---- //
+                            navigate(
+                              `/room/${activeHotel.id}?${new URLSearchParams(
+                                current
+                              ).toString()}&name=${hotelName}`
+                            );
+                          }}>
                           <img
                             src={imgs[0]}
                             style={{
@@ -795,7 +837,7 @@ const FilterMap = ({
                           <Typography sx={{ fontSize: 14, color: "#FF5722" }}>
                             Từ {activeHotel.price_min}$ / đêm
                           </Typography>
-                        </>
+                        </Box>
                       );
                     })()}
                   </Box>
@@ -944,45 +986,41 @@ const ItemHotel = ({
                   key={i}
                   ref={(el) => isMap && (itemRefs.current[hotel.id] = el)}
                   onClick={() => {
-                    if (isMap) {
-                      setActiveHotel(hotel);
-                    } else {
-                      const current = Object.fromEntries([...searchParams]);
+                    const current = Object.fromEntries([...searchParams]);
 
-                      // ---- xử lý mặc định ---- //
-                      const now = new Date();
+                    // ---- xử lý mặc định ---- //
+                    const now = new Date();
 
-                      // format yyyy-MM-dd
-                      const formatDate = (d) => d.toISOString().split("T")[0];
+                    // format yyyy-MM-dd
+                    const formatDate = (d) => d.toISOString().split("T")[0];
 
-                      // format lên giờ chẵn
-                      const formatHour = (d) => {
-                        let hour = d.getHours();
-                        let minute = d.getMinutes();
+                    // format lên giờ chẵn
+                    const formatHour = (d) => {
+                      let hour = d.getHours();
+                      let minute = d.getMinutes();
 
-                        // round up: nếu phút > 0 thì cộng 1 giờ
-                        if (minute > 0) hour++;
+                      // round up: nếu phút > 0 thì cộng 1 giờ
+                      if (minute > 0) hour++;
 
-                        // format HH:00 (VD: 09:00, 20:00)
-                        return `${String(hour).padStart(2, "0")}:00`;
-                      };
+                      // format HH:00 (VD: 09:00, 20:00)
+                      return `${String(hour).padStart(2, "0")}:00`;
+                    };
 
-                      // Set mặc định nếu param không có
-                      current.checkIn = current.checkIn || formatDate(now);
-                      current.checkOut = current.checkOut || formatDate(now);
-                      current.checkInTime =
-                        current.checkInTime || formatHour(now);
-                      current.duration = current.duration || 2;
+                    // Set mặc định nếu param không có
+                    current.checkIn = current.checkIn || formatDate(now);
+                    current.checkOut = current.checkOut || formatDate(now);
+                    current.checkInTime =
+                      current.checkInTime || formatHour(now);
+                    current.duration = current.duration || 2;
 
-                      // ---- build URL ---- //
-                      navigate(
-                        `/room/${hotel.id}?${new URLSearchParams(
-                          current
-                        ).toString()}&name=${
-                          JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
-                        }`
-                      );
-                    }
+                    // ---- build URL ---- //
+                    navigate(
+                      `/room/${hotel.id}?${new URLSearchParams(
+                        current
+                      ).toString()}&name=${
+                        JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
+                      }`
+                    );
                   }}
                   elevation={0}
                   sx={{
@@ -1363,6 +1401,7 @@ const SortButton = ({ queryHotel, setQueryHotel }) => {
 
 import gift from "../../images/image 8.png";
 import { useBookingContext } from "../../App";
+import { borderRadius } from "@mui/system";
 
 function PromotionBanner() {
   const navigate = useNavigate();

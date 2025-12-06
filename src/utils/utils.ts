@@ -1,4 +1,3 @@
-
 import CryptoJS from "crypto-js";
 
 // Hàm sắp xếp object theo thứ tự key tăng dần
@@ -128,7 +127,7 @@ export function formattedDateHHMMDDMMYYYY(data) {
     year: "numeric",
     hour12: false,
   });
-  return formatted
+  return formatted;
 }
 
 const ERROR_MESSAGES = {
@@ -148,5 +147,5 @@ const ERROR_MESSAGES = {
 
 // Hàm lấy message từ code lỗi
 export const getErrorMessage = (errorCode) => {
-  return ERROR_MESSAGES[errorCode] || "Đã có lỗi xảy ra";
+  return ERROR_MESSAGES[errorCode] || null;
 };

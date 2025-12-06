@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DetailRoomView from "./DetailRoomView";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
+  getAmenities,
   getAvailableRooms,
   getDetailHotelApi,
   getReviewHotel,
@@ -21,12 +22,63 @@ const DetailRoomController = (props: Props) => {
   const [hastag, setHastag] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
-
+  const [amenities, setAmenities] = useState([]);
   useEffect(() => {
-    const check_in = searchParams.get("checkIn");
-    const check_out = searchParams.get("checkOut");
+    const checkIn = searchParams.get("checkIn"); // 2025-12-06
+    const checkOut = searchParams.get("checkOut"); // 2025-12-06
+    const type = searchParams.get("type"); // hourly / daily
+    const checkInTime = searchParams.get("checkInTime"); // 14:00
+    const duration = Number(searchParams.get("duration")); // 2
 
-    getAvaibleRoom(idPrams, { check_in, check_out });
+    let finalCheckIn = checkIn;
+    let finalCheckOut = checkOut;
+
+    // Nếu type = hourly → convert datetime sang UTC
+    if (type === "hourly") {
+      // Tạo datetime local từ checkIn + checkInTime
+      const localDateTime = new Date(`${checkIn}T${checkInTime}:00`);
+
+      // Convert sang UTC
+      const utcIn = localDateTime
+        .toISOString()
+        .replace("T", " ")
+        .substring(0, 19);
+
+      // Tính checkOut theo duration (giờ)
+      const localOut = new Date(
+        localDateTime.getTime() + duration * 60 * 60 * 1000
+      );
+      const utcOut = localOut.toISOString().replace("T", " ").substring(0, 19);
+
+      finalCheckIn = utcIn; // ví dụ: "2025-11-26 07:00:00"
+      finalCheckOut = utcOut; // ví dụ: "2025-11-26 09:00:00"
+    }
+
+    // Gọi API
+    getAvaibleRoom(idPrams, {
+      check_in: finalCheckIn,
+      check_out: finalCheckOut,
+    });
+  }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        let result = await getAmenities();
+
+        if (result?.amenities?.length > 0) {
+          setAmenities(
+            result?.amenities.map((item) => {
+              return {
+                ...item,
+                active: false,
+              };
+            })
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })();
   }, []);
   useEffect(() => {
     if (idPrams) {
@@ -98,6 +150,7 @@ const DetailRoomController = (props: Props) => {
       getReviewHotel={getReview}
       hastag={hastag}
       rooms={rooms}
+      amenities={amenities}
     />
   );
 };
