@@ -76,11 +76,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn);
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
-  const [time, setTime] = useState<string>(initialTime );
+  const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
   const now = dayjs();
-  const hours = Array.from({ length: 24 }, (_, i) =>
-    String(i).padStart(2, "0") + ":00"
+  const hours = Array.from(
+    { length: 24 },
+    (_, i) => String(i).padStart(2, "0") + ":00"
   );
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
 
@@ -106,13 +107,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setTime("10:00");
     setDuration(2);
   };
-  const isToday =
-    checkIn && checkIn.isSame(now, "day");
+  const isToday = checkIn && checkIn.isSame(now, "day");
   const disabledHours = isToday
     ? hours.filter((h) => {
-      const hourNum = parseInt(h.split(":")[0]);
-      return hourNum <= now.hour();   // disable những giờ đã qua
-    })
+        const hourNum = parseInt(h.split(":")[0]);
+        return hourNum <= now.hour(); // disable những giờ đã qua
+      })
     : [];
   const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
     if (bookingType === "overnight") {
@@ -131,9 +131,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     } else if (bookingType === "hourly") {
       setCheckIn(date);
 
-
       const selectedIsToday = date.isSame(now, "day");
-
 
       if (selectedIsToday) {
         const nextHour = now.hour() + 1;
@@ -143,7 +141,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         setTime("00:00"); // ngày khác → active 00:00
       }
 
-
       setDuration(2); // mặc định luôn chọn 2h
     }
   };
@@ -152,9 +149,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const endTime = checkIn
     ? checkIn
-      .hour(parseInt(time.split(":")[0]))
-      .minute(0)
-      .add(duration, "hour")
+        .hour(parseInt(time?.split(":")[0]))
+        .minute(0)
+        .add(duration, "hour")
     : null;
 
   return (
@@ -175,8 +172,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                  ? 680
-                  : 380,
+                ? 680
+                : 380,
           },
           bgcolor: "white",
         }}>
@@ -196,7 +193,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -362,7 +359,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         onClick={() =>
                           setDuration(
                             durations[
-                            Math.min(durations.length - 1, durationIndex + 1)
+                              Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -400,7 +397,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -434,8 +431,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                  ? "#f0f8f0"
+                                  : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
                               "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
@@ -452,7 +449,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
                       value={checkIn}
-                      onChange={() => { }}
+                      onChange={() => {}}
                       disablePast
                       sx={{
                         width: "100%",
@@ -486,8 +483,8 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                      ? "#f0f8f0"
-                                      : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
                                 "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
@@ -544,7 +541,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 };
 
 // === MAIN COMPONENT ===
-const SearchBarWithDropdown = ({ location,address }) => {
+const SearchBarWithDropdown = ({ location, address }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
@@ -568,18 +565,18 @@ const SearchBarWithDropdown = ({ location,address }) => {
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
   );
-  console.log("AAAA address",address)
-  useEffect(()=>{
-    if(address){
-      let name  = location.find((item)=>item.id == address.id)?.name.vi;
-      setSearchValue(name)
+  console.log("AAAA address", address);
+  useEffect(() => {
+    if (address) {
+      let name = location.find((item) => item.id == address.id)?.name.vi;
+      setSearchValue(name);
     }
-  },[address])
+  }, [address]);
   const handleLocationClick = (loc: string) => {
     setSearchValue(loc);
     setDropdownOpen(false);
   };
- 
+
   const handleClickAway = (e: any) => {
     if (inputRef.current && !inputRef.current.contains(e.target))
       setDropdownOpen(false);
@@ -678,9 +675,8 @@ const SearchBarWithDropdown = ({ location,address }) => {
 
   const cancelGeo = () => {
     setLoading(false);
-    geoResolveRef.current?.(null);  // <-- Gửi null như “bị chặn”
+    geoResolveRef.current?.(null); // <-- Gửi null như “bị chặn”
   };
-
 
   // -------------------------------------
   // HANDLE SEARCH
@@ -1090,7 +1086,7 @@ const SearchBarWithDropdown = ({ location,address }) => {
               <Close />
             </IconButton>
           </Stack>
-          <img src={query} width={"100%"} alt="" />
+          <img src={query} width={"100%"} alt='' />
         </Box>
       </Modal>
     </LocalizationProvider>
