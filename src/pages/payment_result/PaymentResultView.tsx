@@ -39,14 +39,60 @@ const PaymentResultView = () => {
   const [paymentStatus, setPaymentStatus] = useState("pending"); // success | fail | pending
 
   // 👉 format time
-  const checkIn = dayjs(data.check_in).format("YYYY-MM-DD");
-  const checkOut = dayjs(data.check_out).format("YYYY-MM-DD");
+ let startTime = "";
+ let endTime = "";
+ let checkInDate = "";
+ let checkOutDate = "";
 
-  const startTime = dayjs(data.check_in).format("HH:mm");
-  const endTime = dayjs(data.check_out).format("HH:mm");
+ if (data.type === "hourly") {
+   // đảm bảo có checkInTime và duration
+   const inTime =
+     data.checkInTime && data.checkInTime !== "null"
+       ? data.checkInTime
+       : "00:00";
+   const duration = Number(data.duration || 0);
 
-  // Hủy miễn phí trước giờ check-in
-  const cancelBefore = `${startTime}, ${checkIn}`;
+   // tạo datetime bắt đầu từ checkIn (FE lưu kiểu "YYYY-MM-DD")
+   const start = dayjs(`${data.checkIn} ${inTime}`, "YYYY-MM-DD HH:mm");
+
+   // tính end bằng dayjs (tự xử lý vượt ngày)
+   const end = start.add(duration, "hour");
+
+   startTime = start.format("HH:mm");
+   endTime = end.format("HH:mm");
+
+   // ngày hiển thị
+   checkInDate = start.format("YYYY-MM-DD");
+
+   // nếu kết thúc khác ngày bắt đầu → hiển thị ngày kết thúc
+   if (!end.isSame(start, "day")) {
+     checkOutDate = end.format("YYYY-MM-DD");
+   } else {
+     checkOutDate = checkInDate;
+   }
+ } else {
+   // daily / overnight: lấy trực tiếp check_in & check_out do backend đã tính
+   // nếu backend lưu "YYYY-MM-DD HH:mm:ss" thì dùng dayjs(data.check_in)
+   const start = dayjs(data.check_in); // note: ensure data.check_in tồn tại
+   const end = dayjs(data.check_out);
+
+   startTime = start.format("HH:mm");
+   endTime = end.format("HH:mm");
+
+   checkInDate = start.format("YYYY-MM-DD");
+   checkOutDate = end.format("YYYY-MM-DD");
+ }
+
+ // chuỗi hiển thị
+ const timeDisplay =
+   data.type === "hourly"
+     ? `${startTime} – ${endTime}, ${checkInDate}${
+         checkOutDate !== checkInDate ? ` → ${checkOutDate}` : ""
+       }`
+     : `${startTime} – ${endTime}, ${checkInDate} → ${checkOutDate}`;
+
+ // cancelBefore (ví dụ)
+ const cancelBefore = `${startTime}, ${checkInDate}`;
 
   // 🔥 AUTO CHECK PAYMENT STATUS
   useEffect(() => {
@@ -196,7 +242,8 @@ const PaymentResultView = () => {
                         <TimeIcon sx={{ fontSize: 20, color: "#666" }} />
                       </Box>
                       <Typography fontSize='0.9rem' color='#333'>
-                        {startTime} – {endTime}, {checkIn} → {checkOut}
+                        {startTime} – {endTime}, {checkInDate}
+                        {data.type !== "hourly" ? ` → ${checkOutDate}` : ""}
                       </Typography>
                     </Stack>
 

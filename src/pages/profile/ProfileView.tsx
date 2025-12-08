@@ -194,10 +194,8 @@ const ProfileView = ({
   );
 
   const MainContent = () => {
-   
-   
     if (!detailBooking) return null;
-    
+
     // Parse JSON string fields
     const hotelName =
       JSON.parse(detailBooking.hotel_name)?.vi ||
@@ -258,11 +256,11 @@ const ProfileView = ({
     };
     const getBestPayment = (payments = []) => {
       if (!payments.length) return null;
-    
+
       const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
-    
+
       for (const st of priority) {
-        const found = payments.find(p => p.status === st);
+        const found = payments.find((p) => p.status === st);
         if (found) return found;
       }
       return null;
@@ -271,20 +269,20 @@ const ProfileView = ({
       if (!payments || payments.length === 0) {
         return "Trả tại khách sạn"; // không có thông tin thanh toán
       }
-    
+
       // Thứ tự ưu tiên
       const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
-    
+
       let status: string | null = null;
-    
+
       for (const st of priority) {
-        const found = payments.find(p => p.status === st);
+        const found = payments.find((p) => p.status === st);
         if (found) {
           status = found.status;
           break;
         }
       }
-    
+
       // Map sang text tiếng Việt
       switch (status) {
         case "paid":
@@ -306,10 +304,10 @@ const ProfileView = ({
 
     // Lấy payment "quan trọng nhất"
     const bestPayment = getBestPayment(payments);
-    
+
     // Lấy text status
     const paymentStatus = getPaymentTextStatus(payments);
-    
+
     // Lấy label method đúng
     const paymentMethodLabel = bestPayment?.method
       ? bestPayment.method === "momo"
@@ -329,34 +327,34 @@ const ProfileView = ({
     };
     const getPaymentStatus = (payments = []) => {
       if (!payments.length) return null;
-    
+
       const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
-    
+
       for (const status of priority) {
-        const found = payments.find(p => p.status === status);
+        const found = payments.find((p) => p.status === status);
         if (found) return found.status;
       }
       return null;
     };
-    
+
     const getBookingNameStatus = (detailBooking: any) => {
       const paymentStatus = getPaymentStatus(detailBooking.payments);
       const bookingStatus = detailBooking.status;
-    
+
       // -----------------------------
       // LOGIC NÚT HIỂN THỊ
       // -----------------------------
-    
+
       // booking đã hoàn thành hoặc bị hủy -> nút "Đặt lại"
       if (bookingStatus === "checked_out" || bookingStatus === "cancelled") {
         return "Đặt lại";
       }
-    
+
       // đã xác nhận và đã thanh toán → có thể hủy
       if (bookingStatus === "confirmed" && paymentStatus === "paid") {
         return "Hủy đặt phòng";
       }
-    
+
       // chưa thanh toán đủ hoặc payment lỗi
       if (
         paymentStatus === "failed" ||
@@ -365,7 +363,7 @@ const ProfileView = ({
       ) {
         return "Tiếp tục thanh toán";
       }
-    
+
       // fallback – mặc định vẫn hiển thị tiếp tục thanh toán
       return "Tiếp tục thanh toán";
     };
@@ -373,57 +371,56 @@ const ProfileView = ({
       setLoadingSubmit(true);
       try {
         if (getBookingNameStatus(detailBooking) == "Hủy đặt phòng") {
-          setOpenReason(true)
+          setOpenReason(true);
           // let result = await cancelBooking(detailBooking.booking_id);
           // if (result?.code == "OK") {
           //   toast.success(result?.message);
           //   getHistoryBooking();
           // }
-        }else if(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán"){
-          handleRetryPayment({booking_id:detailBooking?.booking_id,method:detailBooking.payments[0]?.method})
+        } else if (
+          getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán"
+        ) {
+          handleRetryPayment({
+            booking_id: detailBooking?.booking_id,
+            method: detailBooking.payments[0]?.method,
+          });
         }
       } catch (error) {
         console.log(error);
       }
-      if(!(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán")){
+      if (!(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán")) {
         setLoadingSubmit(false);
       }
-      
     };
 
     const handleRetryPayment = async (body) => {
       setLoadingSubmit(true);
-    
+
       try {
         // 1️⃣ GỌI API RETRY
         const result = await retryPayment(body);
-    
-        if(result?.payment_id){
+
+        if (result?.payment_id) {
           checkPaymentStatusLoop(result?.payment_id);
-        }else{
+        } else {
           toast.error(getErrorMessage(result.code) || result.message);
           setLoadingSubmit(false);
         }
-        
-       
-    
       } catch (error) {
         console.log(error);
-        
-      } 
+      }
     };
-    
-    
+
     const checkPaymentStatusLoop = async (paymentId) => {
       let retry = 0;
-    
+
       const interval = setInterval(async () => {
         retry++;
-    
+
         try {
           let result = await getStatusPayment(paymentId);
           const status = result?.status;
-    
+
           switch (status) {
             case "paid":
               clearInterval(interval);
@@ -431,25 +428,25 @@ const ProfileView = ({
               toast.success("Thanh toán thành công!");
               getHistoryBooking();
               return;
-    
+
             case "failed":
               clearInterval(interval);
               setLoadingSubmit(false);
               toast.error("Thanh toán thất bại!");
               return;
-    
+
             case "refunded":
               clearInterval(interval);
               setLoadingSubmit(false);
               toast.info("Thanh toán đã được hoàn tiền!");
               return;
-    
+
             case "cancelled":
               clearInterval(interval);
               setLoadingSubmit(false);
               toast.warning("Thanh toán đã bị hủy!");
               return;
-    
+
             case "pending":
             default:
               // vẫn pending → tiếp tục call
@@ -458,7 +455,7 @@ const ProfileView = ({
         } catch (error) {
           console.log("Error:", error);
         }
-    
+
         // ❌ quá 30 lần → xem như fail
         if (retry >= 30) {
           clearInterval(interval);
@@ -469,18 +466,21 @@ const ProfileView = ({
         }
       }, 2000);
     };
-    
+
     const [openReason, setOpenReason] = React.useState(false);
 
-    const handleSubmitReason = async(value) => {
+    const handleSubmitReason = async (value) => {
       setLoadingSubmit(true);
       console.log("Lý do:", value);
       try {
-        let result = await cancelBooking({id:detailBooking.booking_id,reason:value});
-          if (result?.code == "OK") {
-            toast.success(result?.message);
-            getHistoryBooking();
-          }
+        let result = await cancelBooking({
+          id: detailBooking.booking_id,
+          reason: value,
+        });
+        if (result?.code == "OK") {
+          toast.success(result?.message);
+          getHistoryBooking();
+        }
       } catch (error) {
         console.log(error);
       }
@@ -507,11 +507,11 @@ const ProfileView = ({
           </Typography>
         </Stack>
         <ReasonModal
-        open={openReason}
-        onClose={() => setOpenReason(false)}
-        onSubmit={handleSubmitReason}
-        loadingSubmit={loadingSubmit}
-      />
+          open={openReason}
+          onClose={() => setOpenReason(false)}
+          onSubmit={handleSubmitReason}
+          loadingSubmit={loadingSubmit}
+        />
         {/* BANNER HOÀN THÀNH */}
         {detailBooking.status === "checked_out" && (
           <Paper
@@ -579,8 +579,8 @@ const ProfileView = ({
           )}
 
         {detailBooking.status === "pending" &&
-          ( bestPayment?.status == "failed" ||
-             bestPayment?.status == "pending") && (
+          (bestPayment?.status == "failed" ||
+            bestPayment?.status == "pending") && (
             <Paper
               elevation={0}
               sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
@@ -604,7 +604,13 @@ const ProfileView = ({
                 </Stack>
                 <Button
                   variant='contained'
-                  onClick={()=> handleRetryPayment({booking_id:detailBooking?.booking_id,method:detailBooking.payments[0]?.method})}
+                  disabled={loadingSubmit}
+                  onClick={() =>
+                    handleRetryPayment({
+                      booking_id: detailBooking?.booking_id,
+                      method: detailBooking.payments[0]?.method,
+                    })
+                  }
                   sx={{
                     bgcolor: "#98b720",
                     color: "white",
@@ -617,7 +623,17 @@ const ProfileView = ({
                     minWidth: 120,
                     "&:hover": { bgcolor: "#7a9a1a" },
                   }}>
-                  Tiếp tục thanh toán
+                  {loadingSubmit ? (
+                    <>
+                      <CircularProgress
+                        size={20}
+                        sx={{ color: "#fff", mr: 1 }}
+                      />
+                      Tiếp tục thanh toán...
+                    </>
+                  ) : (
+                    <> Tiếp tục thanh toán</>
+                  )}
                 </Button>
               </Stack>
             </Paper>
@@ -1039,20 +1055,16 @@ const ProfileView = ({
 
 export default ProfileView;
 
-
-
-import {
-  TextField,
-} from "@mui/material";
+import { TextField } from "@mui/material";
 import { getStatusPayment, retryPayment } from "../../service/payment";
 import { getErrorMessage } from "../../utils/utils";
 
-const ReasonModal = ({ open, onClose, onSubmit,loadingSubmit }) => {
+const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
   const [reason, setReason] = React.useState("");
 
   const handleSubmit = () => {
-    onSubmit(reason);        // trả lý do về parent
-    setReason("");           // clear input
+    onSubmit(reason); // trả lý do về parent
+    setReason(""); // clear input
   };
 
   const handleClose = () => {
@@ -1061,11 +1073,11 @@ const ReasonModal = ({ open, onClose, onSubmit,loadingSubmit }) => {
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth='xs' fullWidth>
       <DialogTitle>Lý do</DialogTitle>
 
       <DialogContent>
-      <TextField
+        <TextField
           multiline
           rows={3}
           placeholder='Viết suy nghĩ cảm nhận của bạn'
@@ -1075,28 +1087,38 @@ const ReasonModal = ({ open, onClose, onSubmit,loadingSubmit }) => {
           variant='outlined'
           inputProps={{ maxLength: 1000 }}
           helperText={`${reason.length}/1000`}
-          sx={{ mb: 3, "& .MuiOutlinedInput-root": { borderRadius: "12px" ,"&.Mui-focused fieldset": {
-            borderColor: "#98b720",
-            borderWidth: 1.5,
-          },} }}
+          sx={{
+            mb: 3,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+              "&.Mui-focused fieldset": {
+                borderColor: "#98b720",
+                borderWidth: 1.5,
+              },
+            },
+          }}
         />
       </DialogContent>
 
       <DialogActions>
-        <Button variant="outlined" sx={{borderColor:"#98b720",color:"#98b720"}} onClick={handleClose}>
+        <Button
+          variant='outlined'
+          sx={{ borderColor: "#98b720", color: "#98b720" }}
+          onClick={handleClose}>
           Hủy
         </Button>
         <Button
-          variant="contained"
-          sx={{background:"#98b720",color:"white"}}
+          variant='contained'
+          sx={{ background: "#98b720", color: "white" }}
           onClick={handleSubmit}
-          disabled={!reason.trim()}
-        >
-          {loadingSubmit ? <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />:"Đồng ý"}
-         
+          disabled={!reason.trim()}>
+          {loadingSubmit ? (
+            <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+          ) : (
+            "Đồng ý"
+          )}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
-
