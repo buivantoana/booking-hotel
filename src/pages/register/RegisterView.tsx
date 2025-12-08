@@ -26,7 +26,7 @@ import { checkUser, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
-import { getErrorMessage } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
 
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
@@ -61,7 +61,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
       try {
         let checkUserResult = await checkUser({
           type: "phone",
-          value: "+84" + phoneNumber,
+          value: "+84" + normalizePhoneForAPI(phoneNumber),
         });
         if (checkUserResult.code == "OK") {
           toast.warning("Tài khoản đã tồn tại");
@@ -71,7 +71,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         let result = await sendOtp({
           platform: "ios",
           type: "phone",
-          value: "+84" + phoneNumber,
+          value: "+84" + normalizePhoneForAPI(phoneNumber),
         });
         if (result.success) {
           onNext();
@@ -515,7 +515,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 
             <Typography
               sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              Mã xác nhận đã được gửi đến số <b>+84{phoneNumber}</b>
+              Mã xác nhận đã được gửi đến số <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>

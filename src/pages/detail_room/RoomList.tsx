@@ -1087,7 +1087,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
             gap: 2,
           }}>
           <ArrowBackIosNewIcon />
-          Hi,+84{phoneNumber}
+          Hi,+84{normalizePhoneForAPI(phoneNumber)}
         </Typography>
       </Box>
 

@@ -510,7 +510,7 @@ const OtpVerification = ({
 
             <Typography
               sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              Mã xác nhận đã được gửi đến số <b>+84{phoneNumber}</b>
+              Mã xác nhận đã được gửi đến số <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>
@@ -1129,7 +1129,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }) => {
                     setCurrentStep("register");
                   }}
                 />
-                Hi,+84{phoneNumber}
+                Hi,+84{normalizePhoneForAPI(phoneNumber)}
               </Typography>
             </Box>
 
