@@ -21,7 +21,8 @@ import {
 import success from "../../images/Frame 1321317962.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getStatusPayment } from "../../service/payment";
-import failed from "../../images/Frame 1321317963.png"
+import failed from "../../images/Frame 1321317963.png";
+import dayjs from "dayjs";
 
 const PaymentResultView = () => {
   const theme = useTheme();
@@ -33,18 +34,19 @@ const PaymentResultView = () => {
     location.state?.data || JSON.parse(localStorage.getItem("booking"));
 
   const paymentId = data?.payment?.payment_id;
-  console.log("aaa paymentId",paymentId)
+  console.log("aaa paymentId", paymentId);
   const [loading, setLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState("pending"); // success | fail | pending
 
   // 👉 format time
-  const startTime = data.checkInTime;
-  const endTime = () => {
-    const [h, m] = data.checkInTime.split(":");
-    const endHour = Number(h) + Number(data.duration);
-    return `${endHour.toString().padStart(2, "0")}:${m}`;
-  };
-  const cancelBefore = `${data.checkInTime}, ${data.checkIn}`;
+  const checkIn = dayjs(data.check_in).format("YYYY-MM-DD");
+  const checkOut = dayjs(data.check_out).format("YYYY-MM-DD");
+
+  const startTime = dayjs(data.check_in).format("HH:mm");
+  const endTime = dayjs(data.check_out).format("HH:mm");
+
+  // Hủy miễn phí trước giờ check-in
+  const cancelBefore = `${startTime}, ${checkIn}`;
 
   // 🔥 AUTO CHECK PAYMENT STATUS
   useEffect(() => {
@@ -58,7 +60,7 @@ const PaymentResultView = () => {
 
     const checkPayment = async () => {
       try {
-        let result = await getStatusPayment(paymentId)
+        let result = await getStatusPayment(paymentId);
         const status = result?.status;
         if (status === "failed") {
           clearInterval(interval);
@@ -72,7 +74,7 @@ const PaymentResultView = () => {
           clearInterval(interval);
           setPaymentStatus("paid");
           setLoading(false);
-          
+
           return;
         }
         // chưa có kết quả → retry
@@ -120,7 +122,7 @@ const PaymentResultView = () => {
             {/* LOAD PAYMENT */}
             {loading ? (
               <>
-                <CircularProgress sx={{color:"#98b720"}} />
+                <CircularProgress sx={{ color: "#98b720" }} />
                 <Typography fontSize='0.9rem' color='#666'>
                   Đang xác thực thanh toán...
                 </Typography>
@@ -138,18 +140,30 @@ const PaymentResultView = () => {
               <>
                 {/* Success */}
                 <Box>
-                  <img src={ paymentStatus == "failed"?failed :success} alt='' style={{ width: 90 }} />
+                  <img
+                    src={paymentStatus == "failed" ? failed : success}
+                    alt=''
+                    style={{ width: 90 }}
+                  />
                 </Box>
 
                 <Typography
                   fontWeight={700}
                   fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
-                  color={paymentStatus == "failed"?"#FF3030":'rgba(152, 183, 32, 1)'}>
-                 {paymentStatus == "failed" ? "Đặt phòng không thành công":"Đặt phòng thành công" } 
+                  color={
+                    paymentStatus == "failed"
+                      ? "#FF3030"
+                      : "rgba(152, 183, 32, 1)"
+                  }>
+                  {paymentStatus == "failed"
+                    ? "Đặt phòng không thành công"
+                    : "Đặt phòng thành công"}
                 </Typography>
 
                 <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
-                 {paymentStatus == "failed"?"Đã có lỗi xảy ra trong lúc thanh toán phòng tại":"Chúc mừng bạn đã đặt thành công phòng tại"} {" "}
+                  {paymentStatus == "failed"
+                    ? "Đã có lỗi xảy ra trong lúc thanh toán phòng tại"
+                    : "Chúc mừng bạn đã đặt thành công phòng tại"}{" "}
                   <strong>{data.name}</strong>
                 </Typography>
 
@@ -168,7 +182,10 @@ const PaymentResultView = () => {
                       <Box sx={{ width: 36, height: 36 }}>
                         <HomeIcon sx={{ fontSize: 20, color: "#666" }} />
                       </Box>
-                      <Typography fontSize='0.95rem' color='#666' fontWeight={600}>
+                      <Typography
+                        fontSize='0.95rem'
+                        color='#666'
+                        fontWeight={600}>
                         Room × {data.rooms[0].quantity}
                       </Typography>
                     </Stack>
@@ -179,7 +196,7 @@ const PaymentResultView = () => {
                         <TimeIcon sx={{ fontSize: 20, color: "#666" }} />
                       </Box>
                       <Typography fontSize='0.9rem' color='#333'>
-                        {startTime} – {endTime()}, {data.checkIn}
+                        {startTime} – {endTime}, {checkIn} → {checkOut}
                       </Typography>
                     </Stack>
 
@@ -229,7 +246,9 @@ const PaymentResultView = () => {
 
                 <Button
                   onClick={() =>
-                    navigate("/profile?type=booking", { state: { booking: data } })
+                    navigate("/profile?type=booking", {
+                      state: { booking: data },
+                    })
                   }
                   fullWidth
                   variant='contained'

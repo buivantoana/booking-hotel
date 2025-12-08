@@ -369,31 +369,31 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-  
+
     // Nếu bắt đầu bằng 84 → thay thành 0
     if (p.startsWith("84")) {
       p = "0" + p.slice(2);
     }
-  
+
     // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
     if (!p.startsWith("0")) {
       p = "0" + p;
     }
-  
+
     return p;
   };
-  
+
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-  
+
     const normalized = normalizePhone(phone);
-  
+
     // chỉ cho phép đúng 10 hoặc 11 số
     if (normalized.length !== 10 && normalized.length !== 11) return false;
-  
+
     // đầu số VN hợp lệ
     if (!/^0[35789]/.test(normalized)) return false;
-  
+
     return true;
   };
   console.log("AAA data", selectedRoom);
@@ -759,6 +759,7 @@ const RoomDetailModal = ({
           image: hotel?.images?.[0],
           ...Object.fromEntries([...searchParams]),
           phone: "+84" + phoneNumber,
+          rent_types: hotel.rent_types,
         })
       );
       setTimeout(() => {
@@ -937,7 +938,7 @@ const RoomDetailModal = ({
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
               Thông tin phòng
             </Typography>
-            <FacilitiesList facilities={room?.facilities||{}} />
+            <FacilitiesList facilities={room?.facilities || {}} />
 
             <Typography fontWeight={600} mb={1}>
               Quyền lợi đặt phòng
@@ -984,7 +985,7 @@ const RoomDetailModal = ({
               Mô tả phòng
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={3}>
-             {room?.description}
+              {room?.description}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {/* PRICE + BUTTON */}
@@ -1218,13 +1219,9 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
   );
 };
 
-
-
 const FacilitiesList = ({ facilities }) => {
   const prettyKey = (key) => {
-    return key
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   };
 
   const prettyValue = (value) => {
@@ -1248,5 +1245,3 @@ const FacilitiesList = ({ facilities }) => {
     </Box>
   );
 };
-
-

@@ -30,7 +30,6 @@ import {
   AccessTime,
   Nightlight,
   CalendarToday,
-  
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import imgMain from "../../images/Rectangle 12.png";
@@ -101,28 +100,63 @@ const CheckOutView = ({ dataCheckout }) => {
   // Format ngày + giờ
   const formatCheckIn = () => {
     if (!checkIn) return "Chưa chọn";
+
     const date = dayjs(checkIn);
-    if (type === "hourly" || type === "overnight") {
-      return `${checkInTime}, ${date.format("D/M")}`;
-    }
-    return date.format("D/M");
+
+    const cfg = dataCheckout?.rent_types?.[dataCheckout?.type];
+    if (!cfg) return "Chưa chọn";
+
+    // Nếu không có checkInTime thì dùng config.from
+    const usedCheckInTime =
+      checkInTime && checkInTime !== "null" ? checkInTime : cfg.from || "00:00";
+
+    return `${usedCheckInTime}, ${dayjs(checkIn).format("D/M")}`;
   };
 
   const formatCheckOut = () => {
+    const cfg = dataCheckout?.rent_types?.[dataCheckout?.type];
+    if (!cfg) return "Chưa chọn";
+
+    // ---------- HOURLY ----------
     if (type === "hourly" && checkIn) {
-      const start = dayjs(checkIn)
-        .hour(parseInt(checkInTime.split(":")[0]))
-        .minute(0);
-      const end = start.add(duration, "hour");
+      const usedCheckInTime =
+        checkInTime && checkInTime !== "null"
+          ? checkInTime
+          : cfg.from || "00:00";
+      const [hh, mm] = usedCheckInTime.split(":").map(Number);
+      const start = dayjs(checkIn).hour(hh).minute(mm).second(0);
+      const end = start.add(Number(duration || 0), "hour");
       return `${end.format("HH:mm")}, ${end.format("D/M")}`;
     }
+
+    // ---------- OVERNIGHT ----------
     if (type === "overnight" && checkIn) {
-      const end = dayjs(checkIn).add(1, "day");
-      return `12:00, ${end.format("D/M")}`;
+      // nếu FE có checkOut cụ thể thì dùng checkOut + cfg.to (giờ "to")
+      if (checkOut) {
+        const [toH, toM] = (cfg.to || "12:00").split(":").map(Number);
+        const end = dayjs(checkOut).hour(toH).minute(toM).second(0);
+        return `${end.format("HH:mm")}, ${end.format("D/M")}`;
+      }
+      // ngược lại => mặc định +1 ngày và giờ = cfg.to
+      const [toH, toM] = (cfg.to || "12:00").split(":").map(Number);
+      const end = dayjs(checkIn).add(1, "day").hour(toH).minute(toM).second(0);
+      return `${end.format("HH:mm")}, ${end.format("D/M")}`;
     }
-    if (type === "daily" && checkOut) {
-      return dayjs(checkOut).format("D/M");
+
+    // ---------- DAILY ----------
+    if (type === "daily") {
+      // nếu FE gửi checkOut => dùng ngày đó + giờ cfg.to
+      if (checkOut) {
+        const [toH, toM] = (cfg.to || "12:00").split(":").map(Number);
+        const end = dayjs(checkOut).hour(toH).minute(toM).second(0);
+        return `${end.format("HH:mm")}, ${end.format("D/M")}`;
+      }
+      // nếu FE không gửi checkOut => mặc định +1 ngày với giờ cfg.to
+      const [toH, toM] = (cfg.to || "12:00").split(":").map(Number);
+      const end = dayjs(checkIn).add(1, "day").hour(toH).minute(toM).second(0);
+      return `${end.format("HH:mm")}, ${end.format("D/M")}`;
     }
+
     return "Chưa chọn";
   };
 
@@ -159,118 +193,149 @@ const CheckOutView = ({ dataCheckout }) => {
   ];
   const handleCreateBooking = async () => {
     setLoading(true);
+
     if (!dataCheckout) {
       alert("Thiếu thông tin đặt phòng!");
       return;
     }
 
     try {
-      // Format ngày giờ theo chuẩn API: YYYY-MM-DD HH:mm:ss
-      const formatDateTime = (dateStr: string, time?: string) => {
+      const formatFullDateTime = (dateStr, timeStr) => {
         if (!dateStr) return null;
-        const date = dayjs(dateStr);
-        if (time) {
-          const [h, m] = time.split(":");
-          return date
-            .hour(+h)
-            .minute(+m)
-            .second(0)
-            .format("YYYY-MM-DD HH:mm:ss");
-        }
-        return date.format("YYYY-MM-DD HH:mm:ss");
-      };
-
-      // Tính check_out nếu là hourly
-      let checkInDateTime = formatDateTime(
-        dataCheckout.checkIn,
-        dataCheckout.checkInTime
-      );
-      let checkOutDateTime = null;
-
-      if (dataCheckout.type === "hourly" && checkInDateTime) {
-        const start = dayjs(checkInDateTime);
-        checkOutDateTime = start
-          .add(dataCheckout.duration, "hour")
-          .format("YYYY-MM-DD HH:mm:ss");
-      } else if (dataCheckout.type === "overnight" && checkInDateTime) {
-        const start = dayjs(checkInDateTime);
-        checkOutDateTime = start
-          .add(1, "day")
-          .hour(12)
-          .minute(0)
+        const [hh, mm] = timeStr.split(":");
+        return dayjs(dateStr)
+          .hour(Number(hh))
+          .minute(Number(mm))
           .second(0)
           .format("YYYY-MM-DD HH:mm:ss");
-      } else if (dataCheckout.type === "daily" && dataCheckout.checkOut) {
-        checkOutDateTime = formatDateTime(dataCheckout.checkOut);
+      };
+
+      const { type } = dataCheckout; // hourly | daily | overnight
+      const timeConfig = dataCheckout.rent_types[type];
+
+      // ================================
+      // 1) TÍNH CHECK-IN
+      // ================================
+      let checkInTime =
+        dataCheckout.checkInTime && dataCheckout.checkInTime !== "null"
+          ? dataCheckout.checkInTime
+          : timeConfig.from;
+
+      const checkInDateTime = formatFullDateTime(
+        dataCheckout.checkIn,
+        checkInTime
+      );
+
+      // ================================
+      // 2) TÍNH CHECK-OUT
+      // ================================
+      let checkOutDateTime = null;
+
+      if (type === "hourly") {
+        // hourly = +duration giờ tính từ check-in
+        checkOutDateTime = dayjs(checkInDateTime)
+          .add(Number(dataCheckout.duration), "hour")
+          .format("YYYY-MM-DD HH:mm:ss");
       }
 
+      if (type === "daily" || type === "overnight") {
+        /**
+         * QUY TẮC:
+         * FE gửi checkOut (date) → dùng ngày đó
+         * FE KHÔNG gửi → +1 ngày
+         */
+
+        let checkOutDate = dataCheckout.checkOut;
+
+        if (!checkOutDate) {
+          // FE không gửi → +1 ngày
+          checkOutDate = dayjs(dataCheckout.checkIn)
+            .add(1, "day")
+            .format("YYYY-MM-DD");
+        }
+
+        const [toH, toM] = timeConfig.to.split(":");
+
+        checkOutDateTime = dayjs(checkOutDate)
+          .hour(Number(toH))
+          .minute(Number(toM))
+          .second(0)
+          .format("YYYY-MM-DD HH:mm:ss");
+      }
+
+      // ================================
+      // 3) TẠO BODY GỬI API
+      // ================================
       const body = {
         hotel_id: dataCheckout.hotel_id,
         check_in: checkInDateTime,
         check_out: checkOutDateTime,
-        rent_type: dataCheckout.type, // hourly | overnight | daily
-        payment_method: paymentMethod, // momo | vnpay | hotel
+        rent_type: dataCheckout.type,
+        payment_method: paymentMethod,
         contact_info: {
           full_name: (name && name.trim()) || "Khách lẻ",
-          phone: phone.replace(/[^0-9]/g, ""), // chỉ lấy số
-          email: "khachle@gmail.com", // nếu có thì thêm sau
+          phone: phone.replace(/[^0-9]/g, ""),
+          email: "khachle@gmail.com",
         },
-        rooms: dataCheckout.rooms || [], // ví dụ: [{ room_type_id: "...", quantity: 1 }]
-        note: "ghi chú", // bạn có thể thêm TextField để nhập ghi chú
+        rooms: dataCheckout.rooms || [],
+        note: "ghi chú",
       };
 
-      console.log("Gửi booking:", body); // để check trước khi gọi API
+      console.log("Gửi booking:", body);
 
-      const result = await createBooking(body); // gọi API thật
-      console.log("AAA result", result);
-      if(result?.booking_id){
-        localStorage.setItem("booking",JSON.stringify({...JSON.parse(localStorage.getItem("booking")),...result}));
-        setTimeout(()=>{
+      const result = await createBooking(body);
+
+      if (result?.booking_id) {
+        localStorage.setItem(
+          "booking",
+          JSON.stringify({
+            ...JSON.parse(localStorage.getItem("booking")),
+            ...result,
+          })
+        );
+
+        setTimeout(() => {
           navigate("/payment-result");
-        },300)
-      }else{
+        }, 300);
+      } else {
         toast.error(getErrorMessage(result.code) || result.message);
       }
-      
-      // if (result.success) {
-      //   alert("Đặt phòng thành công!");
-      //   // Chuyển hướng sang trang xác nhận hoặc thanh toán
-      //   // router.push(`/booking-success/${result.booking_id}`);
-      // }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Lỗi đặt phòng:", error);
       alert(error.message || "Đặt phòng thất bại, vui lòng thử lại!");
     }
+
     setLoading(false);
   };
+
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-  
+
     // Nếu bắt đầu bằng 84 → thay thành 0
     if (p.startsWith("84")) {
       p = "0" + p.slice(2);
     }
-  
+
     // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
     if (!p.startsWith("0")) {
       p = "0" + p;
     }
-  
+
     return p;
   };
-  
+
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-  
+
     const normalized = normalizePhone(phone);
-  
+
     // chỉ cho phép đúng 10 hoặc 11 số
     if (normalized.length !== 10 && normalized.length !== 9) return false;
-  
+
     // đầu số VN hợp lệ
     if (!/^0[35789]/.test(normalized)) return false;
-  
+
     return true;
   };
   return (
@@ -460,7 +525,7 @@ const CheckOutView = ({ dataCheckout }) => {
                       sx={{ minWidth: 80 }}>
                       Số điện thoại
                     </Typography>
-                   
+
                     <Box sx={{ position: "relative", width: 200 }}>
                       <TextField
                         value={phone}
@@ -479,13 +544,16 @@ const CheckOutView = ({ dataCheckout }) => {
                           startAdornment: (
                             <InputAdornment position='start'>
                               <Box
-                                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                }}>
                                 <Flag
                                   countryCode='VN'
                                   svg
                                   style={{ width: 24, height: 24 }}
                                 />
-                                
                               </Box>
                             </InputAdornment>
                           ),
@@ -701,11 +769,7 @@ const CheckOutView = ({ dataCheckout }) => {
                         justifyContent='space-between'
                         alignItems='flex-start'
                         sx={{ py: 1, px: 1 }}>
-                        <Stack
-                          direction='row'
-                          spacing={2}
-                          alignItems='center'>
-                            
+                        <Stack direction='row' spacing={2} alignItems='center'>
                           <Box
                             component='img'
                             src={wallet}
@@ -713,9 +777,7 @@ const CheckOutView = ({ dataCheckout }) => {
                             sx={{ width: 32, height: 32 }}
                           />
                           <Stack spacing={0.5}>
-                            <Typography fontWeight={600}>
-                            Thẻ ATM
-                            </Typography>
+                            <Typography fontWeight={600}>Thẻ ATM</Typography>
                           </Stack>
                         </Stack>
                         <Radio value='card' size='small' />
