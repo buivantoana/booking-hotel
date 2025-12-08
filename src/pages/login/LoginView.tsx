@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import AppleLogin from "react-apple-login";
 
 const GOOGLE_CLIENT_ID =
   "285312507829-8puo8pp5kikc3ahdivtr9ehq1fm3kkks.apps.googleusercontent.com";
@@ -279,12 +280,15 @@ const PinCreationConfirm = ({
         if (result.code == "OK") {
           localStorage.setItem("access_token", dataUser.access_token);
           localStorage.setItem("refresh_token", dataUser.refresh_token);
-          localStorage.setItem("user", JSON.stringify({...dataUser.user,phone:"+84"+phoneNumber }));
+          localStorage.setItem(
+            "user",
+            JSON.stringify({ ...dataUser.user, phone: "+84" + phoneNumber })
+          );
           context.dispatch({
             type: "LOGIN",
             payload: {
               ...context.state,
-              user: { ...{...dataUser.user,phone:"+84"+phoneNumber  } },
+              user: { ...{ ...dataUser.user, phone: "+84" + phoneNumber } },
             },
           });
           onSuccess();
@@ -510,7 +514,8 @@ const OtpVerification = ({
 
             <Typography
               sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              Mã xác nhận đã được gửi đến số <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
+              Mã xác nhận đã được gửi đến số{" "}
+              <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>
@@ -675,8 +680,7 @@ const RegistrationForm = ({
         value: "+84" + normalizePhoneForAPI(phoneNumber),
       });
       if (checkUserResult.code == "OK") {
-      
-        setErrorExits(true)
+        setErrorExits(true);
         setLoading(false);
         return;
       }
@@ -693,37 +697,44 @@ const RegistrationForm = ({
     }
     setLoading(false);
   };
+  const handleAppleResponse = (response) => {
+    console.log("Apple login response:", response);
+
+    // Nếu login thành công có response.authorization.code
+    if (response?.authorization?.code) {
+    }
+  };
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-  
+
     // Nếu bắt đầu bằng 84 → thay thành 0
     if (p.startsWith("84")) {
       p = "0" + p.slice(2);
     }
-  
+
     // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
     if (!p.startsWith("0")) {
       p = "0" + p;
     }
-  
+
     return p;
   };
-  
+
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-  
+
     const normalized = normalizePhone(phone);
-  
+
     // chỉ cho phép đúng 10 hoặc 11 số
     if (normalized.length !== 10 && normalized.length !== 11) return false;
-  
+
     // đầu số VN hợp lệ
     if (!/^0[35789]/.test(normalized)) return false;
-  
+
     return true;
   };
-  
+
   return (
     <Container
       maxWidth='lg'
@@ -821,12 +832,11 @@ const RegistrationForm = ({
                 onBlur={() => setTouched(true)} // chỉ validate khi blur
                 error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
-                   touched && !isValidVietnamPhone(phoneNumber)
+                  touched && !isValidVietnamPhone(phoneNumber)
                     ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
                     : ""
                 }
                 sx={{
-                  
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
                     height: "60px",
@@ -884,7 +894,9 @@ const RegistrationForm = ({
                     ) : null,
                 }}
               />
-              <Typography sx={{mb: 3,mt:.5}} fontSize={"12px"} color="red">{errorExits&&"Số điện thoại này đã đăng ký tài khoản"}</Typography>
+              <Typography sx={{ mb: 3, mt: 0.5 }} fontSize={"12px"} color='red'>
+                {errorExits && "Số điện thoại này đã đăng ký tài khoản"}
+              </Typography>
               {/* TÊN */}
 
               {/* NGÀY SINH */}
@@ -972,7 +984,7 @@ const RegistrationForm = ({
                   {/* SOCIAL BUTTONS */}
                   <Grid container spacing={2} mb={3}>
                     <Grid item xs={12} sm={6}>
-                      <Button
+                      {/* <Button
                         variant='outlined'
                         fullWidth
                         sx={{
@@ -994,7 +1006,24 @@ const RegistrationForm = ({
                           sx={{ width: 20 }}
                         />
                         Sign up with Apple
-                      </Button>
+                      </Button> */}
+                      <AppleLogin
+                        clientId='com.zeezoo.hotelbooking.login'
+                        redirectURI='https://booking-hotel-liard.vercel.app'
+                        responseType='code'
+                        responseMode='query'
+                        usePopup={true}
+                        scope='name email'
+                        designProp={{
+                          height: 44,
+                          width: 260,
+                          color: "black",
+                          border: false,
+                          type: "sign-in",
+                          border_radius: 12,
+                        }}
+                        callback={handleAppleResponse}
+                      />
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
