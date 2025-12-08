@@ -456,7 +456,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         let result = await verifyOtp({
           platform: "ios",
           type: "phone",
-          value: "+84" + phoneNumber,
+          value: "+84" + normalizePhoneForAPI(phoneNumber),
           otp: otp,
           location: "hanoi",
           name: name,
