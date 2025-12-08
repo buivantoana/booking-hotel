@@ -26,7 +26,7 @@ import { sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
-import { getErrorMessage } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
 
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
@@ -57,7 +57,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
         let result = await sendOtp({
           platform: "ios",
           type: "phone",
-          value: "+84" + phoneNumber,
+          value: "+84" + normalizePhoneForAPI(phoneNumber),
         });
         if (result.success) {
           onNext();
@@ -71,16 +71,31 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
-    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
+  
+    // Nếu bắt đầu bằng 84 → thay thành 0
+    if (p.startsWith("84")) {
+      p = "0" + p.slice(2);
+    }
+  
+    // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
+    if (!p.startsWith("0")) {
+      p = "0" + p;
+    }
+  
     return p;
   };
+  
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-    if (phone.length > 9) return false;
+  
     const normalized = normalizePhone(phone);
-    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
-    if (normalized.length < 9) return false; // độ dài
+  
+    // chỉ cho phép đúng 10 hoặc 11 số
+    if (normalized.length !== 10 && normalized.length !== 11) return false;
+  
+    // đầu số VN hợp lệ
+    if (!/^0[35789]/.test(normalized)) return false;
+  
     return true;
   };
 
@@ -310,7 +325,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         let result = await verifyOtp({
           platform: "ios",
           type: "phone",
-          value: "+84" + phoneNumber,
+          value: "+84" + normalizePhoneForAPI(phoneNumber),
           otp: otp,
           location: "hanoi",
         });

@@ -67,7 +67,7 @@ const ProfileView = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loadingSubmit, setLoadingSubmit] = useState(false);
- 
+
   const menuItems = [
     { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
     { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
@@ -194,8 +194,10 @@ const ProfileView = ({
   );
 
   const MainContent = () => {
+   
+   
     if (!detailBooking) return null;
-
+    
     // Parse JSON string fields
     const hotelName =
       JSON.parse(detailBooking.hotel_name)?.vi ||
@@ -254,25 +256,68 @@ const ProfileView = ({
           return "Theo giờ";
       }
     };
-
+    const getBestPayment = (payments = []) => {
+      if (!payments.length) return null;
+    
+      const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
+    
+      for (const st of priority) {
+        const found = payments.find(p => p.status === st);
+        if (found) return found;
+      }
+      return null;
+    };
+    const getPaymentTextStatus = (payments = []) => {
+      if (!payments || payments.length === 0) {
+        return "Trả tại khách sạn"; // không có thông tin thanh toán
+      }
+    
+      // Thứ tự ưu tiên
+      const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
+    
+      let status: string | null = null;
+    
+      for (const st of priority) {
+        const found = payments.find(p => p.status === st);
+        if (found) {
+          status = found.status;
+          break;
+        }
+      }
+    
+      // Map sang text tiếng Việt
+      switch (status) {
+        case "paid":
+          return "Đã thanh toán";
+        case "pending":
+          return "Đang chờ thanh toán";
+        case "failed":
+          return "Thanh toán thất bại";
+        case "cancelled":
+          return "Thanh toán bị hủy";
+        case "refunded":
+          return "Đã hoàn tiền";
+        default:
+          return "Chưa thanh toán";
+      }
+    };
     // Trạng thái thanh toán
-    const payment = detailBooking.payments?.[0];
-    const paymentStatus = payment
-      ? payment.status === "success"
-        ? "Đã thanh toán"
-        : payment.status === "failed"
-        ? "Thanh toán thất bại"
-        : "Chưa thanh toán"
-      : "Trả tại khách sạn";
+    const payments = detailBooking.payments || [];
 
-    const paymentMethodLabel = payment?.method
-      ? payment.method === "momo"
+    // Lấy payment "quan trọng nhất"
+    const bestPayment = getBestPayment(payments);
+    
+    // Lấy text status
+    const paymentStatus = getPaymentTextStatus(payments);
+    
+    // Lấy label method đúng
+    const paymentMethodLabel = bestPayment?.method
+      ? bestPayment.method === "momo"
         ? "Ví MoMo"
-        : payment.method === "vnpay"
+        : bestPayment.method === "vnpay"
         ? "VNPay"
         : "Trả tại khách sạn"
       : "Trả tại khách sạn";
-
     const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
       "vi-VN"
     );
@@ -282,27 +327,47 @@ const ProfileView = ({
       navigator.clipboard.writeText(detailBooking.booking_code);
       alert("Đã sao chép mã đặt phòng!");
     };
+    const getPaymentStatus = (payments = []) => {
+      if (!payments.length) return null;
+    
+      const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
+    
+      for (const status of priority) {
+        const found = payments.find(p => p.status === status);
+        if (found) return found.status;
+      }
+      return null;
+    };
+    
     const getBookingNameStatus = (detailBooking: any) => {
-      const paymentStatus = detailBooking.payments?.[0]?.status;
+      const paymentStatus = getPaymentStatus(detailBooking.payments);
       const bookingStatus = detailBooking.status;
-
-      if (bookingStatus === "checked_out") {
+    
+      // -----------------------------
+      // LOGIC NÚT HIỂN THỊ
+      // -----------------------------
+    
+      // booking đã hoàn thành hoặc bị hủy -> nút "Đặt lại"
+      if (bookingStatus === "checked_out" || bookingStatus === "cancelled") {
         return "Đặt lại";
       }
-      if (bookingStatus === "cancelled") {
-        return "Đặt lại";
-      }
+    
+      // đã xác nhận và đã thanh toán → có thể hủy
       if (bookingStatus === "confirmed" && paymentStatus === "paid") {
         return "Hủy đặt phòng";
       }
-
+    
+      // chưa thanh toán đủ hoặc payment lỗi
       if (
         paymentStatus === "failed" ||
         paymentStatus === "pending" ||
         bookingStatus === "pending"
       ) {
-        return "Tiếp tục thành toán";
+        return "Tiếp tục thanh toán";
       }
+    
+      // fallback – mặc định vẫn hiển thị tiếp tục thanh toán
+      return "Tiếp tục thanh toán";
     };
     const handleSubmit = async () => {
       setLoadingSubmit(true);
@@ -314,12 +379,97 @@ const ProfileView = ({
           //   toast.success(result?.message);
           //   getHistoryBooking();
           // }
+        }else if(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán"){
+          handleRetryPayment({booking_id:detailBooking?.booking_id,method:detailBooking.payments[0]?.method})
         }
       } catch (error) {
         console.log(error);
       }
-      setLoadingSubmit(false);
+      if(!(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán")){
+        setLoadingSubmit(false);
+      }
+      
     };
+
+    const handleRetryPayment = async (body) => {
+      setLoadingSubmit(true);
+    
+      try {
+        // 1️⃣ GỌI API RETRY
+        const result = await retryPayment(body);
+    
+        if(result?.payment_id){
+          checkPaymentStatusLoop(result?.payment_id);
+        }else{
+          toast.error(getErrorMessage(result.code) || result.message);
+          setLoadingSubmit(false);
+        }
+        
+       
+    
+      } catch (error) {
+        console.log(error);
+        
+      } 
+    };
+    
+    
+    const checkPaymentStatusLoop = async (paymentId) => {
+      let retry = 0;
+    
+      const interval = setInterval(async () => {
+        retry++;
+    
+        try {
+          let result = await getStatusPayment(paymentId);
+          const status = result?.status;
+    
+          switch (status) {
+            case "paid":
+              clearInterval(interval);
+              setLoadingSubmit(false);
+              toast.success("Thanh toán thành công!");
+              getHistoryBooking();
+              return;
+    
+            case "failed":
+              clearInterval(interval);
+              setLoadingSubmit(false);
+              toast.error("Thanh toán thất bại!");
+              return;
+    
+            case "refunded":
+              clearInterval(interval);
+              setLoadingSubmit(false);
+              toast.info("Thanh toán đã được hoàn tiền!");
+              return;
+    
+            case "cancelled":
+              clearInterval(interval);
+              setLoadingSubmit(false);
+              toast.warning("Thanh toán đã bị hủy!");
+              return;
+    
+            case "pending":
+            default:
+              // vẫn pending → tiếp tục call
+              break;
+          }
+        } catch (error) {
+          console.log("Error:", error);
+        }
+    
+        // ❌ quá 30 lần → xem như fail
+        if (retry >= 30) {
+          clearInterval(interval);
+          setLoadingSubmit(false);
+          toast.error("Thanh toán quá thời gian! Vui lòng thử lại.", {
+            position: "top-center",
+          });
+        }
+      }, 2000);
+    };
+    
     const [openReason, setOpenReason] = React.useState(false);
 
     const handleSubmitReason = async(value) => {
@@ -402,7 +552,7 @@ const ProfileView = ({
           </Paper>
         )}
         {detailBooking.status === "confirmed" &&
-          detailBooking?.payments?.[0]?.status == "paid" && (
+          bestPayment?.status === "paid" && (
             <Paper
               elevation={0}
               sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
@@ -429,8 +579,8 @@ const ProfileView = ({
           )}
 
         {detailBooking.status === "pending" &&
-          (detailBooking?.payments?.[0]?.status == "failed" ||
-            detailBooking?.payments?.[0]?.status == "pending") && (
+          ( bestPayment?.status == "failed" ||
+             bestPayment?.status == "pending") && (
             <Paper
               elevation={0}
               sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
@@ -454,6 +604,7 @@ const ProfileView = ({
                 </Stack>
                 <Button
                   variant='contained'
+                  onClick={()=> handleRetryPayment({booking_id:detailBooking?.booking_id,method:detailBooking.payments[0]?.method})}
                   sx={{
                     bgcolor: "#98b720",
                     color: "white",
@@ -466,7 +617,7 @@ const ProfileView = ({
                     minWidth: 120,
                     "&:hover": { bgcolor: "#7a9a1a" },
                   }}>
-                  Tiếp tục thành toán
+                  Tiếp tục thanh toán
                 </Button>
               </Stack>
             </Paper>
@@ -674,7 +825,7 @@ const ProfileView = ({
               </Typography>
               <Typography
                 fontWeight={600}
-                color={payment?.status === "success" ? "#98b720" : "#ff4444"}
+                color={bestPayment?.status === "paid" ? "#98b720" : "#ff4444"}
                 fontSize='0.95rem'>
                 {paymentStatus}
               </Typography>
@@ -893,6 +1044,8 @@ export default ProfileView;
 import {
   TextField,
 } from "@mui/material";
+import { getStatusPayment, retryPayment } from "../../service/payment";
+import { getErrorMessage } from "../../utils/utils";
 
 const ReasonModal = ({ open, onClose, onSubmit,loadingSubmit }) => {
   const [reason, setReason] = React.useState("");

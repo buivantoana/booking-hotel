@@ -39,6 +39,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import no_room from "../../images/No Navigation.svg";
 import building from "../../images/building.png";
 import remove from "../../images/delete.png";
+import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import { format } from "date-fns";
 import {
   deleteBooking,
@@ -76,28 +77,52 @@ const getThumbnail = (booking: any) => {
     try {
       const arr = JSON.parse(imagesStr.replace(/\\"/g, '"'));
       return arr[0] || "";
-    } catch {}
+    } catch { }
   }
   return "";
 };
 
 // Map backend status → UI status + label
+// Ưu tiên chọn payment có trạng thái có giá trị nhất
+const getPaymentStatus = (payments = []) => {
+  if (!payments.length) return null;
+
+  // Ưu tiên theo thứ tự
+  const priority = ["paid", "pending", "failed", "cancelled", "refunded"];
+
+  // Tìm payment đầu tiên theo thứ tự ưu tiên
+  for (const status of priority) {
+    const p = payments.find((x) => x.status === status);
+    if (p) return p.status;
+  }
+
+  return null;
+};
+
 const getBookingStatus = (booking: any) => {
-  const paymentStatus = booking.payments?.[0]?.status;
+  const paymentStatus = getPaymentStatus(booking.payments);
   const bookingStatus = booking.status;
+
+  // =======================
+  // LOGIC BOOKING
+  // =======================
 
   if (bookingStatus === "checked_out") {
     return { label: "Hoàn thành", color: "#1A9A50", bg: "#E8F5E9" };
   }
+
   if (bookingStatus === "cancelled") {
     return { label: "Đã hủy", color: "#E91E1E", bg: "#FFEBEE" };
   }
+
   if (bookingStatus === "confirmed" && paymentStatus === "paid") {
     return { label: "Chờ nhận phòng", color: "#0066CC", bg: "#E6F0FA" };
   }
+
   if (paymentStatus === "paid") {
     return { label: "Hoàn thành", color: "#1A9A50", bg: "#E8F5E9" };
   }
+
   if (
     paymentStatus === "failed" ||
     paymentStatus === "pending" ||
@@ -105,8 +130,10 @@ const getBookingStatus = (booking: any) => {
   ) {
     return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
   }
+
   return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
 };
+
 
 // ==================== BOOKING CARD (dùng data thật) ====================
 const BookingCard = ({
@@ -124,6 +151,8 @@ const BookingCard = ({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [issueModalOpen, setIssueModalOpen] = useState(false);
+  const [loadingRetry, setLoadingRetry] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState("");
 
   const statusConfig = getBookingStatus(booking);
   const hotelName = parseJsonField(booking.hotel_name);
@@ -147,6 +176,87 @@ const BookingCard = ({
       console.log(error);
     }
   };
+  const handleRetryPayment = async (body) => {
+    setLoadingRetry(true);
+  
+    try {
+      // 1️⃣ GỌI API RETRY
+      const result = await retryPayment(body);
+  
+      if(result?.payment_id){
+        checkPaymentStatusLoop(result?.payment_id);
+      }else{
+        toast.error(getErrorMessage(result.code) || result.message);
+        setLoadingRetry(false);
+      }
+      
+     
+  
+    } catch (error) {
+      console.log(error);
+      setPaymentStatus("failed");
+    } finally {
+      
+    }
+  };
+  
+  const checkPaymentStatusLoop = async (paymentId) => {
+    let retry = 0;
+  
+    const interval = setInterval(async () => {
+      retry++;
+  
+      try {
+        let result = await getStatusPayment(paymentId);
+        const status = result?.status;
+  
+        switch (status) {
+          case "paid":
+            clearInterval(interval);
+            setLoadingRetry(false);
+            toast.success("Thanh toán thành công!");
+            getHistoryBooking();
+            return;
+  
+          case "failed":
+            clearInterval(interval);
+            setLoadingRetry(false);
+            toast.error("Thanh toán thất bại!");
+            return;
+  
+          case "refunded":
+            clearInterval(interval);
+            setLoadingRetry(false);
+            toast.info("Thanh toán đã được hoàn tiền!");
+            return;
+  
+          case "cancelled":
+            clearInterval(interval);
+            setLoadingRetry(false);
+            toast.warning("Thanh toán đã bị hủy!");
+            return;
+  
+          case "pending":
+          default:
+            // vẫn pending → tiếp tục call
+            break;
+        }
+      } catch (error) {
+        console.log("Error:", error);
+      }
+  
+      // ❌ quá 30 lần → xem như fail
+      if (retry >= 30) {
+        clearInterval(interval);
+        setLoadingRetry(false);
+        toast.error("Thanh toán quá thời gian! Vui lòng thử lại.", {
+          position: "top-center",
+        });
+      }
+    }, 2000);
+  };
+  
+  
   return (
     <>
       <IssueBooking
@@ -333,6 +443,8 @@ const BookingCard = ({
             {(isWaitingPayment || isCancelled) && (
               <Button
                 variant='contained'
+                disabled={loadingRetry}
+                onClick={isWaitingPayment ? ()=>handleRetryPayment({booking_id:booking?.booking_id,method:booking.payments[0]?.method}):()=>{}}
                 sx={{
                   borderRadius: "24px",
                   textTransform: "none",
@@ -340,7 +452,15 @@ const BookingCard = ({
                   bgcolor: "#98b720",
                   "&:hover": { bgcolor: "#8ab020" },
                 }}>
-                {isWaitingPayment ? "Thanh toán" : "Đặt lại"}
+                {loadingRetry ? (
+                  <>
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                    {isWaitingPayment ? "Thanh toán" : "Đặt lại"}...
+                  </>
+                ) : (
+                  <> {isWaitingPayment ? "Thanh toán" : "Đặt lại"}</>
+                )}
+
               </Button>
             )}
           </Stack>
@@ -371,6 +491,23 @@ const BookingCard = ({
         <MenuItem
           onClick={() => {
             setMenuAnchor(null);
+            setDeleteDialogOpen(true);
+          }}>
+          <ListItemIcon>
+            <ReportGmailerrorredIcon
+              fontSize='small'
+              sx={{ color: "rgba(93, 102, 121, 1)" }}
+            />
+          </ListItemIcon>
+          <ListItemText>
+            <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
+              Xóa lịch sử đặt phòng
+            </Typography>
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setMenuAnchor(null);
             setIssueModalOpen(true);
           }}>
           <ListItemIcon>
@@ -381,7 +518,7 @@ const BookingCard = ({
           </ListItemIcon>
           <ListItemText>
             <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
-              Xóa lịch sử đặt phòng
+            Báo cáo
             </Typography>
           </ListItemText>
         </MenuItem>
@@ -922,6 +1059,7 @@ export default function MyBookingsPage({
 
 import { Card, Skeleton } from "@mui/material";
 import { getErrorMessage } from "../../utils/utils";
+import { getStatusPayment, retryPayment } from "../../service/payment";
 
 const BookingCardSkeleton = () => {
   return (
@@ -978,12 +1116,12 @@ const BookingCardSkeleton = () => {
   );
 };
 
+
 function IssueBooking({
   open,
   onClose,
   id,
   title,
-  setDeleteDialogOpen,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1009,9 +1147,7 @@ function IssueBooking({
       const res = await issueBooking(id, formData);
       if (res?.message) {
         onClose();
-        setDeleteDialogOpen(true);
         toast.success(res?.message);
-        setIssueTitle("");
         setIssueText("");
       } else {
         toast.error(getErrorMessage(res.code) || res.message);

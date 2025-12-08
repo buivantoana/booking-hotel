@@ -85,16 +85,31 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
-    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
+  
+    // Nếu bắt đầu bằng 84 → thay thành 0
+    if (p.startsWith("84")) {
+      p = "0" + p.slice(2);
+    }
+  
+    // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
+    if (!p.startsWith("0")) {
+      p = "0" + p;
+    }
+  
     return p;
   };
+  
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-    if (phone.length > 9) return false;
+  
     const normalized = normalizePhone(phone);
-    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
-    if (normalized.length < 9) return false; // độ dài
+  
+    // chỉ cho phép đúng 10 hoặc 11 số
+    if (normalized.length !== 10 && normalized.length !== 9) return false;
+  
+    // đầu số VN hợp lệ
+    if (!/^0[35789]/.test(normalized)) return false;
+  
     return true;
   };
   const isValidName = (name) => {
@@ -179,7 +194,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
                   // loại bỏ 0 đầu tiên
                   if (val.length > 20) val = val.slice(0, 20);
-                  if (val.startsWith("0")) val = val.slice(1);
+                 
                   setPhoneNumber(val);
                 }}
                 onBlur={() => setTouched(true)} // chỉ validate khi blur

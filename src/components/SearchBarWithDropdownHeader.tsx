@@ -653,6 +653,38 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     setCheckOut(checkOutParam ? dayjs(checkOutParam) : null);
   }, [location.pathname, locationAddress]);
 
+  useEffect(() => {
+    if (!checkIn) return;
+
+    if (bookingType === "overnight") {
+      // Qua đêm: luôn trả phòng = nhận phòng + 1 ngày
+      setCheckOut(checkIn.add(1, "day"));
+      setCheckInTime(null);
+      setCheckInDuration(null);
+    } 
+    else if (bookingType === "daily") {
+      // Theo ngày: nếu chưa có checkOut cũ mà nó <= checkIn → đẩy lên +1 ngày (tối thiểu 1 đêm)
+      if (!checkOut || checkOut.isSame(checkIn, "day") || checkOut.isBefore(checkIn)) {
+        setCheckOut(checkIn.add(1, "day"));
+      }
+      setCheckInTime(null);
+      setCheckInDuration(null);
+    } 
+    else if (bookingType === "hourly") {
+      // Theo giờ: xóa checkOut cũ (vì giờ dùng endTime tính từ giờ + duration)
+      // Giữ lại checkIn để chọn ngày
+      
+      // Nếu là hôm nay → giờ mặc định là giờ hiện tại + 1
+      const today = dayjs();
+      if (checkIn.isSame(today, "day")) {
+        const nextHour = today.hour() + 1;
+        setCheckInTime(String(nextHour).padStart(2, "0") + ":00");
+      } else {
+        setCheckInTime("10:00"); // hoặc "00:00" tuỳ bạn muốn
+      }
+      setCheckInDuration(3); // mặc định 3 tiếng hoặc 2 tùy bạn
+    }
+  }, [bookingType, checkIn])
 
   const updateParams = (newParams: Record<string, any>) => {
     const current = Object.fromEntries([...searchParams]);
@@ -696,17 +728,32 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   );
 
   const formatDateDisplay = () => {
-    if (!checkIn) return "";
+    if (!checkIn) return "Chọn ngày nhận phòng";
+  
+    // === THEO GIỜ ===
     if (bookingType === "hourly") {
-      const endHour =
-        (parseInt(checkInTime.split(":")[0]) + checkInDuration) % 24;
-      return `${checkInTime} - ${endHour
-        .toString()
-        .padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
+      if (!checkInTime || !checkInDuration) {
+        return `${checkIn.format("D/M")}`;
+      }
+  
+      const startHour = parseInt(checkInTime.split(":")[0], 10);
+      const endHour = (startHour + checkInDuration) % 24;
+  
+      return `${checkInTime} - ${endHour.toString().padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
     }
-    return (
-      checkIn.format("D/M") + (checkOut ? ` - ${checkOut.format("D/M")}` : "")
-    );
+  
+    // === QUA ĐÊM & THEO NGÀY ===
+    const checkInStr = checkIn.format("D/M");
+  
+    if (!checkOut) return checkInStr;
+  
+    const checkOutStr = checkOut.format("D/M");
+  
+    // Nếu cùng tháng → chỉ hiện ngày (ví dụ: 15/3 - 18/3)
+    // Nếu khác tháng → hiện đầy đủ (ví dụ: 30/3 - 2/4)
+    return checkIn.isSame(checkOut, "month")
+      ? `${checkInStr} - ${checkOut.format("D/M")}`
+      : `${checkInStr} - ${checkOutStr}`;
   };
 
   const getTypeLabel = () => {
@@ -730,7 +777,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       };
     }else{
        params = {
-        location: locationAddress.find((item) => item.name.vi == searchValue)?.id,
+        location: locationAddress.find((item) => item.name.vi == searchValue)?.id|| "",
         type: bookingType,
         checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
         checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",

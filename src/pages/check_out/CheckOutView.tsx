@@ -19,6 +19,7 @@ import {
   TextField,
   FormControlLabel,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import {
   ArrowBack as ArrowBackIcon,
@@ -29,14 +30,19 @@ import {
   AccessTime,
   Nightlight,
   CalendarToday,
+  
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import imgMain from "../../images/Rectangle 12.png";
 import vnpay from "../../images/Frame 1321317955.png";
 import momo from "../../images/Rectangle 30024.png";
+import wallet from "../../images/wallet-3.png";
 import building from "../../images/building.png";
 import { createBooking } from "../../service/booking";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { getErrorMessage } from "../../utils/utils";
+import Flag from "react-country-flag";
 
 const CheckOutView = ({ dataCheckout }) => {
   const theme = useTheme();
@@ -48,12 +54,13 @@ const CheckOutView = ({ dataCheckout }) => {
   const [selectedOffer, setSelectedOffer] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [phone, setPhone] = useState(
-    JSON.parse(localStorage.getItem("user"))?.phone ||
-      JSON.parse(localStorage.getItem("booking"))?.phone
+    JSON.parse(localStorage.getItem("user"))?.phone.replace(/^\+84/, "") ||
+      JSON.parse(localStorage.getItem("booking"))?.phone.replace(/^\+84/, "")
   );
   const [name, setName] = useState(
     JSON.parse(localStorage.getItem("user"))?.name
   );
+  const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -216,7 +223,15 @@ const CheckOutView = ({ dataCheckout }) => {
 
       const result = await createBooking(body); // gọi API thật
       console.log("AAA result", result);
-      navigate("/payment-result");
+      if(result?.booking_id){
+        localStorage.setItem("booking",JSON.stringify({...JSON.parse(localStorage.getItem("booking")),...result}));
+        setTimeout(()=>{
+          navigate("/payment-result");
+        },300)
+      }else{
+        toast.error(getErrorMessage(result.code) || result.message);
+      }
+      
       // if (result.success) {
       //   alert("Đặt phòng thành công!");
       //   // Chuyển hướng sang trang xác nhận hoặc thanh toán
@@ -227,6 +242,36 @@ const CheckOutView = ({ dataCheckout }) => {
       alert(error.message || "Đặt phòng thất bại, vui lòng thử lại!");
     }
     setLoading(false);
+  };
+  const normalizePhone = (phone) => {
+    if (!phone) return "";
+    let p = phone.trim().replace(/\D/g, "");
+  
+    // Nếu bắt đầu bằng 84 → thay thành 0
+    if (p.startsWith("84")) {
+      p = "0" + p.slice(2);
+    }
+  
+    // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
+    if (!p.startsWith("0")) {
+      p = "0" + p;
+    }
+  
+    return p;
+  };
+  
+  const isValidVietnamPhone = (phone) => {
+    if (!phone) return false;
+  
+    const normalized = normalizePhone(phone);
+  
+    // chỉ cho phép đúng 10 hoặc 11 số
+    if (normalized.length !== 10 && normalized.length !== 9) return false;
+  
+    // đầu số VN hợp lệ
+    if (!/^0[35789]/.test(normalized)) return false;
+  
+    return true;
   };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
@@ -415,9 +460,68 @@ const CheckOutView = ({ dataCheckout }) => {
                       sx={{ minWidth: 80 }}>
                       Số điện thoại
                     </Typography>
-                    <Typography fontWeight={600} color='#333'>
-                      {phone}
-                    </Typography>
+                   
+                    <Box sx={{ position: "relative", width: 200 }}>
+                      <TextField
+                        value={phone}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
+                          // loại bỏ 0 đầu tiên
+                          if (val.length > 20) val = val.slice(0, 20);
+                          setPhone(val);
+                        }}
+                        onBlur={() => setTouched(true)} // chỉ validate khi blur
+                        error={touched && !isValidVietnamPhone(phone)}
+                        placeholder='Nhập tên'
+                        variant='outlined'
+                        size='small'
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position='start'>
+                              <Box
+                                sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                <Flag
+                                  countryCode='VN'
+                                  svg
+                                  style={{ width: 24, height: 24 }}
+                                />
+                                
+                              </Box>
+                            </InputAdornment>
+                          ),
+                        }}
+                        disabled={!isEditing}
+                        sx={{
+                          width: "100%",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "12px",
+                            border: isEditing
+                              ? "1px solid #98b720"
+                              : "none !important",
+                            bgcolor: isEditing ? "#f0f8f0" : "transparent",
+                            pr: 5,
+                          },
+                          "& .Mui-disabled": {
+                            bgcolor: "transparent",
+                            color: "#333",
+                            WebkitTextFillColor: "#333",
+                            border: "none",
+                          },
+                        }}
+                      />
+                      {isEditing && (
+                        <CheckIcon
+                          sx={{
+                            position: "absolute",
+                            right: 8,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: "#98b720",
+                            fontSize: 20,
+                          }}
+                        />
+                      )}
+                    </Box>
                   </Stack>
 
                   <Stack
@@ -430,7 +534,7 @@ const CheckOutView = ({ dataCheckout }) => {
                       sx={{ minWidth: 80 }}>
                       Họ tên
                     </Typography>
-                    <Box sx={{ position: "relative", width: 180 }}>
+                    <Box sx={{ position: "relative", width: 200 }}>
                       <TextField
                         value={name}
                         onChange={(e) => setName(e.target.value)}
@@ -474,7 +578,7 @@ const CheckOutView = ({ dataCheckout }) => {
               </Paper>
 
               {/* ƯU ĐÃI */}
-              <Paper
+              {/* <Paper
                 elevation={0}
                 sx={{
                   borderRadius: "16px",
@@ -501,7 +605,7 @@ const CheckOutView = ({ dataCheckout }) => {
                     Chọn ưu đãi
                   </Typography>
                 </Stack>
-              </Paper>
+              </Paper> */}
             </Grid>
 
             {/* CỘT PHẢI */}
@@ -591,6 +695,30 @@ const CheckOutView = ({ dataCheckout }) => {
                           <Typography fontWeight={600}>VN pay</Typography>
                         </Stack>
                         <Radio value='vnpay' size='small' />
+                      </Stack>
+                      <Stack
+                        direction='row'
+                        justifyContent='space-between'
+                        alignItems='flex-start'
+                        sx={{ py: 1, px: 1 }}>
+                        <Stack
+                          direction='row'
+                          spacing={2}
+                          alignItems='center'>
+                            
+                          <Box
+                            component='img'
+                            src={wallet}
+                            alt='Hotel'
+                            sx={{ width: 32, height: 32 }}
+                          />
+                          <Stack spacing={0.5}>
+                            <Typography fontWeight={600}>
+                            Thẻ ATM
+                            </Typography>
+                          </Stack>
+                        </Stack>
+                        <Radio value='card' size='small' />
                       </Stack>
                       <Stack
                         direction='row'

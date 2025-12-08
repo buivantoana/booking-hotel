@@ -148,6 +148,7 @@ const Account = ({ context }) => {
                   color: "#212529",
                   fontWeight: 500,
                   borderRadius: "16px",
+                  height:"50px"
                 },
                 "& .MuiInputBase-input.Mui-disabled": {
                   WebkitTextFillColor: "#212529",
@@ -183,7 +184,7 @@ const Account = ({ context }) => {
                   mb: 3,
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
-                    height: "60px",
+                    height: "50px",
                     backgroundColor: "#fff",
                     "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
@@ -216,7 +217,7 @@ const Account = ({ context }) => {
                 }
                 sx={{
                   mb: 3, "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px", height: "60px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
+                    borderRadius: "16px", height: "50px", backgroundColor: "#fff", "&.Mui-focused fieldset": {
                       borderColor: "#98b720",
                       borderWidth: 1.5,
                     },
@@ -229,7 +230,7 @@ const Account = ({ context }) => {
 
           {/* Email - CHO SỬA */}
           <Grid item xs={12} sm={6}>
-            <Typography variant='body2' color='#6c757d' mb={1}>
+            {/* <Typography variant='body2' color='#6c757d' mb={1}>
               Email
             </Typography>
             <TextField
@@ -259,30 +260,28 @@ const Account = ({ context }) => {
                   borderColor: "#dee2e6",
                 },
               }}
-            />
-          </Grid>
-
-          {/* Nút Cập nhật */}
-          <Grid item xs={12}>
+            /> */}
             <Box
               sx={{
                 display: "flex",
-                justifyContent: isMobile ? "center" : "flex-end",
-                mt: 2,
+                justifyContent: isMobile ? "center" : "start",
+               
               }}>
-              <Button
+              
+            <Button
                 variant='contained'
                 size='large'
                 disabled={loading}
                 onClick={handleSubmit}
                 sx={{
                   backgroundColor: "rgba(152, 183, 32, 1)",
-                  borderRadius: 50,
+                  borderRadius: "16px",
                   px: 6,
-                  py: 1.5,
+                  height:"50px",
                   fontWeight: 600,
                   textTransform: "none",
                   boxShadow: "0 4px 15px rgba(160, 212, 104, 0.4)",
+                  mt:3.5,
                   "&:hover": {
                     backgroundColor: "rgba(152, 183, 32, 1)",
                   },
@@ -297,6 +296,18 @@ const Account = ({ context }) => {
                 )}
                 
               </Button>
+            </Box>
+          </Grid>
+
+          {/* Nút Cập nhật */}
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: isMobile ? "center" : "flex-end",
+                mt: 2,
+              }}>
+              
             </Box>
           </Grid>
         </Grid>

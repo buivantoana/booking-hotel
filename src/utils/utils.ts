@@ -133,7 +133,7 @@ export function formattedDateHHMMDDMMYYYY(data) {
 const ERROR_MESSAGES = {
   USER_NOT_FOUND: "Không tìm thấy tài khoản",
   USER_NOT_PW: "Tài khoản chưa cấu hình mã pin",
-  WRONG_PW: "Sai mật khẩu",
+  WRONG_PW: "Sai mã Pin",
   UPDATE_ERROR: "Cập nhật thất bại",
   UNAUTHORIZED: "Lỗi đăng nhập",
   INVALID_DATETIME_FORMAT: "Sai định dạng thời gian",
@@ -148,4 +148,16 @@ const ERROR_MESSAGES = {
 // Hàm lấy message từ code lỗi
 export const getErrorMessage = (errorCode) => {
   return ERROR_MESSAGES[errorCode] || null;
+};
+
+export const normalizePhoneForAPI = (phone) => {
+  if (!phone) return "";
+
+  let p = phone.trim().replace(/\D/g, ""); // chỉ giữ số
+
+  if (p.startsWith("0")) {
+    p = p.slice(1); // xoá số 0 đầu tiên
+  }
+
+  return p;
 };

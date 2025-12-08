@@ -1138,7 +1138,7 @@ const ItemHotel = ({
                               {hotel.price_min.toLocaleString("vi-VN")}đ
                             </Typography>
 
-                            <Box
+                            {/* <Box
                               sx={{
                                 bgcolor: "rgba(255, 237, 233, 1)",
                                 color: "rgba(204, 50, 0, 1)",
@@ -1150,7 +1150,7 @@ const ItemHotel = ({
                                 cursor: "pointer",
                               }}>
                               Chỉ còn {hotel.remaining || 1} phòng
-                            </Box>
+                            </Box> */}
                           </Stack>
                         </Stack>
                       </Stack>

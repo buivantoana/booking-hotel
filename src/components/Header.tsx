@@ -59,7 +59,7 @@ const Header = () => {
   };
 
   return (
-    <Box bgcolor={"white"} sx={{position:"sticky",top:0,left:0,zIndex:1000}} p={0}>
+    <Box bgcolor={"white"} sx={{ position: "sticky", top: 0, left: 0, zIndex: 1000 }} p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
@@ -98,7 +98,7 @@ const Header = () => {
                     sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
                     <img src={logo} width={200} alt="" />
                   </Typography>
-                  
+
                   <Typography
                     variant='body2'
                     color='#666'
@@ -111,7 +111,7 @@ const Header = () => {
                 </>
               )}
             </Box>
-            {(location.pathname == "/rooms"|| location.pathname.includes("room")) && (
+            {(location.pathname == "/rooms" || location.pathname.includes("room")) && (
               <SearchBarWithDropdownHeader locationAddress={locationAddress} />
             )}
             {/* RIGHT: AVATAR */}
@@ -121,12 +121,12 @@ const Header = () => {
               ) : (
                 <>
                   {location.pathname == "/" ||
-                  location.pathname == "/login" ||
-                  location.pathname == "/register" ? (
+                    location.pathname == "/login" ||
+                    location.pathname == "/register" ? (
                     <Box>
                       <Button
                         onClick={() => {
-                          navigate("/login");
+                          window.location.href = "/login";
                         }}
                         variant='outlined'
                         sx={{
@@ -136,12 +136,14 @@ const Header = () => {
                           px: 3,
                           py: 1.2,
                           textTransform: "none",
-                        }}>
+                        }}
+                      >
                         Đăng nhập
                       </Button>
+
                       <Button
                         onClick={() => {
-                          navigate("/register");
+                          window.location.href = "/register";
                         }}
                         variant='contained'
                         sx={{
@@ -151,7 +153,8 @@ const Header = () => {
                           px: 3,
                           py: 1.2,
                           textTransform: "none",
-                        }}>
+                        }}
+                      >
                         Đăng ký
                       </Button>
                     </Box>

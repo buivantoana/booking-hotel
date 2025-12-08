@@ -37,7 +37,7 @@ import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import no_room from "../../images/Calendar.svg";
-import { getErrorMessage } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
 interface Room {
   id: number;
   name: string;
@@ -301,7 +301,7 @@ const RoomCard = ({
                   color={isLowStock ? "#d32f2f" : "#666"}>
                   {isLowStock
                     ? "Chỉ còn 1 phòng"
-                    : `Chỉ còn ${room.remaining || 1} phòng`}
+                    : `Chỉ còn ${room.available_rooms || 1} phòng`}
                 </Typography>
               )}
               <Typography
@@ -369,16 +369,31 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-    if (p.startsWith("84")) p = p.slice(2); // bỏ 84 đầu nếu nhập +84
-    if (p.startsWith("0")) p = p.slice(1); // bỏ số 0 đầu nếu người dùng nhập
+  
+    // Nếu bắt đầu bằng 84 → thay thành 0
+    if (p.startsWith("84")) {
+      p = "0" + p.slice(2);
+    }
+  
+    // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
+    if (!p.startsWith("0")) {
+      p = "0" + p;
+    }
+  
     return p;
   };
+  
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-    if (phone.length > 9) return false;
+  
     const normalized = normalizePhone(phone);
-    if (!/^[35789]/.test(normalized)) return false; // đầu số hợp lệ
-    if (normalized.length < 9) return false; // độ dài
+  
+    // chỉ cho phép đúng 10 hoặc 11 số
+    if (normalized.length !== 10 && normalized.length !== 11) return false;
+  
+    // đầu số VN hợp lệ
+    if (!/^0[35789]/.test(normalized)) return false;
+  
     return true;
   };
   console.log("AAA data", selectedRoom);
@@ -519,7 +534,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                     try {
                       let result = await checkUser({
                         type: "phone",
-                        value: "+84" + phoneNumber,
+                        value: "+84" + normalizePhoneForAPI(phoneNumber),
                       });
                       if (result.code == "OK") {
                         setPassword(true);
@@ -922,9 +937,7 @@ const RoomDetailModal = ({
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
               Thông tin phòng
             </Typography>
-            <Typography color='gray' fontSize='0.9rem' mb={2}>
-              Giường king-size (1m8 × 2m) – 25m² – hướng vườn
-            </Typography>
+            <FacilitiesList facilities={room?.facilities||{}} />
 
             <Typography fontWeight={600} mb={1}>
               Quyền lợi đặt phòng
@@ -971,8 +984,7 @@ const RoomDetailModal = ({
               Mô tả phòng
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={3}>
-              It is a long established fact that a reader will be distracted by
-              the readable content of a page…
+             {room?.description}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {/* PRICE + BUTTON */}
@@ -1029,7 +1041,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
       let result = await Login({
         platform: "ios",
         type: "phone",
-        value: "+84" + phoneNumber,
+        value: "+84" + normalizePhoneForAPI(phoneNumber),
         password: pin,
       });
       if (result.access_token) {
@@ -1205,3 +1217,36 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
     </Box>
   );
 };
+
+
+
+const FacilitiesList = ({ facilities }) => {
+  const prettyKey = (key) => {
+    return key
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const prettyValue = (value) => {
+    return value.replace("m2", "m²");
+  };
+
+  return (
+    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 1 }}>
+      {Object.entries(facilities).map(([key, value]) => (
+        <Chip
+          key={key}
+          label={`${prettyKey(key)}: ${prettyValue(value)}`}
+          sx={{
+            fontSize: 14,
+            padding: "4px 8px",
+            background: "#f5f5f5",
+            borderRadius: "8px",
+          }}
+        />
+      ))}
+    </Box>
+  );
+};
+
+

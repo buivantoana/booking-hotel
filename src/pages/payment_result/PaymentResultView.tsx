@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Stack,
@@ -8,22 +8,94 @@ import {
   Paper,
   Button,
   Container,
+  CircularProgress,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import {
-  CheckCircle as CheckCircleIcon,
   Home as HomeIcon,
   AccessTime as TimeIcon,
   LocationOn as LocationIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
 import success from "../../images/Frame 1321317962.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getStatusPayment } from "../../service/payment";
+import failed from "../../images/Frame 1321317963.png"
+
 const PaymentResultView = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const data =
+    location.state?.data || JSON.parse(localStorage.getItem("booking"));
+
+  const paymentId = data?.payment?.payment_id;
+  console.log("aaa paymentId",paymentId)
+  const [loading, setLoading] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState("pending"); // success | fail | pending
+
+  // 👉 format time
+  const startTime = data.checkInTime;
+  const endTime = () => {
+    const [h, m] = data.checkInTime.split(":");
+    const endHour = Number(h) + Number(data.duration);
+    return `${endHour.toString().padStart(2, "0")}:${m}`;
+  };
+  const cancelBefore = `${data.checkInTime}, ${data.checkIn}`;
+
+  // 🔥 AUTO CHECK PAYMENT STATUS
+  useEffect(() => {
+    if (!paymentId) {
+      setPaymentStatus("fail");
+      setLoading(false);
+      return;
+    }
+
+    let count = 0;
+
+    const checkPayment = async () => {
+      try {
+        let result = await getStatusPayment(paymentId)
+        const status = result?.status;
+        if (status === "failed") {
+          clearInterval(interval);
+          setPaymentStatus("failed");
+          setLoading(false);
+          return;
+        }
+
+        // 🟩 STOP LOOP WHEN SUCCESS
+        if (status === "paid") {
+          clearInterval(interval);
+          setPaymentStatus("paid");
+          setLoading(false);
+          
+          return;
+        }
+        // chưa có kết quả → retry
+        count++;
+        if (count >= 30) {
+          setPaymentStatus("failed");
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.log("ERR", e);
+      }
+    };
+
+    // call ngay khi vào
+    checkPayment();
+
+    // call liên tục mỗi 2s
+    const interval = setInterval(checkPayment, 2000);
+
+    return () => clearInterval(interval);
+  }, [paymentId]);
+
   return (
     <Box
       sx={{
@@ -45,156 +117,139 @@ const PaymentResultView = () => {
             boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
           }}>
           <Stack spacing={3} alignItems='center'>
-            {/* ICON CHECK XANH */}
-            <Box>
-              <img src={success} alt='' />
-            </Box>
+            {/* LOAD PAYMENT */}
+            {loading ? (
+              <>
+                <CircularProgress sx={{color:"#98b720"}} />
+                <Typography fontSize='0.9rem' color='#666'>
+                  Đang xác thực thanh toán...
+                </Typography>
+              </>
+            ) : paymentStatus === "fail" ? (
+              <>
+                <Typography color='red' fontSize='1.2rem' fontWeight={600}>
+                  Thanh toán thất bại!
+                </Typography>
+                <Typography color='#666'>
+                  Vui lòng thử lại hoặc chọn phương thức thanh toán khác.
+                </Typography>
+              </>
+            ) : (
+              <>
+                {/* Success */}
+                <Box>
+                  <img src={ paymentStatus == "failed"?failed :success} alt='' style={{ width: 90 }} />
+                </Box>
 
-            {/* TIÊU ĐỀ */}
-            <Typography
-              fontWeight={700}
-              fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
-              color='rgba(152, 183, 32, 1)'>
-              Đặt phòng thành công
-            </Typography>
+                <Typography
+                  fontWeight={700}
+                  fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
+                  color={paymentStatus == "failed"?"#FF3030":'rgba(152, 183, 32, 1)'}>
+                 {paymentStatus == "failed" ? "Đặt phòng không thành công":"Đặt phòng thành công" } 
+                </Typography>
 
-            {/* MÔ TẢ */}
-            <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
-              Chúc mừng bạn đã đặt thành công phòng tại{" "}
-              <strong>Hoàng gia Luxury hotel</strong>
-            </Typography>
+                <Typography fontSize='0.9rem' color='#666' lineHeight={1.5}>
+                 {paymentStatus == "failed"?"Đã có lỗi xảy ra trong lúc thanh toán phòng tại":"Chúc mừng bạn đã đặt thành công phòng tại"} {" "}
+                  <strong>{data.name}</strong>
+                </Typography>
 
-            {/* THÔNG TIN CHI TIẾT */}
-            <Paper
-              elevation={0}
-              sx={{
-                bgcolor: "#f5f5f5",
-                borderRadius: "16px",
-                p: 2.5,
-                width: "100%",
-                textAlign: "left",
-              }}>
-              <Stack spacing={1}>
-                {/* PHÒNG */}
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
+                <Paper
+                  elevation={0}
+                  sx={{
+                    bgcolor: "#f5f5f5",
+                    borderRadius: "16px",
+                    p: 2.5,
+                    width: "100%",
+                    textAlign: "left",
+                  }}>
+                  <Stack spacing={1}>
+                    {/* ROOM */}
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Box sx={{ width: 36, height: 36 }}>
+                        <HomeIcon sx={{ fontSize: 20, color: "#666" }} />
+                      </Box>
+                      <Typography fontSize='0.95rem' color='#666' fontWeight={600}>
+                        Room × {data.rooms[0].quantity}
+                      </Typography>
+                    </Stack>
 
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                    <HomeIcon sx={{ fontSize: 20, color: "#666" }} />
-                  </Box>
-                  <Typography fontSize='0.95rem' color='#666' fontWeight={600}>
-                    Deluxe room
-                  </Typography>
-                </Stack>
+                    {/* TIME */}
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Box sx={{ width: 36, height: 36 }}>
+                        <TimeIcon sx={{ fontSize: 20, color: "#666" }} />
+                      </Box>
+                      <Typography fontSize='0.9rem' color='#333'>
+                        {startTime} – {endTime()}, {data.checkIn}
+                      </Typography>
+                    </Stack>
 
-                {/* THỜI GIAN */}
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
+                    {/* PAYMENT METHOD */}
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Box sx={{ width: 36, height: 36 }}>
+                        <LocationIcon sx={{ fontSize: 20, color: "#666" }} />
+                      </Box>
+                      <Typography fontSize='0.9rem' color='#333'>
+                        Thanh toán: {data.payment.method.toUpperCase()}
+                      </Typography>
+                    </Stack>
 
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                    <TimeIcon sx={{ fontSize: 20, color: "#666" }} />
-                  </Box>
-                  <Typography fontSize='0.9rem' color='#333'>
-                    10:00 – 12:00, 04/11/2025
-                  </Typography>
-                </Stack>
+                    {/* CANCEL */}
+                    <Stack direction='row' spacing={2} alignItems='center'>
+                      <Box sx={{ width: 36, height: 36 }}>
+                        <InfoIcon sx={{ fontSize: 20, color: "#666" }} />
+                      </Box>
+                      <Typography fontSize='0.9rem' color='#333'>
+                        Hủy miễn phí trước {cancelBefore}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              </>
+            )}
 
-                {/* THANH TOÁN */}
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
+            {/* ACTION */}
+            {!loading && (
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                width='100%'
+                mt={2}>
+                <Button
+                  fullWidth
+                  onClick={() => navigate("/")}
+                  variant='text'
+                  sx={{
+                    color: "#666",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    fontSize: "0.95rem",
+                  }}>
+                  Về trang chủ
+                </Button>
 
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                    <LocationIcon sx={{ fontSize: 20, color: "#666" }} />
-                  </Box>
-                  <Typography fontSize='0.9rem' color='#333'>
-                    Trả tại khách sạn
-                  </Typography>
-                </Stack>
-
-                {/* HỦY PHÒNG */}
-                <Stack direction='row' spacing={2} alignItems='center'>
-                  <Box
-                    sx={{
-                      width: 36,
-                      height: 36,
-
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}>
-                    <InfoIcon sx={{ fontSize: 20, color: "#666" }} />
-                  </Box>
-                  <Typography fontSize='0.9rem' color='#333'>
-                    Hủy miễn phí trước 10:05, 4/11/2025
-                  </Typography>
-                </Stack>
+                <Button
+                  onClick={() =>
+                    navigate("/profile?type=booking", { state: { booking: data } })
+                  }
+                  fullWidth
+                  variant='contained'
+                  sx={{
+                    bgcolor: "#98b720",
+                    color: "white",
+                    borderRadius: "50px",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    py: 1.5,
+                    fontSize: "0.95rem",
+                    boxShadow: "0 4px 12px rgba(152, 183, 32, 0.3)",
+                    "&:hover": {
+                      bgcolor: "#7a9a1a",
+                    },
+                  }}>
+                  Xem thông tin đặt phòng
+                </Button>
               </Stack>
-            </Paper>
-
-            {/* NÚT HÀNH ĐỘNG */}
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              width='100%'
-              mt={2}>
-              <Button
-                fullWidth
-                onClick={()=>{
-                  navigate("/")
-                }}
-                variant='text'
-                sx={{
-                  color: "#666",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  fontSize: "0.95rem",
-                }}>
-                Về trang chủ
-              </Button>
-              <Button
-              onClick={()=>{
-                navigate("/profile?type=booking")
-              }}
-                fullWidth
-                variant='contained'
-                sx={{
-                  bgcolor: "#98b720",
-                  color: "white",
-                  borderRadius: "50px",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  py: 1.5,
-                  fontSize: "0.95rem",
-                  boxShadow: "0 4px 12px rgba(152, 183, 32, 0.3)",
-                  "&:hover": {
-                    bgcolor: "#7a9a1a",
-                  },
-                }}>
-                Xem thông tin đặt phòng
-              </Button>
-            </Stack>
+            )}
           </Stack>
         </Paper>
       </Container>

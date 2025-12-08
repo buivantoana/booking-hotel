@@ -87,7 +87,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 
   const hourIndex = hours.indexOf(time);
   const durationIndex = durations.indexOf(duration);
-
+    
   const handleApply = () => {
     if (bookingType === "hourly" && checkIn) {
       const endTime = checkIn
@@ -577,6 +577,39 @@ const SearchBarWithDropdown = ({ location, address }) => {
     setDropdownOpen(false);
   };
 
+  useEffect(() => {
+    if (!checkIn) return;
+
+    if (bookingType === "overnight") {
+      // Qua đêm: luôn trả phòng = nhận phòng + 1 ngày
+      setCheckOut(checkIn.add(1, "day"));
+      setCheckInTime(null);
+      setCheckInDuration(null);
+    } 
+    else if (bookingType === "daily") {
+      // Theo ngày: nếu chưa có checkOut cũ mà nó <= checkIn → đẩy lên +1 ngày (tối thiểu 1 đêm)
+      if (!checkOut || checkOut.isSame(checkIn, "day") || checkOut.isBefore(checkIn)) {
+        setCheckOut(checkIn.add(1, "day"));
+      }
+      setCheckInTime(null);
+      setCheckInDuration(null);
+    } 
+    else if (bookingType === "hourly") {
+      // Theo giờ: xóa checkOut cũ (vì giờ dùng endTime tính từ giờ + duration)
+      // Giữ lại checkIn để chọn ngày
+      
+      // Nếu là hôm nay → giờ mặc định là giờ hiện tại + 1
+      const today = dayjs();
+      if (checkIn.isSame(today, "day")) {
+        const nextHour = today.hour() + 1;
+        setCheckInTime(String(nextHour).padStart(2, "0") + ":00");
+      } else {
+        setCheckInTime("10:00"); // hoặc "00:00" tuỳ bạn muốn
+      }
+      setCheckInDuration(3); // mặc định 3 tiếng hoặc 2 tùy bạn
+    }
+  }, [bookingType, checkIn])
+
   const handleClickAway = (e: any) => {
     if (inputRef.current && !inputRef.current.contains(e.target))
       setDropdownOpen(false);
@@ -594,13 +627,15 @@ const SearchBarWithDropdown = ({ location, address }) => {
   };
 
   const formatCheckOut = () => {
-    if (!checkOut) return "Trả phòng";
     if (bookingType === "hourly") {
+      if (!checkOut ) return "Trả phòng";
+      
       return checkOut.format("HH:mm, DD/MM");
     }
-    return checkOut.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
+  
+    if (!checkOut) return "Trả phòng";
+    return checkOut.format("DD/MM/YYYY");
   };
-
   // Hàm convert "Hà Nội" -> "hanoi"
   function toCityKey(text) {
     if (!text) return "";
