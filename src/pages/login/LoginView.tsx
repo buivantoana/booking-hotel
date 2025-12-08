@@ -23,6 +23,7 @@ import vn from "../../images/VN - Vietnam.png";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import {
   Login,
+  LoginApple,
   LoginGoogle,
   checkUser,
   sendOtp,
@@ -697,12 +698,42 @@ const RegistrationForm = ({
     }
     setLoading(false);
   };
-  const handleAppleResponse = (response) => {
-    console.log("Apple login response:", response);
+  const handleAppleResponse = async (response) => {
+    try {
+      console.log("Apple login response:", response);
 
-    // Nếu login thành công có response.authorization.code
-    if (response?.authorization?.code) {
-    }
+      // Nếu login thành công có response.authorization.code
+      if (response?.authorization?.id_token) {
+        let result = await LoginApple({
+          platform: "ios",
+          id_token: response?.authorization?.id_token,
+          location: "hanoi",
+        });
+        if (!result?.user?.phone) {
+          setIsLoginGoogle(true);
+          setDataLoginGoogle(result);
+          return;
+        }
+        if (result.access_token) {
+          localStorage.setItem("access_token", result.access_token);
+          localStorage.setItem("refresh_token", result.refresh_token);
+          localStorage.setItem("user", JSON.stringify(result.user));
+          context.dispatch({
+            type: "LOGIN",
+            payload: {
+              ...context.state,
+              user: { ...result.user },
+            },
+          });
+          toast.success("Login success");
+          setTimeout(() => {
+            navigate("/");
+          }, 300);
+        } else {
+          toast.error(getErrorMessage(result.code) || result.message);
+        }
+      }
+    } catch (error) {}
   };
   const normalizePhone = (phone) => {
     if (!phone) return "";
@@ -984,29 +1015,6 @@ const RegistrationForm = ({
                   {/* SOCIAL BUTTONS */}
                   <Grid container spacing={2} mb={3}>
                     <Grid item xs={12} sm={6}>
-                      {/* <Button
-                        variant='outlined'
-                        fullWidth
-                        sx={{
-                          py: 1.2,
-                          textTransform: "none",
-                          fontWeight: 500,
-                          borderRadius: 3,
-                          borderColor: "#e0e0e0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 1,
-                          "&:hover": { borderColor: "#bdbdbd" },
-                        }}>
-                        <Box
-                          component='img'
-                          src={apple}
-                          alt='Apple'
-                          sx={{ width: 20 }}
-                        />
-                        Sign up with Apple
-                      </Button> */}
                       <AppleLogin
                         clientId='com.zeezoo.hotelbooking.login'
                         redirectURI='https://booking-hotel-liard.vercel.app'
@@ -1014,15 +1022,33 @@ const RegistrationForm = ({
                         responseMode='query'
                         usePopup={true}
                         scope='name email'
-                        designProp={{
-                          height: 44,
-                          width: 260,
-                          color: "black",
-                          border: false,
-                          type: "sign-in",
-                          border_radius: 12,
-                        }}
                         callback={handleAppleResponse}
+                        render={(renderProps) => (
+                          <Button
+                            variant='outlined'
+                            onClick={renderProps.onClick}
+                            fullWidth
+                            sx={{
+                              py: 1.2,
+                              textTransform: "none",
+                              fontWeight: 500,
+                              borderRadius: 3,
+                              borderColor: "#e0e0e0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: 1,
+                              "&:hover": { borderColor: "#bdbdbd" },
+                            }}>
+                            <Box
+                              component='img'
+                              src={apple}
+                              alt='Apple'
+                              sx={{ width: 20 }}
+                            />
+                            Sign up with Apple
+                          </Button>
+                        )}
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
