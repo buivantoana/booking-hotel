@@ -30,9 +30,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getStatusPayment } from "../../service/payment";
 import failed from "../../images/Frame 1321317963.png";
 import dayjs from "dayjs";
+import { useBookingContext } from "../../App";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 
-const PaymentResultView = () => {
+const PaymentResultView = ({ getDetail, loadingDetail,detailBooking }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
@@ -45,62 +47,61 @@ const PaymentResultView = () => {
   console.log("aaa paymentId", paymentId);
   const [loading, setLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState("pending"); // success | fail | pending
-
+  const context = useBookingContext()
   // 👉 format time
- let startTime = "";
- let endTime = "";
- let checkInDate = "";
- let checkOutDate = "";
+  let startTime = "";
+  let endTime = "";
+  let checkInDate = "";
+  let checkOutDate = "";
 
- if (data.type === "hourly") {
-   // đảm bảo có checkInTime và duration
-   const inTime =
-     data.checkInTime && data.checkInTime !== "null"
-       ? data.checkInTime
-       : "00:00";
-   const duration = Number(data.duration || 0);
+  if (data.type === "hourly") {
+    // đảm bảo có checkInTime và duration
+    const inTime =
+      data.checkInTime && data.checkInTime !== "null"
+        ? data.checkInTime
+        : "00:00";
+    const duration = Number(data.duration || 0);
 
-   // tạo datetime bắt đầu từ checkIn (FE lưu kiểu "YYYY-MM-DD")
-   const start = dayjs(`${data.checkIn} ${inTime}`, "YYYY-MM-DD HH:mm");
+    // tạo datetime bắt đầu từ checkIn (FE lưu kiểu "YYYY-MM-DD")
+    const start = dayjs(`${data.checkIn} ${inTime}`, "YYYY-MM-DD HH:mm");
 
-   // tính end bằng dayjs (tự xử lý vượt ngày)
-   const end = start.add(duration, "hour");
+    // tính end bằng dayjs (tự xử lý vượt ngày)
+    const end = start.add(duration, "hour");
 
-   startTime = start.format("HH:mm");
-   endTime = end.format("HH:mm");
+    startTime = start.format("HH:mm");
+    endTime = end.format("HH:mm");
 
-   // ngày hiển thị
-   checkInDate = start.format("YYYY-MM-DD");
+    // ngày hiển thị
+    checkInDate = start.format("YYYY-MM-DD");
 
-   // nếu kết thúc khác ngày bắt đầu → hiển thị ngày kết thúc
-   if (!end.isSame(start, "day")) {
-     checkOutDate = end.format("YYYY-MM-DD");
-   } else {
-     checkOutDate = checkInDate;
-   }
- } else {
-   // daily / overnight: lấy trực tiếp check_in & check_out do backend đã tính
-   // nếu backend lưu "YYYY-MM-DD HH:mm:ss" thì dùng dayjs(data.check_in)
-   const start = dayjs(data.check_in); // note: ensure data.check_in tồn tại
-   const end = dayjs(data.check_out);
+    // nếu kết thúc khác ngày bắt đầu → hiển thị ngày kết thúc
+    if (!end.isSame(start, "day")) {
+      checkOutDate = end.format("YYYY-MM-DD");
+    } else {
+      checkOutDate = checkInDate;
+    }
+  } else {
+    // daily / overnight: lấy trực tiếp check_in & check_out do backend đã tính
+    // nếu backend lưu "YYYY-MM-DD HH:mm:ss" thì dùng dayjs(data.check_in)
+    const start = dayjs(data.check_in); // note: ensure data.check_in tồn tại
+    const end = dayjs(data.check_out);
 
-   startTime = start.format("HH:mm");
-   endTime = end.format("HH:mm");
+    startTime = start.format("HH:mm");
+    endTime = end.format("HH:mm");
 
-   checkInDate = start.format("YYYY-MM-DD");
-   checkOutDate = end.format("YYYY-MM-DD");
- }
+    checkInDate = start.format("YYYY-MM-DD");
+    checkOutDate = end.format("YYYY-MM-DD");
+  }
 
- // chuỗi hiển thị
- const timeDisplay =
-   data.type === "hourly"
-     ? `${startTime} – ${endTime}, ${checkInDate}${
-         checkOutDate !== checkInDate ? ` → ${checkOutDate}` : ""
-       }`
-     : `${startTime} – ${endTime}, ${checkInDate} → ${checkOutDate}`;
+  // chuỗi hiển thị
+  const timeDisplay =
+    data.type === "hourly"
+      ? `${startTime} – ${endTime}, ${checkInDate}${checkOutDate !== checkInDate ? ` → ${checkOutDate}` : ""
+      }`
+      : `${startTime} – ${endTime}, ${checkInDate} → ${checkOutDate}`;
 
- // cancelBefore (ví dụ)
- const cancelBefore = `${startTime}, ${checkInDate}`;
+  // cancelBefore (ví dụ)
+  const cancelBefore = `${startTime}, ${checkInDate}`;
 
   // 🔥 AUTO CHECK PAYMENT STATUS
   useEffect(() => {
@@ -151,7 +152,7 @@ const PaymentResultView = () => {
 
     return () => clearInterval(interval);
   }, [paymentId]);
-
+  console.log("AAAAA detail booking",detailBooking)
   return (
     <Box
       sx={{
@@ -162,7 +163,10 @@ const PaymentResultView = () => {
         justifyContent: "center",
         py: 4,
       }}>
-      <Container maxWidth='sm'>
+       {detailBooking&& <Container maxWidth='lg'>
+           <MainContent navigate={navigate} detailBooking={detailBooking} />
+        </Container>}
+      {!detailBooking&&<Container maxWidth='sm'>
         <Paper
           elevation={0}
           sx={{
@@ -300,12 +304,21 @@ const PaymentResultView = () => {
                 </Button>
 
                 <Button
-                  onClick={() =>
-                    navigate("/profile?type=booking", {
-                      state: { booking: data },
-                    })
+                  onClick={() => {
+
+                    if (context?.state?.user?.id) {
+                      navigate("/profile?type=booking", {
+                        state: { booking: data },
+                      })
+
+                    } else {
+                      getDetail(data?.booking_id)
+                    }
+                  }
+
                   }
                   fullWidth
+                  disabled={loadingDetail}
                   variant='contained'
                   sx={{
                     bgcolor: "#98b720",
@@ -320,21 +333,30 @@ const PaymentResultView = () => {
                       bgcolor: "#7a9a1a",
                     },
                   }}>
-                  Xem thông tin đặt phòng
+                  {loadingDetail ? (
+                    <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                  ) : (
+                    "Xem thông tin đặt phòng"
+                  )}
+                  
                 </Button>
               </Stack>
             )}
           </Stack>
         </Paper>
-      </Container>
+      </Container>}
     </Box>
   );
 };
 
 export default PaymentResultView;
+import image_room from "../../images/Rectangle 29975.png";
+import logout from "../../images/logout2.png";
 
-
-const MainContent = ({detailBooking}) => {
+import cancel from "../../images/cancel.png";
+import pending from "../../images/pending.png";
+import pendingpayment from "../../images/pendingpayment.png";
+const MainContent = ({ detailBooking,navigate }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -352,7 +374,7 @@ const MainContent = ({detailBooking}) => {
 
   // Xử lý ảnh phòng
   const roomImages = detailBooking.rooms[0]?.images
-    ? JSON.parse(detailBooking.rooms[0].images)
+    ? detailBooking.rooms[0].images
     : [];
   const roomThumbnail =
     roomImages[0] || detailBooking.thumbnail_url || image_room;
@@ -457,8 +479,8 @@ const MainContent = ({detailBooking}) => {
     ? bestPayment.method === "momo"
       ? "Ví MoMo"
       : bestPayment.method === "vnpay"
-      ? "VNPay"
-      : "Trả tại khách sạn"
+        ? "VNPay"
+        : "Trả tại khách sạn"
     : "Trả tại khách sạn";
   const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
     "vi-VN"
@@ -466,15 +488,15 @@ const MainContent = ({detailBooking}) => {
 
 
 
- 
-  
+
+
   return (
     <Stack spacing={3}>
       {/* HEADER */}
       <Stack direction='row' alignItems='center' spacing={1}>
-        
-        <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-          Đặt phòng của tôi
+
+        <Typography display={"flex"} alignItems={"center"} gap={2} fontWeight={600} fontSize='1.1rem' color='#333'>
+         <ArrowBackIcon onClick={()=>navigate('/')} sx={{cursor:"pointer"}}/>  Đặt phòng của tôi
         </Typography>
       </Stack>
       {/* BANNER HOÀN THÀNH */}
@@ -567,7 +589,7 @@ const MainContent = ({detailBooking}) => {
                   </Typography>
                 </Stack>
               </Stack>
-             
+
             </Stack>
           </Paper>
         )}
@@ -727,7 +749,7 @@ const MainContent = ({detailBooking}) => {
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {detailBooking.booking_code}
               </Typography>
-             
+
             </Stack>
           </Stack>
           <Stack
@@ -738,7 +760,7 @@ const MainContent = ({detailBooking}) => {
               Số điện thoại
             </Typography>
             <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
-              +84 {context?.state?.user?.phone?.slice(3)}
+              +84 {detailBooking?.contact_phone?.slice(3)}
             </Typography>
           </Stack>
           <Stack
@@ -749,7 +771,7 @@ const MainContent = ({detailBooking}) => {
               Họ tên
             </Typography>
             <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
-              {context?.state?.user?.name}
+              {detailBooking?.contact_name}
             </Typography>
           </Stack>
         </Stack>
@@ -803,7 +825,7 @@ const MainContent = ({detailBooking}) => {
       </Paper>
 
       {/* FOOTER */}
-     
+
     </Stack>
   );
 };
