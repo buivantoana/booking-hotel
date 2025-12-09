@@ -74,7 +74,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   initialTime,
   initialDuration,
 }) => {
-  const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn);
+  const [checkIn, setCheckIn] = useState<Dayjs | null>(dayjs());
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
   const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
@@ -101,10 +101,23 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     onClose();
   };
 
+  useEffect(() => {
+    if (bookingType === "hourly") {
+      const now = dayjs();
+      const nextHour = now.add(1, "hour").startOf("hour"); // làm tròn lên giờ tiếp theo
+      const formatted = nextHour.format("HH:00");
+  
+      setTime(formatted); // <<< SET ĐÚNG VÀO STATE BẠN CẦN
+    }
+  }, []);
   const handleReset = () => {
-    setCheckIn(null);
+    setCheckIn(dayjs());
     setCheckOut(null);
-    setTime("10:00");
+    const now = dayjs();
+      const nextHour = now.add(1, "hour").startOf("hour"); // làm tròn lên giờ tiếp theo
+      const formatted = nextHour.format("HH:00");
+  
+      setTime(formatted); 
     setDuration(2);
   };
   const isToday = checkIn && checkIn.isSame(now, "day");
@@ -604,9 +617,12 @@ const SearchBarWithDropdown = ({ location, address }) => {
         const nextHour = today.hour() + 1;
         setCheckInTime(String(nextHour).padStart(2, "0") + ":00");
       } else {
-        setCheckInTime("10:00"); // hoặc "00:00" tuỳ bạn muốn
+      //   const now = dayjs();
+      // const nextHour = now.add(1, "hour").startOf("hour"); // làm tròn lên giờ tiếp theo
+      // const formatted = nextHour.format("HH:00");
+      //   setCheckInTime(formatted); // hoặc "00:00" tuỳ bạn muốn
       }
-      setCheckInDuration(3); // mặc định 3 tiếng hoặc 2 tùy bạn
+      // setCheckInDuration(3); // mặc định 3 tiếng hoặc 2 tùy bạn
     }
   }, [bookingType, checkIn])
 

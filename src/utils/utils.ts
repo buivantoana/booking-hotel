@@ -143,6 +143,7 @@ const ERROR_MESSAGES = {
   INVALID_BODY: "Vui lòng điền đầy đủ các thông tin cần thiết",
   INVALID_PARTNER: "Đối tác không hợp lệ hoặc bị khoá",
   ACCOUNT_LOCKED: "Tài khoản bị khoá",
+  MISSING_BODY:"Vui điền đầy đủ thông tin",
 };
 
 // Hàm lấy message từ code lỗi

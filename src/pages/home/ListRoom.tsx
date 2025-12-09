@@ -126,6 +126,7 @@ const HotelCard = ({
         current.checkOut = current.checkOut || formatDate(now);
         current.checkInTime = current.checkInTime || formatHour(now);
         current.duration = current.duration || 2;
+        current.type = "hourly"
 
         // ---- build URL ---- //
         navigate(

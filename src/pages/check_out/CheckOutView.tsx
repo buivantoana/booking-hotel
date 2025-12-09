@@ -537,7 +537,7 @@ const CheckOutView = ({ dataCheckout }) => {
                         }}
                         onBlur={() => setTouched(true)} // chỉ validate khi blur
                         error={touched && !isValidVietnamPhone(phone)}
-                        placeholder='Nhập tên'
+                        placeholder='Nhập số điện thoại'
                         variant='outlined'
                         size='small'
                         InputProps={{
