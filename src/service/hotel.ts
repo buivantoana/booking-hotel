@@ -72,8 +72,17 @@ export async function getAvailableRooms(id, query) {
 }
 
 export async function getDetailHotelApi(id) {
+  let token = localStorage.getItem("access_token");
+  let headers = {};
+  if (token) {
+    headers = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+  }
   try {
-    const response = await api.get(`/hotel/detail/${id}`);
+    const response = await api.get(`/hotel/detail/${id}`,headers);
     return response.data;
   } catch (error: any) {
     if (error.response) {

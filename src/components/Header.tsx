@@ -80,13 +80,9 @@ const Header = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                width: "400px",
+                width:isMobile? "max-content": "400px",
               }}>
-              {isMobile ? (
-                <IconButton edge='start' onClick={handleMenuOpen}>
-                  <MenuIcon sx={{ color: "#333" }} />
-                </IconButton>
-              ) : (
+             
                 <>
                   <Typography
                     onClick={() => {
@@ -96,22 +92,23 @@ const Header = () => {
                     fontWeight={700}
                     color='#333'
                     sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
-                    <img src={logo} width={200} alt="" />
+                    <img src={logo} width={isMobile?150: 200} alt="" />
                   </Typography>
 
                   <Typography
                     variant='body2'
                     color='#666'
                     sx={{
-                      fontSize: "0.875rem",
+                      fontSize:isMobile?"0.775rem" : "0.875rem",
                       letterSpacing: "0.5px",
+                      display:isMobile?"none":"block"
                     }}>
                     Dành cho đối tác
                   </Typography>
                 </>
-              )}
+             
             </Box>
-            {(location.pathname == "/rooms" || location.pathname.includes("room")) && (
+            {(location.pathname == "/rooms" || location.pathname.includes("room")) &&!isMobile &&  (
               <SearchBarWithDropdownHeader locationAddress={locationAddress} />
             )}
             {/* RIGHT: AVATAR */}
@@ -123,7 +120,7 @@ const Header = () => {
                   {location.pathname == "/" ||
                     location.pathname == "/login" ||
                     location.pathname == "/register" ? (
-                    <Box>
+                    <Box sx={{display:"flex"}}>
                       <Button
                         onClick={() => {
                           window.location.href = "/login";
@@ -133,8 +130,8 @@ const Header = () => {
                           border: "none",
                           color: "#5D6679",
                           borderRadius: "16px",
-                          px: 3,
-                          py: 1.2,
+                          px:isMobile?1: 3,
+                          py:isMobile?1: 1.2,
                           textTransform: "none",
                         }}
                       >
@@ -150,8 +147,8 @@ const Header = () => {
                           bgcolor: "#98b720",
                           color: "white",
                           borderRadius: "16px",
-                          px: 3,
-                          py: 1.2,
+                          px:isMobile?1: 3,
+                          py:isMobile?1: 1.2,
                           textTransform: "none",
                         }}
                       >

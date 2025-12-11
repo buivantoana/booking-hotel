@@ -1044,7 +1044,7 @@ const RegistrationForm = ({
                               component='img'
                               src={apple}
                               alt='Apple'
-                              sx={{ width: 20 }}
+                              sx={{ width: 20,mt:-.7 }}
                             />
                             Sign up with Apple
                           </Button>

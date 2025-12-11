@@ -45,7 +45,7 @@ const DestinationItem = ({
         fontWeight='600'
         color='rgba(43, 47, 56, 1)'
         sx={{
-          fontSize: { xs: "0.95rem", md: "1rem" },
+          fontSize: { xs: "0.85rem", md: "1rem" },
           mb: 0.5,
           "&:hover": { textDecoration: "underline", cursor: "pointer" },
         }}>
@@ -79,7 +79,7 @@ const PopularDestinations = ({location}) => {
             fontWeight='bold'
             color='#333'
             sx={{
-              fontSize: { xs: "1.5rem", md: "1.875rem" },
+              fontSize: { xs: "1.2rem", md: "1.875rem" },
             }}>
           Các địa điểm thu hút nhất Việt Nam
           </Typography>

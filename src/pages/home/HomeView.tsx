@@ -108,6 +108,7 @@ const HomeView = ({
         <Typography
           variant={isMobile ? "h5" : "h4"}
           fontWeight='bold'
+          display={isMobile?"none":"block"}
           align='center'
           gutterBottom>
           Booking Hotel có gì
@@ -116,7 +117,8 @@ const HomeView = ({
         <Box
           mt={"100px"}
           mb={"50px"}
-          display={"flex"}
+        
+          display={isMobile?"none":"flex"}
           justifyContent={"center"}
           sx={{ cursor: "pointer", position: "relative" }}>
           <img

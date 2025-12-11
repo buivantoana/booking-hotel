@@ -101,7 +101,7 @@ const Footer = () => {
 
           {/* ĐỐI TÁC THANH TOÁN & APP */}
           <Grid item xs={12} sm={6} md={4}>
-            <Box display={"flex"} justifyContent={"end"}>
+            <Box display={"flex"} justifyContent={isMobile?"start":"end"}>
 
             <Stack
               spacing={3}

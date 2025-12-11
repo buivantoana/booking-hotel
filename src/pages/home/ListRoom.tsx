@@ -302,7 +302,7 @@ const ListRoom = ({
                 fontWeight='bold'
                 color='#333'
                 sx={{
-                  fontSize: { xs: "1.5rem", md: "1.875rem" },
+                  fontSize: { xs: "1.2rem", md: "1.875rem" },
                 }}>
                 {title}
               </Typography>

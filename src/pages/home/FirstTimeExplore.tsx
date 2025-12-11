@@ -60,17 +60,17 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
       <Box sx={{ maxWidth: "1400px", mx: "auto" }}>
         {/* Tiêu đề + Khu vực */}
         <Stack
-          direction={{ xs: "column", md: "row" }}
+          direction={{ xs: "row", md: "row" }}
           justifyContent='space-between'
-          alignItems={{ xs: "flex-start", md: "center" }}
+          alignItems={{ xs: "center", md: "center" }}
           spacing={2}
           mb={4}>
           <Typography
-            variant='h4'
+            variant={'h4'}
             fontWeight='bold'
             color='#333'
             sx={{
-              fontSize: { xs: "1.5rem", md: "1.875rem" },
+              fontSize: { xs: "1.2rem", md: "1.875rem" },
             }}>
             Lần đầu khám phá
           </Typography>
@@ -99,7 +99,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
               bgcolor: "white",
               color: "rgba(152, 183, 32, 1)",
               fontWeight: 600,
-              fontSize: "0.9rem",
+              fontSize: isMobile?".6rem":"0.9rem",
 
               "& .MuiChip-deleteIcon": {
                 color: "rgba(152, 183, 32, 1)",
@@ -119,7 +119,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
                 bgcolor: "rgba(236, 240, 218, 1)",
                 borderRadius: "24px",
                 p: { xs: 3, md: 4 },
-                height: "70%",
+                height:isMobile?"80%": "70%",
                 boxShadow: "0 8px 24px rgba(76, 175, 80, 0.1)",
                 transition: "all 0.3s",
                 "&:hover": {
@@ -177,7 +177,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
                 bgcolor: "#fff8e1",
                 borderRadius: "24px",
                 p: { xs: 3, md: 4 },
-                height: "70%",
+                height: isMobile?"80%":"70%",
                 boxShadow: "0 8px 24px rgba(255, 193, 7, 0.1)",
                 transition: "all 0.3s",
                 "&:hover": {
