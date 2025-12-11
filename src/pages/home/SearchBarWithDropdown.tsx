@@ -785,7 +785,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                   bgcolor: "rgba(0,0,0,0.4)",
                   backdropFilter: "blur(10px)",
                   borderRadius: "32px",
-                  p: "16px 24px",
+                  p: isMobile?"10px":"16px 24px",
                   gap: "20px",
                   flexDirection: "row",
 
@@ -801,7 +801,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                     value={x.v}
                     sx={{
                       px: { xs: 1, md: 4 },
-                      py: 1,
+                      py: isMobile?.5:1,
                       color:
                         bookingType === x.v
                           ? "rgba(152, 183, 32, 1) !important"
@@ -839,6 +839,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                 bgcolor: "white",
                 p: { xs: 1.5, md: "70px 20px 20px" },
                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                
               }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}

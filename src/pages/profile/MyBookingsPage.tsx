@@ -607,6 +607,7 @@ const BookingCard = ({
 const SortButton = ({
   selected,
   onSelect,
+  isMobile
 }: {
   selected: string;
   onSelect: (v: string) => void;
@@ -645,7 +646,7 @@ const SortButton = ({
           bgcolor: "white",
           "&:hover": { borderColor: "#98b720", bgcolor: "transparent" },
         }}
-        startIcon={<SwapVertIcon sx={{ fontSize: "22px !important" }} />}
+        startIcon={!isMobile&&<SwapVertIcon sx={{ fontSize: "22px !important" }} />}
         endIcon={
           open ? (
             <ArrowDropUpIcon
@@ -994,7 +995,8 @@ export default function MyBookingsPage({
   historyBooking?: any[];
 }) {
   const [sortValue, setSortValue] = useState("all");
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const filtered = historyBooking.filter((booking) => {
     if (sortValue === "all") return true;
     const status = getBookingStatus(booking).label;
@@ -1014,10 +1016,10 @@ export default function MyBookingsPage({
         alignItems='center'
         mb={3}
         justifyContent='space-between'>
-        <Typography variant='h5' fontWeight={600} color='#212529'>
+        <Typography variant={isMobile?"h6":'h5'} fontWeight={600} color='#212529'>
           Đặt phòng của tôi
         </Typography>
-        <SortButton selected={sortValue} onSelect={setSortValue} />
+        <SortButton selected={sortValue} isMobile={isMobile} onSelect={setSortValue} />
       </Box>
 
       <Box>

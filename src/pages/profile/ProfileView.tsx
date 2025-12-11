@@ -103,95 +103,190 @@ const ProfileView = ({
     setDetailBooking(null);
     setActiveMenu(active);
   };
-  const Sidebar = () => (
-    <Paper
-      elevation={0}
-      sx={{
-        width: 280,
-        height: "fit-content",
-        borderRadius: "16px",
-        bgcolor: "white",
-        p: 3,
 
-        position: "sticky",
-        top: 16,
-      }}>
-      <Stack spacing={3}>
-        {/* USER INFO */}
-        <Stack direction='row' spacing={2} alignItems='center'>
-          <Avatar
-            sx={{
-              width: 48,
-              height: 48,
-              bgcolor: "#e8f5e8",
-            }}>
-            <PersonIcon sx={{ color: "#98b720", fontSize: 28 }} />
-          </Avatar>
-          <Stack>
-            <Typography fontWeight={600} fontSize='1rem' color='#333'>
-              {context?.state?.user?.name}
+  
+  const Sidebar = ({  }) => {
+    // Thêm state để quản lý trạng thái mở/đóng sidebar trên mobile
+    const [mobileOpen, setMobileOpen] = useState(false);
+    
+    // Sử dụng theme breakpoints
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+    // Hàm đóng sidebar trên mobile
+    const handleDrawerToggle = () => {
+      setMobileOpen(!mobileOpen);
+    };
+  
+    const sidebarContent = (
+      <Paper
+        elevation={0}
+        sx={{
+          width: { xs: '100%', md: 280 },
+          height: { xs: '100vh', md: "fit-content" },
+          borderRadius: { xs: 0, md: "16px" },
+          bgcolor: "white",
+          p: { xs: 2, md: 3 },
+          position: { xs: "fixed", md: "sticky" },
+          top: { xs: 0, md: 16 },
+          left: 0,
+          zIndex: { xs: 1200, md: 1 },
+          overflowY: "auto",
+          boxSizing: "border-box",
+        }}>
+        {/* Header cho mobile */}
+        {isMobile && (
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" fontWeight={600} color="#333">
+              Menu
             </Typography>
-            <Typography fontSize='0.8rem' color='#666'>
-              +84 {context?.state?.user?.phone?.slice(3)}
-            </Typography>
+            <IconButton onClick={handleDrawerToggle} sx={{ color: '#98b720' }}>
+              <Close />
+            </IconButton>
           </Stack>
-        </Stack>
-
-        <Divider sx={{ bgcolor: "#eee" }} />
-
-        {/* MENU */}
-        <List disablePadding sx={{ cursor: "pointer" }}>
-          {menuItems.map((item) => (
-            <>
-              {item.text == "Đăng xuất" && <Divider sx={{ my: 2 }} />}
-              <ListItem
-                onClick={
-                  item.text == "Đăng xuất"
-                    ? () => setDeleteDialogOpen(true)
-                    : () => handleClickItemMenu(item.text)
-                }
-                key={item.text}
-                disablePadding
-                sx={{
-                  borderRadius: "12px",
-                  mb: 1,
-                  bgcolor: activeMenu == item.text ? "#f0f8f0" : "transparent",
-                  border:
-                    activeMenu == item.text ? "1px solid #98b720" : "none",
-                  px: 1,
-                  py: 1,
-                }}>
-                <ListItemIcon
+        )}
+  
+        <Stack spacing={3}>
+          {/* USER INFO */}
+          <Stack direction='row' spacing={2} alignItems='center'>
+            <Avatar
+              sx={{
+                width: { xs: 40, md: 48 },
+                height: { xs: 40, md: 48 },
+                bgcolor: "#e8f5e8",
+              }}>
+              <PersonIcon sx={{ color: "#98b720", fontSize: { xs: 24, md: 28 } }} />
+            </Avatar>
+            <Stack>
+              <Typography fontWeight={600} fontSize={{ xs: '0.9rem', md: '1rem' }} color='#333'>
+                {context?.state?.user?.name || "Người dùng"}
+              </Typography>
+              <Typography fontSize={{ xs: '0.75rem', md: '0.8rem' }} color='#666'>
+                +84 {context?.state?.user?.phone?.slice(3) || "123456789"}
+              </Typography>
+            </Stack>
+          </Stack>
+  
+          <Divider sx={{ bgcolor: "#eee" }} />
+  
+          {/* MENU */}
+          <List disablePadding sx={{ cursor: "pointer" }}>
+            {menuItems.map((item) => (
+              <React.Fragment key={item.text}>
+                {item.text === "Đăng xuất" && <Divider sx={{ my: 2 }} />}
+                <ListItem
+                  onClick={() => {
+                    if (item.text === "Đăng xuất") {
+                      setDeleteDialogOpen(true);
+                    } else {
+                      handleClickItemMenu(item.text);
+                    }
+                    // Đóng sidebar trên mobile sau khi chọn menu
+                    if (isMobile) {
+                      setMobileOpen(false);
+                    }
+                  }}
+                  disablePadding
                   sx={{
-                    minWidth: 36,
-                    color:
-                      activeMenu == item.text
-                        ? "rgba(152, 183, 32, 1)"
-                        : "#999",
+                    borderRadius: "12px",
+                    mb: 1,
+                    bgcolor: activeMenu === item.text ? "#f0f8f0" : "transparent",
+                    border:
+                      activeMenu === item.text ? "1px solid #98b720" : "none",
+                    px: 1,
+                    py: { xs: 1.5, md: 1 },
+                    '&:hover': {
+                      bgcolor: activeMenu === item.text ? "#f0f8f0" : "#f9f9f9",
+                    }
                   }}>
-                  {React.cloneElement(item.icon, { fontSize: "small" })}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography
-                      fontWeight={activeMenu == item.text ? 600 : 500}
-                      fontSize='0.9rem'
-                      color={
-                        activeMenu == item.text
+                  <ListItemIcon
+                    sx={{
+                      minWidth: { xs: 32, md: 36 },
+                      color:
+                        activeMenu === item.text
                           ? "rgba(152, 183, 32, 1)"
-                          : "#666"
-                      }>
-                      {item.text}
-                    </Typography>
-                  }
-                />
-              </ListItem>
-            </>
-          ))}
-        </List>
-      </Stack>
-    </Paper>
-  );
+                          : "#999",
+                      '& .MuiSvgIcon-root': {
+                        fontSize: { xs: '1.25rem', md: '1.375rem' }
+                      }
+                    }}>
+                    {React.cloneElement(item.icon)}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography
+                        fontWeight={activeMenu === item.text ? 600 : 500}
+                        fontSize={{ xs: '0.85rem', md: '0.9rem' }}
+                        color={
+                          activeMenu === item.text
+                            ? "rgba(152, 183, 32, 1)"
+                            : "#666"
+                        }>
+                        {item.text}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              </React.Fragment>
+            ))}
+          </List>
+        </Stack>
+      </Paper>
+    );
+  
+    // Nếu là mobile, hiển thị với Drawer
+    if (isMobile) {
+      return (
+        <>
+          {/* Nút mở sidebar trên mobile - đặt ở nơi phù hợp trong layout chính */}
+          <IconButton
+            onClick={handleDrawerToggle}
+            sx={{
+              position: 'fixed',
+              bottom: 20,
+              right: 20,
+              bgcolor: '#98b720',
+              color: 'white',
+              '&:hover': {
+                bgcolor: '#7a9a1a',
+              },
+              zIndex: 1100,
+              width: 56,
+              height: 56,
+              boxShadow: 3,
+              display: { xs: 'flex', md: 'none' }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+  
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile
+            }}
+            sx={{
+              display: { xs: 'block', md: 'none' },
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: '100%',
+                bgcolor: 'transparent',
+                boxShadow: 'none',
+              },
+            }}
+          >
+            {sidebarContent}
+          </Drawer>
+        </>
+      );
+    }
+  
+    // Nếu là desktop, hiển thị bình thường
+    return sidebarContent;
+  };
+  
 
   const MainContent = () => {
     if (!detailBooking) return null;
@@ -494,13 +589,11 @@ const ProfileView = ({
           <IconButton
             size='small'
             onClick={() =>
-              isMobile ? setDrawerOpen(true) : setDetailBooking(false)
+              setDetailBooking(false)
             }>
-            {isMobile ? (
-              <MenuIcon sx={{ fontSize: 22 }} />
-            ) : (
+           
               <ArrowBackIcon sx={{ fontSize: 20 }} />
-            )}
+           
           </IconButton>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
             Đặt phòng của tôi
@@ -684,7 +777,7 @@ const ProfileView = ({
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
             Lựa chọn của bạn
           </Typography>
-          <Stack direction='row' spacing={2} alignItems='flex-start'>
+          <Stack direction={'row'} flexWrap={"wrap"} gap={2}  spacing={2} alignItems='flex-start'>
             {/* HÌNH ẢNH PHÒNG */}
             <Box
               sx={{
@@ -1013,19 +1106,7 @@ const ProfileView = ({
         </DialogActions>
       </Dialog>
       <Container maxWidth='lg'>
-        {isMobile ? (
-          <>
-            <Drawer
-              anchor='left'
-              open={drawerOpen}
-              onClose={() => setDrawerOpen(false)}>
-              <Box sx={{ width: 280, p: 2 }}>
-                <Sidebar />
-              </Box>
-            </Drawer>
-            <MainContent />
-          </>
-        ) : (
+      
           <Grid container spacing={3}>
             <Grid item xs={12} md={4} lg={3.5}>
               <Sidebar />
@@ -1047,7 +1128,7 @@ const ProfileView = ({
               )}
             </Grid>
           </Grid>
-        )}
+        
       </Container>
     </Box>
   );

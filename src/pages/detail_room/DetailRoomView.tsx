@@ -28,6 +28,9 @@ import RoomList from "./RoomList";
 
 import HotelDetailInfo from "./HotelDetailInfo";
 import ListRoom from "../home/ListRoom";
+import SearchBarWithDropdown from "../../components/SearchBarWithDropdownHeader";
+import { getLocation } from "../../service/hotel";
+import { useLocation } from "react-router-dom";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -65,7 +68,7 @@ const DetailRoomView = ({
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [tabValue, setTabValue] = useState(0);
-
+  const location = useLocation()
   const section1Ref = useRef(null);
   const section2Ref = useRef(null);
   const section3Ref = useRef(null);
@@ -123,8 +126,27 @@ const DetailRoomView = ({
     const url = `https://www.google.com/maps?q=${lat},${lon}`;
     window.open(url, "_blank");
   };
+  const [locationAddress, setLocationAddress] = useState([]);
+
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (location.pathname == "/rooms") {
+          let result = await getLocation();
+          console.log("AAA location", result);
+          if (result?.locations) {
+            setLocationAddress(result?.locations);
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, [location.pathname]);
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
+       {isMobile && <SearchBarWithDropdown locationAddress={locationAddress} />}
       <Lightbox
         open={lightboxOpen}
         close={() => setLightboxOpen(false)}
@@ -208,7 +230,7 @@ const DetailRoomView = ({
               scrollButtons={false}
               sx={{
                 position: "sticky",
-                top: 80,
+                top: isMobile?70:80,
                 background: "#f9f9f9",
                 borderBottom: "1px solid #ccc",
                 zIndex: "35",

@@ -718,7 +718,8 @@ const RoomDetailModal = ({
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate();
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
 
@@ -774,7 +775,7 @@ const RoomDetailModal = ({
       <Box
         className='hidden-add-voice'
         sx={{
-          width: { xs: "95%", md: "1000px" },
+          width: { xs: "90%", md: "1000px" },
 
           position: "absolute",
           top: "50%",
@@ -784,7 +785,8 @@ const RoomDetailModal = ({
           transform: "translate(-50%, -50%)",
           p: { xs: 2, md: 3 },
 
-          height: "max-content",
+          height: isMobile?"80vh": "max-content",
+          overflowY:"scroll"
         }}>
         {/* HEADER */}
         <Stack direction='row' justifyContent='space-between' mb={2}>
@@ -802,7 +804,7 @@ const RoomDetailModal = ({
 
         <Stack direction={{ xs: "column", md: "row" }} gap={3}>
           {/* LEFT: SLIDER */}
-          <Box width={"60%"} position='relative'>
+          <Box width={isMobile?"100%":"60%"} position='relative'>
             <Box mb={1}>
               <Slider
                 {...settingsMain}
@@ -934,7 +936,7 @@ const RoomDetailModal = ({
             </Box>
           </Box>
           {/* RIGHT: ROOM INFO */}
-          <Box width={"37%"}>
+          <Box width={isMobile?"100%":"37%"}>
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
               Thông tin phòng
             </Typography>

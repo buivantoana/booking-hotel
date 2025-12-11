@@ -230,7 +230,7 @@ const PaymentResultView = ({ getDetail, loadingDetail,detailBooking }) => {
                   sx={{
                     bgcolor: "#f5f5f5",
                     borderRadius: "16px",
-                    p: 2.5,
+                    p:isMobile? 1: 2.5,
                     width: "100%",
                     textAlign: "left",
                   }}>
@@ -639,7 +639,7 @@ const MainContent = ({ detailBooking,navigate }) => {
         <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
           Lựa chọn của bạn
         </Typography>
-        <Stack direction='row' spacing={2} alignItems='flex-start'>
+        <Stack direction='row' flexWrap={"wrap"} gap={2} spacing={2} alignItems='flex-start'>
           {/* HÌNH ẢNH PHÒNG */}
           <Box
             sx={{

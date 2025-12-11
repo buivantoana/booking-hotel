@@ -280,7 +280,7 @@ const HotelDetailInfo = ({
           </Paper>
 
           {/* DANH SÁCH REVIEW */}
-          <Grid container justifyContent={"space-between"}>
+          <Grid container gap={2} justifyContent={"space-between"}>
             {reviews.slice(0, 3).map((review) => {
               const isExpanded = expandedReviews.includes(review.created_at);
               const shortContent = review.comment.slice(0, 120) + "...";
@@ -465,6 +465,7 @@ const HotelDetailInfo = ({
               boxShadow: 24,
               p: 4,
               overflow: "auto",
+              
             }}>
             <Stack
               direction='row'

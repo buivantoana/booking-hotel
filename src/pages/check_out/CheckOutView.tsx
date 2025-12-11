@@ -357,7 +357,7 @@ const CheckOutView = ({ dataCheckout }) => {
             </Typography>
           </Stack>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={isMobile?0:2}>
             {/* CỘT TRÁI */}
             <Grid item xs={12} md={6}>
               {/* BOOKING SUMMARY */}
@@ -677,7 +677,7 @@ const CheckOutView = ({ dataCheckout }) => {
             </Grid>
 
             {/* CỘT PHẢI */}
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} sx={{mt: isMobile?2:0}} md={6}>
               <Stack spacing={2}>
                 {/* CHI TIẾT THANH TOÁN */}
                 <Paper
@@ -818,10 +818,10 @@ const CheckOutView = ({ dataCheckout }) => {
 
                 {/* CHÍNH SÁCH + NÚT THANH TOÁN */}
                 <Stack
-                  direction='row'
+                  direction={isMobile?"column":'row'}
                   pt={3}
-                  justifyContent='space-between'
-                  alignItems='center'>
+                  justifyContent={isMobile?"start":'space-between'}
+                  alignItems={isMobile?"start":'center'}>
                   <Typography
                     fontSize='16px'
                     fontWeight={600}
@@ -844,6 +844,7 @@ const CheckOutView = ({ dataCheckout }) => {
                       fontSize: "1rem",
                       "&:hover": { bgcolor: "#7a9a1a" },
                       width: isMobile ? "100%" : "282px",
+                      mt:isMobile?2:0
                     }}>
                     {loading ? (
                       <>
