@@ -37,14 +37,10 @@ const HomeController = (props: Props) => {
     (async () => {
       setLoading(true);
       try {
-       
-        let featured = await searchHotel({ category: "featured" });
         let recommend = await searchHotel({ category: "recommend" });
         let toprated = await searchHotel({ category: "toprated" });
         let newHotel = await searchHotel({ category: "new" });
-        if (featured?.hotels?.length) {
-          setFeatured(featured?.hotels);
-        }
+        
         if (recommend?.hotels?.length) {
           setRecommend(recommend?.hotels);
         }
