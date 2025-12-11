@@ -61,7 +61,7 @@ const HomeView = ({
       <Box
         sx={{
           position: "relative",
-          height: { xs: "70vh", md: "60vh" },
+          height: { xs: "50vh", md: "60vh" },
           backgroundImage: `url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')`,
           backgroundSize: "cover",
           backgroundPosition: "center",

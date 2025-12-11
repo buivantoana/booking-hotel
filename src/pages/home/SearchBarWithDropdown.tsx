@@ -776,7 +776,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
           zIndex={10}>
           <Container maxWidth='lg'>
             {/* Toggle */}
-            <Stack direction='row' justifyContent='center' sx={{ mb: isMobile?"10px":"-40px" }}>
+            <Stack direction='row' justifyContent='center' sx={{ mb: isMobile?"-10px":"-40px" }}>
               <ToggleButtonGroup
                 value={bookingType}
                 exclusive
@@ -788,8 +788,8 @@ const SearchBarWithDropdown = ({ location, address }) => {
                   p: isMobile?"10px":"16px 24px",
                   gap: "20px",
                   flexDirection: "row",
-
-                  width: isMobile?"90%":"unset"
+                  justifyContent:"space-between",
+                  width: isMobile?"80%":"unset"
                 }}>
                 {[
                   { v: "hourly", i: <AccessTime sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: "Theo giờ" },
