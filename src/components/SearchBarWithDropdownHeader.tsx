@@ -631,6 +631,8 @@ const getNextHour = () => {
 export default function SearchBarWithDropdown({ locationAddress }) {
   const [bookingType, setBookingType] = useState("hourly");
   const [searchValue, setSearchValue] = useState("");
+  const [addressOld, setAddressOld] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState("");
   const [checkIn, setCheckIn] = useState<Dayjs | null>(dayjs());
   const [checkOut, setCheckOut] = useState<Dayjs | null>(null);
   const [checkInTime, setCheckInTime] = useState<string>(getNextHour());
@@ -639,8 +641,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const location = useLocation();
   const [name, setName] = useState<string>("");
   const [searchParams] = useSearchParams();
+  const addressOldRef = useRef("");
   const isMobile = useMediaQuery('(max-width:900px)'); // Thêm breakpoint cho mobile
-  
+  const selectingRef = useRef(false);
   useEffect(() => {
     // Giữ nguyên logic
     const locationParam = searchParams.get("location") || "";
@@ -701,10 +704,12 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   }, [bookingType]);
 
   useEffect(() => {
-    const locId = locationAddress.find(i => i.name.vi === searchValue)?.id;
+    const locId = locationAddress.find(
+      i => i.name.vi === selectedAddress
+    )?.id;
+  
     updateParams({ location: locId || "" });
-  }, [searchValue]);
-
+  }, [selectedAddress]);
   useEffect(() => {
     updateParams({
       checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
@@ -792,6 +797,19 @@ export default function SearchBarWithDropdown({ locationAddress }) {
             setTypeDropdownOpen(false);
           if (dateRef.current && !dateRef.current.contains(e.target))
             setPickerOpen(false);
+
+            if (inputRef.current && !inputRef.current.contains(e.target)) {
+              const isValid = locationAddress.some(
+                (loc) => loc.name.vi === searchValue
+              );
+          
+              if (!isValid) {
+              
+                setSearchValue(addressOldRef.current || "");
+              }
+          
+              setDropdownOpen(false);
+            }
         }}>
         <Box width={isMobile ? '100%' : '70%'}>
           <Container sx={{px:0}} maxWidth={isMobile ? 'sm' : 'md'}>
@@ -817,8 +835,23 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       variant='outlined'
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
-                      onFocus={() => setDropdownOpen(true)}
+                      onFocus={() => {
+                        addressOldRef.current = selectedAddress;
+                        setDropdownOpen(true)}}
                       inputRef={inputRef}
+                      onBlur={() => {
+                        if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
+                    
+                        const isValid = locationAddress.some(
+                          (loc) => loc.name.vi === searchValue
+                        );
+                    
+                        if (!isValid) {
+                          setSearchValue(selectedAddress || "");
+                        }
+                    
+                        setDropdownOpen(false);
+                      }}
                       InputProps={{
                         startAdornment: (
                           <LocationOn
@@ -848,9 +881,14 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                           {filteredLocations.map((loc, i) => (
                             <ListItemButton
                               key={i}
+                              onMouseDown={() => {
+                                selectingRef.current = true; // ✅ báo đang chọn
+                              }}
                               onClick={() => {
                                 setSearchValue(loc.name.vi)
+                                setSelectedAddress(loc.name.vi);
                                 setDropdownOpen(false)
+                                selectingRef.current = false;
                               }}
                               sx={{
                                 py: 1.5,
@@ -990,13 +1028,29 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   <Box sx={{ flex: "250px 0 0", position: "relative" }}>
                     <TextField
                       fullWidth
+                      
                       disabled={name}
                       placeholder='Bạn muốn đi đâu?'
                       variant='outlined'
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
-                      onFocus={() => setDropdownOpen(true)}
+                      onFocus={() => {
+                        addressOldRef.current = selectedAddress;
+                        setDropdownOpen(true)}}
                       inputRef={inputRef}
+                      onBlur={() => {
+                        if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
+                    
+                        const isValid = locationAddress.some(
+                          (loc) => loc.name.vi === searchValue
+                        );
+                    
+                        if (!isValid) {
+                          setSearchValue(selectedAddress || "");
+                        }
+                    
+                        setDropdownOpen(false);
+                      }}
                       InputProps={{
                         startAdornment: (
                           <LocationOn
@@ -1051,9 +1105,14 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                             {filteredLocations.map((loc, i) => (
                               <ListItemButton
                                 key={i}
+                                onMouseDown={() => {
+                                  selectingRef.current = true; // ✅ báo đang chọn
+                                }}
                                 onClick={() => {
                                   setSearchValue(loc.name.vi)
+                                  setSelectedAddress(loc.name.vi);
                                   setDropdownOpen(false)
+                                  selectingRef.current = false;
                                 }}
                                 sx={{
                                   py: 1.5,
