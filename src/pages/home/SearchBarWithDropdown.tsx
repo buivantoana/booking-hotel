@@ -574,6 +574,8 @@ const SearchBarWithDropdown = ({ location, address }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [coords, setCoords] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+const selectingRef = useRef(false);
   const geoResolveRef = useRef(null);
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
@@ -581,13 +583,20 @@ const SearchBarWithDropdown = ({ location, address }) => {
   console.log("AAAA address", address);
   useEffect(() => {
     if (address) {
-      let name = location.find((item) => item.id == address.id)?.name.vi;
-      setSearchValue(name);
+      const name = location.find((item) => item.id == address.id)?.name.vi;
+      setSearchValue(name || "");
+      setSelectedLocation(name || "");
     }
   }, [address]);
   const handleLocationClick = (loc: string) => {
     setSearchValue(loc);
+    setSelectedLocation(loc);
     setDropdownOpen(false);
+
+    // reset lại cờ
+    setTimeout(() => {
+      selectingRef.current = false;
+    }, 0);
   };
 
   useEffect(() => {
@@ -875,6 +884,21 @@ const SearchBarWithDropdown = ({ location, address }) => {
                       setSearchValue("");
                       setDropdownOpen(true);
                     }}
+                    onBlur={() => {
+                      // Nếu đang click item → bỏ qua blur
+                      if (selectingRef.current) return;
+                  
+                      const isValid = location.some(
+                        (loc) => loc.name.vi === searchValue
+                      );
+                  
+                      if (!isValid) {
+                        // Trả lại giá trị đã chọn trước đó
+                        setSearchValue(selectedLocation || "");
+                      }
+                  
+                      setDropdownOpen(false);
+                    }}
                     inputRef={inputRef}
                     InputProps={{
                       startAdornment: (
@@ -942,6 +966,9 @@ const SearchBarWithDropdown = ({ location, address }) => {
                           {filteredLocations.map((loc, i) => (
                             <ListItemButton
                               key={i}
+                              onMouseDown={() => {
+                                selectingRef.current = true; // 🔥 chặn blur
+                              }}
                               onClick={() => handleLocationClick(loc.name.vi)}
                               sx={{
                                 px: 2,
