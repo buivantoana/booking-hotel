@@ -57,6 +57,8 @@ const ProfileView = ({
   getHistoryBooking,
   hastag,
   loading,
+  pagination,
+  onPageChange
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -441,7 +443,7 @@ const ProfileView = ({
       // -----------------------------
 
       // booking đã hoàn thành hoặc bị hủy -> nút "Đặt lại"
-      if (bookingStatus === "checked_out" || bookingStatus === "cancelled") {
+      if (bookingStatus === "checked_out" || bookingStatus === "cancelled" ||detailBooking.status === "no_show" ) {
         return "Đặt lại";
       }
 
@@ -731,7 +733,7 @@ const ProfileView = ({
               </Stack>
             </Paper>
           )}
-        {detailBooking.status === "cancelled" && (
+        {detailBooking.status === "cancelled" ||detailBooking.status === "no_show"  && (
           <Paper
             elevation={0}
             sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
@@ -1124,6 +1126,8 @@ const ProfileView = ({
                   getHistoryBooking={getHistoryBooking}
                   hastag={hastag}
                   loading={loading}
+                  pagination={pagination}
+                  onPageChange={onPageChange}
                 />
               )}
             </Grid>

@@ -1,9 +1,10 @@
 import api from "../core/api";
 
-export async function historyBookingContact() {
+export async function historyBookingContact(params) {
   try {
     let token = localStorage.getItem("access_token");
     const response = await api.get(`/booking/history`, {
+      params,
       headers: {
         Authorization: `Bearer ${token}`,
       },

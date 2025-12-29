@@ -659,6 +659,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     setSearchValue(
       name||locationAddress?.find((item) => item.id == locationParam)?.name?.vi || ""
     );
+    addressOldRef.current = locationAddress?.find((item) => item.id == locationParam)?.name?.vi
     setCheckInTime(checkInTimeParam);
     setCheckInDuration(Number(durationParam));
 
@@ -787,6 +788,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     }, 300);
   };
 
+  console.log("AAA addressOldRef",addressOldRef)
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener
@@ -1035,21 +1037,24 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
                       onFocus={() => {
-                        addressOldRef.current = selectedAddress;
+                        // addressOldRef.current = selectedAddress;
                         setDropdownOpen(true)}}
                       inputRef={inputRef}
                       onBlur={() => {
-                        if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
-                    
-                        const isValid = locationAddress.some(
-                          (loc) => loc.name.vi === searchValue
-                        );
-                    
-                        if (!isValid) {
-                          setSearchValue(selectedAddress || "");
+                        if(!name){
+                          if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
+                      
+                          const isValid = locationAddress.some(
+                            (loc) => loc.name.vi === searchValue
+                          );
+                      
+                          if (!isValid) {
+                            setSearchValue(selectedAddress || "");
+                          }
+                      
+                          setDropdownOpen(false);
+
                         }
-                    
-                        setDropdownOpen(false);
                       }}
                       InputProps={{
                         startAdornment: (

@@ -23,6 +23,7 @@ import {
   TextField,
   Rating,
   CircularProgress,
+  Pagination,
 } from "@mui/material";
 import {
   AccessTime as AccessTimeIcon,
@@ -117,6 +118,9 @@ const getBookingStatus = (booking: any) => {
 
   if (bookingStatus === "confirmed" && paymentStatus === "paid") {
     return { label: "Chờ nhận phòng", color: "#0066CC", bg: "#E6F0FA" };
+  }
+  if (bookingStatus === "no_show" && paymentStatus === "paid") {
+    return { label: "Không nhận phòng",  color: "#E91E1E", bg: "#FFEBEE" };
   }
 
   if (paymentStatus === "paid") {
@@ -990,6 +994,8 @@ export default function MyBookingsPage({
   getHistoryBooking,
   hastag,
   loading,
+  pagination,
+  onPageChange,
 }: {
   setDetailBooking: (open: boolean) => void;
   historyBooking?: any[];
@@ -1042,7 +1048,8 @@ export default function MyBookingsPage({
                 </Typography>
               </Box>
             ) : (
-              filtered.map((booking) => (
+              <>
+              {  filtered.map((booking) => (
                 <BookingCard
                   key={booking.booking_id}
                   booking={booking}
@@ -1050,7 +1057,46 @@ export default function MyBookingsPage({
                   getHistoryBooking={getHistoryBooking}
                   hastag={hastag}
                 />
-              ))
+              ))}
+              
+              <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+            <Pagination
+              key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+              count={pagination.total_pages}
+              page={pagination.page}
+              onChange={onPageChange}
+              siblingCount={1}
+              boundaryCount={1}
+              color='primary'
+              size={isMobile ? "medium" : "large"}
+              sx={{
+                // Tùy chỉnh trang active
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                  color: "white",
+                  fontWeight: "bold",
+                  boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                  "&:hover": {
+                    backgroundColor: "#7cb342 !important",
+                  },
+                },
+                // Tùy chỉnh các trang thường (nếu muốn)
+                "& .MuiPaginationItem-root": {
+                  borderRadius: "8px",
+                  margin: "0 4px",
+                  "&:hover": {
+                    backgroundColor: "#e8f5e9",
+                  },
+                },
+                // Tùy chỉnh nút ellipsis (...) nếu cần
+                "& .MuiPaginationItem-ellipsis": {
+                  color: "#666",
+                },
+              }}
+            />
+          </Stack>
+              </>
+            
             )}
           </>
         )}

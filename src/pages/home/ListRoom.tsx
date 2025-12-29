@@ -341,7 +341,7 @@ const ListRoom = ({
                         hotelName={name}
                         hotelAddress={address}
                         rating={hotel.rating}
-                        price={hotel.price_min}
+                        price={hotel.price_min['hourly']}
                         id={hotel.id}
                         reviewCount={hotel.review_count}
                       />

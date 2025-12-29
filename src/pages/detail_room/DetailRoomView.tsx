@@ -31,6 +31,7 @@ import ListRoom from "../home/ListRoom";
 import SearchBarWithDropdown from "../../components/SearchBarWithDropdownHeader";
 import { getLocation } from "../../service/hotel";
 import { useLocation } from "react-router-dom";
+import { Phone } from "@mui/icons-material";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -173,7 +174,7 @@ const DetailRoomView = ({
               <Stack direction='row' alignItems='center' spacing={1} mt={0.5}>
                 <LocationOnIcon sx={{ fontSize: 18, color: "#98b720" }} />
                 <Typography fontSize='0.9rem' color='#666'>
-                  {detailHotel?.hotel?.address?.en}
+                  {detailHotel?.hotel?.address?.vi ||detailHotel?.hotel?.address?.en}
                 </Typography>
                 <Typography
                   onClick={() =>
@@ -207,6 +208,13 @@ const DetailRoomView = ({
                   size='small'
                   sx={{ textTransform: "none", color: "#666" }}></Button>
               </Stack>
+           {detailHotel?.hotel?.phone&&   <Stack direction='row' alignItems='center' spacing={1} mt={1}>
+                <Phone sx={{ fontSize: 18, color: "#98b720" }} />
+                <Typography fontSize='0.9rem' color='#666'>
+                  {detailHotel?.hotel?.phone }
+                </Typography>
+               
+              </Stack>}
             </Stack>
           )}
 

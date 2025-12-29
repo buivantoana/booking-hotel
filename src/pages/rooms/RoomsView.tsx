@@ -1343,11 +1343,10 @@ const ItemHotel = ({
                         justifyContent='space-between'>
                         <Box>
                           <Typography fontWeight={600} fontSize='1.1rem'>
-                            {JSON.parse(hotel.name).vi ||
-                              JSON.parse(hotel.name).en}
+                            {parseName(hotel.name)}
                           </Typography>
                           <Typography fontSize='0.85rem' color='#999' mt={0.5}>
-                            {JSON.parse(hotel.address).en}
+                            {parseName(hotel.address)}
                           </Typography>
                           <Stack
                             direction='row'
@@ -1394,7 +1393,7 @@ const ItemHotel = ({
                                 color='#999'>
                                 Chỉ từ
                               </Typography>{" "}
-                              {hotel.price_min.toLocaleString("vi-VN")}đ
+                              {hotel.price_min[searchParams.get("type")].toLocaleString("vi-VN")}đ
                             </Typography>
 
                             {/* <Box
@@ -1663,6 +1662,7 @@ import { useBookingContext } from "../../App";
 import { borderRadius } from "@mui/system";
 import SearchBarWithDropdown from "../../components/SearchBarWithDropdownHeader";
 import { getLocation } from "../../service/hotel";
+import { parseName } from "../../utils/utils";
 
 function PromotionBanner() {
   const navigate = useNavigate();
