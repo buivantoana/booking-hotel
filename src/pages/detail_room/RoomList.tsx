@@ -37,7 +37,11 @@ import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import no_room from "../../images/Calendar.svg";
-import { facilities, getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import {
+  facilities,
+  getErrorMessage,
+  normalizePhoneForAPI,
+} from "../../utils/utils";
 interface Room {
   id: number;
   name: string;
@@ -47,8 +51,6 @@ interface Room {
   price: number;
   remaining: number | null; // null = hết phòng
 }
-
-
 
 const RoomCard = ({
   room,
@@ -252,70 +254,68 @@ const RoomCard = ({
 
         {/* TIỆN ÍCH */}
         <Stack direction='row' gap={1} flexWrap='wrap'>
-        {(() => {
-                // Parse facilities từ DB (là JSON string dạng array id)
-                console.log("AAA room?.amenities",room?.amenities)
-                const facilityIds = () => {
-                  if (!room?.amenities) return [];
-                  try {
-                    const parsed =
-                      typeof room.amenities === "string"
-                        ? JSON.parse(room.amenities)
-                        : Array.isArray(room.amenities)
-                        ? room.amenities
-                        : [];
-                    return Array.isArray(parsed) ? parsed : [];
-                  } catch (e) {
-                    console.warn("Parse facilities error:", e);
-                    return [];
-                  }
-                };
-                console.log("AAA facilityIds",facilityIds())
-                // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
-                  facilityIds().includes(fac.id)
-                );
+          {(() => {
+            // Parse facilities từ DB (là JSON string dạng array id)
+            console.log("AAA room?.amenities", room?.amenities);
+            const facilityIds = () => {
+              if (!room?.amenities) return [];
+              try {
+                const parsed =
+                  typeof room.amenities === "string"
+                    ? JSON.parse(room.amenities)
+                    : Array.isArray(room.amenities)
+                    ? room.amenities
+                    : [];
+                return Array.isArray(parsed) ? parsed : [];
+              } catch (e) {
+                console.warn("Parse facilities error:", e);
+                return [];
+              }
+            };
+            console.log("AAA facilityIds", facilityIds());
+            // Map id → object đầy đủ (label + icon)
+            const selectedFacilities = facilities.filter((fac) =>
+              facilityIds().includes(fac.id)
+            );
 
-                console.log("AAA selectedFacilities",selectedFacilities)
-                if (selectedFacilities.length === 0) {
-                  return (
-                    <Typography color='#999' fontStyle='italic'>
-                      Chưa có tiện ích nào được thiết lập
-                    </Typography>
-                  );
-                }
+            console.log("AAA selectedFacilities", selectedFacilities);
+            if (selectedFacilities.length === 0) {
+              return (
+                <Typography color='#999' fontStyle='italic'>
+                  Chưa có tiện ích nào được thiết lập
+                </Typography>
+              );
+            }
 
-                return (
+            return (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                {selectedFacilities.map((fac) => (
                   <Box
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-                    {selectedFacilities.map((fac) => (
-                      <Box
-                        key={fac.id}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.5,
-                          bgcolor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
-                          borderRadius: 3,
-                          px: 1,
-                          py: .5,
-                          
-                        }}>
-                        <Box
-                          component='img'
-                          src={fac.icon}
-                          alt={fac?.name?.vi}
-                          sx={{ width: 20, height: 20, objectFit: "contain" }}
-                        />
-                        <Typography fontWeight={500} fontSize='0.85rem'>
-                          {fac?.name?.vi}
-                        </Typography>
-                      </Box>
-                    ))}
+                    key={fac.id}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      bgcolor: "#f8f9fa",
+                      border: "1px solid #e9ecef",
+                      borderRadius: 3,
+                      px: 1,
+                      py: 0.5,
+                    }}>
+                    <Box
+                      component='img'
+                      src={fac.icon}
+                      alt={fac?.name?.vi}
+                      sx={{ width: 20, height: 20, objectFit: "contain" }}
+                    />
+                    <Typography fontWeight={500} fontSize='0.85rem'>
+                      {fac?.name?.vi}
+                    </Typography>
                   </Box>
-                );
-              })()}
+                ))}
+              </Box>
+            );
+          })()}
         </Stack>
         <Divider />
         {/* GIÁ + NÚT */}
@@ -782,7 +782,7 @@ const RoomDetailModal = ({
           rooms: [
             {
               quantity: 1,
-              room_type_id: room.room_type_id,
+              room_type_id: room.id,
             },
           ],
           price: room.price_daily,
@@ -816,8 +816,8 @@ const RoomDetailModal = ({
           transform: "translate(-50%, -50%)",
           p: { xs: 2, md: 3 },
 
-          height: isMobile?"80vh": "max-content",
-          overflowY:"scroll"
+          height: isMobile ? "80vh" : "max-content",
+          overflowY: "scroll",
         }}>
         {/* HEADER */}
         <Stack direction='row' justifyContent='space-between' mb={2}>
@@ -835,7 +835,7 @@ const RoomDetailModal = ({
 
         <Stack direction={{ xs: "column", md: "row" }} gap={3}>
           {/* LEFT: SLIDER */}
-          <Box width={isMobile?"100%":"60%"} position='relative'>
+          <Box width={isMobile ? "100%" : "60%"} position='relative'>
             <Box mb={1}>
               <Slider
                 {...settingsMain}
@@ -967,7 +967,7 @@ const RoomDetailModal = ({
             </Box>
           </Box>
           {/* RIGHT: ROOM INFO */}
-          <Box width={isMobile?"100%":"37%"}>
+          <Box width={isMobile ? "100%" : "37%"}>
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
               Thông tin phòng
             </Typography>
@@ -985,9 +985,9 @@ const RoomDetailModal = ({
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
-            {(() => {
+              {(() => {
                 // Parse facilities từ DB (là JSON string dạng array id)
-                console.log("AAA room?.amenities",room?.amenities)
+                console.log("AAA room?.amenities", room?.amenities);
                 const facilityIds = () => {
                   if (!room?.amenities) return [];
                   try {
@@ -1031,8 +1031,7 @@ const RoomDetailModal = ({
                           border: "1px solid #e9ecef",
                           borderRadius: 3,
                           px: 1,
-                          py: .5,
-                         
+                          py: 0.5,
                         }}>
                         <Box
                           component='img'
