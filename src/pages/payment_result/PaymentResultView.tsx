@@ -265,7 +265,7 @@ const PaymentResultView = ({ getDetail, loadingDetail,detailBooking }) => {
                         <LocationIcon sx={{ fontSize: 20, color: "#666" }} />
                       </Box>
                       <Typography fontSize='0.9rem' color='#333'>
-                        Thanh toán: {data.payment.method.toUpperCase()}
+                        Thanh toán: {data?.payment?.method?.toUpperCase()}
                       </Typography>
                     </Stack>
 
