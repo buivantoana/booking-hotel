@@ -184,7 +184,7 @@ const HotelDetailInfo = ({
                           borderRadius: 3,
                           px: 1,
                           py: .5,
-                          minWidth: 140,
+                          
                         }}>
                         <Box
                           component='img'

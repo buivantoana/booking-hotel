@@ -251,7 +251,7 @@ const RoomCard = ({
         </Stack>
 
         {/* TIỆN ÍCH */}
-        {/* <Stack direction='row' gap={1} flexWrap='wrap'>
+        <Stack direction='row' gap={1} flexWrap='wrap'>
         {(() => {
                 // Parse facilities từ DB (là JSON string dạng array id)
                 console.log("AAA room?.amenities",room?.amenities)
@@ -300,7 +300,7 @@ const RoomCard = ({
                           borderRadius: 3,
                           px: 1,
                           py: .5,
-                          minWidth: 140,
+                          
                         }}>
                         <Box
                           component='img'
@@ -316,7 +316,7 @@ const RoomCard = ({
                   </Box>
                 );
               })()}
-        </Stack> */}
+        </Stack>
         <Divider />
         {/* GIÁ + NÚT */}
         <Stack
@@ -985,7 +985,7 @@ const RoomDetailModal = ({
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
-            {/* {(() => {
+            {(() => {
                 // Parse facilities từ DB (là JSON string dạng array id)
                 console.log("AAA room?.amenities",room?.amenities)
                 const facilityIds = () => {
@@ -1032,7 +1032,7 @@ const RoomDetailModal = ({
                           borderRadius: 3,
                           px: 1,
                           py: .5,
-                          minWidth: 140,
+                         
                         }}>
                         <Box
                           component='img'
@@ -1047,7 +1047,7 @@ const RoomDetailModal = ({
                     ))}
                   </Box>
                 );
-              })()} */}
+              })()}
             </Stack>
 
             <Typography fontWeight={600} my={2}>
