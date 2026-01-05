@@ -24,42 +24,55 @@ const DetailRoomController = (props: Props) => {
   const [idHotel, setIdHotel] = useState(null);
   const [amenities, setAmenities] = useState([]);
   useEffect(() => {
-    const checkIn = searchParams.get("checkIn"); // 2025-12-06
-    const checkOut = searchParams.get("checkOut"); // 2025-12-06
+    const checkIn = searchParams.get("checkIn"); // 2026-01-05
+    const checkOut = searchParams.get("checkOut");
     const type = searchParams.get("type"); // hourly / daily
-    const checkInTime = searchParams.get("checkInTime"); // 14:00
-    const duration = Number(searchParams.get("duration")); // 2
-
+    const checkInTime = searchParams.get("checkInTime"); // 18:00
+    const durationStr = searchParams.get("duration");
+    const duration = durationStr ? Number(durationStr) : null;
+  
     let finalCheckIn = checkIn;
     let finalCheckOut = checkOut;
-
-    // Nếu type = hourly → convert datetime sang UTC
+    let rentType = type;
+  
     if (type === "hourly") {
-      // Tạo datetime local từ checkIn + checkInTime
-      const localDateTime = new Date(`${checkIn}T${checkInTime}:00`);
-
-      // Convert sang UTC
-      const utcIn = localDateTime
-        .toISOString()
-        .replace("T", " ")
-        .substring(0, 19);
-
-      // Tính checkOut theo duration (giờ)
-      const localOut = new Date(
-        localDateTime.getTime() + duration * 60 * 60 * 1000
-      );
-      const utcOut = localOut.toISOString().replace("T", " ").substring(0, 19);
-
-      finalCheckIn = utcIn; // ví dụ: "2025-11-26 07:00:00"
-      finalCheckOut = utcOut; // ví dụ: "2025-11-26 09:00:00"
+      if (!checkIn || !checkInTime || !duration || isNaN(duration)) {
+        console.error("Missing params for hourly");
+        return;
+      }
+  
+      // Không dùng new Date() + toISOString() để tránh convert UTC
+      // Thay vào đó: trực tiếp ghép chuỗi theo định dạng backend mong muốn
+      finalCheckIn = `${checkIn} ${checkInTime}:00`; // "2026-01-05 18:00:00"
+  
+      // Tính check out
+      const [hourStr, minuteStr] = checkInTime.split(":");
+      let hour = parseInt(hourStr);
+      const minute = parseInt(minuteStr);
+  
+      let outHour = hour + duration;
+      let outDay = checkIn;
+  
+      // Nếu vượt 24h thì sang ngày hôm sau (hiếm, nhưng xử lý cho chắc)
+      if (outHour >= 24) {
+        outHour -= 24;
+        const nextDay = new Date(checkIn);
+        nextDay.setDate(nextDay.getDate() + 1);
+        outDay = nextDay.toISOString().slice(0, 10);
+      }
+  
+      const outTime = `${outHour.toString().padStart(2, "0")}:${minuteStr}`;
+      finalCheckOut = `${outDay} ${outTime}:00`; // ví dụ: "2026-01-05 20:00:00"
     }
-
-    // Gọi API
-    getAvaibleRoom(idPrams, {
-      check_in: finalCheckIn,
-      check_out: finalCheckOut,
-    });
-  }, []);
+  
+    if (idPrams && finalCheckIn && finalCheckOut) {
+      getAvailableRooms(idPrams, {
+        check_in: finalCheckIn,
+        check_out: finalCheckOut,
+        rent_type: rentType,
+      });
+    }
+  }, [searchParams, idPrams]);
   useEffect(() => {
     (async () => {
       try {

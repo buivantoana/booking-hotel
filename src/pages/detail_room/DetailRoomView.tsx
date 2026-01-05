@@ -32,6 +32,7 @@ import SearchBarWithDropdown from "../../components/SearchBarWithDropdownHeader"
 import { getLocation } from "../../service/hotel";
 import { useLocation } from "react-router-dom";
 import { Phone } from "@mui/icons-material";
+import { toast } from "react-toastify";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -145,6 +146,17 @@ const DetailRoomView = ({
       }
     })();
   }, [location.pathname]);
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+  
+      await navigator.clipboard.writeText(url);
+  
+      toast.success("Đã sao chép đường dẫn chia sẻ");
+    } catch (err) {
+      toast.error("Không thể sao chép đường dẫn");
+    }
+  };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 4 } }}>
        {isMobile && <SearchBarWithDropdown locationAddress={locationAddress} />}
@@ -204,6 +216,7 @@ const DetailRoomView = ({
                 </Stack>
                 <Box sx={{ flex: 1 }} />
                 <Button
+                  onClick={handleShare}
                   startIcon={<ShareIcon sx={{ fontSize: 18 }} />}
                   size='small'
                   sx={{ textTransform: "none", color: "#666" }}></Button>

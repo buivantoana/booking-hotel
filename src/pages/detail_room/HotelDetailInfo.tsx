@@ -390,7 +390,7 @@ const HotelDetailInfo = ({
                 "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
               }}
               onClick={() => setOpenModal(true)}>
-              Show All {reviews.length} Reviews
+             Toàn bộ đánh giá
             </Button>
           )}
         </Stack>

@@ -716,7 +716,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
       checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
       checkInTime,
-      duration: checkInDuration
+      duration: checkInDuration||2
     });
   }, [checkIn,checkOut,checkInTime,checkInDuration]);
 

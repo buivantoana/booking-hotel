@@ -1089,11 +1089,11 @@ const FilterMap = ({
                           </Typography>
 
                           <Typography sx={{ mt: 1, fontSize: 14 }}>
-                            ⭐ {activeHotel.rating} / 5
+                            ⭐ {activeHotel?.rating} / 5
                           </Typography>
 
                           <Typography sx={{ fontSize: 14, color: "#FF5722" }}>
-                            Từ {activeHotel.price_min}$ / đêm
+                            Từ {activeHotel?.price_min?.[searchParams.get("type")]?.toLocaleString("vi-VN")}đ / đêm
                           </Typography>
                         </Box>
                       );
@@ -1393,7 +1393,7 @@ const ItemHotel = ({
                                 color='#999'>
                                 Chỉ từ
                               </Typography>{" "}
-                              {hotel.price_min[searchParams.get("type")].toLocaleString("vi-VN")}đ
+                              {hotel?.price_min?.[searchParams.get("type")]?.toLocaleString("vi-VN")}đ
                             </Typography>
 
                             {/* <Box
