@@ -3,13 +3,16 @@ import RoomsView from "./RoomsView";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { getAmenities, searchHotel } from "../../service/hotel";
+import { facilities } from "../../utils/utils";
 
 type Props = {};
 
 const RoomsController = (props: Props) => {
   const [queryHotel, setQueryHotel] = useState({});
   const [dataHotel, setDataHotel] = useState([]);
-  const [amenities, setAmenities] = useState([]);
+  const [amenities, setAmenities] = useState(facilities.map((item)=>{
+    return {...item,active:false}
+  }));
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [page, setPage] = useState(1);
@@ -33,26 +36,26 @@ const RoomsController = (props: Props) => {
       page,
     });
   }, [location.pathname, searchParams.get("search") , page]);
-  useEffect(() => {
-    (async () => {
-      try {
-        let result = await getAmenities();
+  // useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       let result = await getAmenities();
 
-        if (result?.amenities?.length > 0) {
-          setAmenities(
-            result?.amenities.map((item) => {
-              return {
-                ...item,
-                active: false,
-              };
-            })
-          );
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    })();
-  }, []);
+  //       if (result?.amenities?.length > 0) {
+  //         setAmenities(
+  //           result?.amenities.map((item) => {
+  //             return {
+  //               ...item,
+  //               active: false,
+  //             };
+  //           })
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   })();
+  // }, []);
   const prevQueryRef = useRef(queryHotel);
   useEffect(() => {
     if (Object.keys(queryHotel).length === 0) return;

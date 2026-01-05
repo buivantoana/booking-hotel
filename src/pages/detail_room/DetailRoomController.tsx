@@ -9,6 +9,7 @@ import {
   searchHotel,
 } from "../../service/hotel";
 import { getHashtags } from "../../service/profile";
+import { facilities } from "../../utils/utils";
 
 type Props = {};
 
@@ -22,7 +23,9 @@ const DetailRoomController = (props: Props) => {
   const [hastag, setHastag] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
-  const [amenities, setAmenities] = useState([]);
+  const [amenities, setAmenities] = useState(facilities.map((item)=>{
+    return {...item,active:false}
+  }));
   useEffect(() => {
     const checkIn = searchParams.get("checkIn"); // 2026-01-05
     const checkOut = searchParams.get("checkOut");
@@ -66,7 +69,7 @@ const DetailRoomController = (props: Props) => {
     }
   
     if (idPrams && finalCheckIn && finalCheckOut) {
-      getAvailableRooms(idPrams, {
+      getAvaibleRoom(idPrams, {
         check_in: finalCheckIn,
         check_out: finalCheckOut,
         rent_type: rentType,

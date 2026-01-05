@@ -174,3 +174,71 @@ export  const parseName = (name?: string) => {
     return name;
   }
 };
+
+export const facilities = [
+  {
+    id: "luggage_storage",
+    name: { en: "Luggage Storage", vi: "Bảo quản hành lý" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/double%20shopping%20bag.png",
+  },
+  {
+    id: "elevator",
+    name: { en: "Elevator", vi: "Thang máy" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%20(1).png",
+  },
+  {
+    id: "safe_box",
+    name: { en: "Safe Box", vi: "Két sắt" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317930%20(1).png",
+  },
+  {
+    id: "parking",
+    name: { en: "Parking", vi: "Bãi đỗ xe" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317935%20(1).png",
+  },
+  {
+    id: "pool",
+    name: { en: "Swimming Pool", vi: "Bể bơi" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317932%20(1).png",
+  },
+  {
+    id: "air_conditioner",
+    name: { en: "Air Conditioner", vi: "Điều hòa" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/hotel-air-conditioner--heating-ac-air-hvac-cool-cooling-cold-hot-conditioning-hotel.png",
+  },
+  {
+    id: "smart_tv",
+    name: { en: "Smart TV", vi: "Smart TV" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Display.png",
+  },
+  {
+    id: "love_chair",
+    name: { en: "Love Chair", vi: "Ghế tình yêu" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Armchair%202.png",
+  },
+  {
+    id: "bathtub",
+    name: { en: "Bathtub", vi: "Bồn tắm" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Bath.png",
+  },
+  {
+    id: "kitchenware",
+    name: { en: "Kitchenware", vi: "Đồ bếp" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/pot-01%20(1).png",
+  },
+  {
+    id: "refrigerator",
+    name: { en: "Refrigerator", vi: "Tủ lạnh" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Fridge.png",
+  },
+  {
+    id: "wifi",
+    name: { en: "WiFi", vi: "Wifi" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317936.png",
+  },
+  {
+    id: "hair_dryer",
+    name: { en: "Hair Dryer", vi: "Máy sấy tóc" },
+    icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317937%20(1).png",
+  },
+];

@@ -43,7 +43,7 @@ import remove from "../../images/delete.png";
 import { editReviewBooking, reviewDelete } from "../../service/booking";
 import { toast } from "react-toastify";
 import { useBookingContext } from "../../App";
-import { getErrorMessage } from "../../utils/utils";
+import { facilities, getErrorMessage } from "../../utils/utils";
 interface Review {
   id: number;
   author: string;
@@ -138,47 +138,68 @@ const HotelDetailInfo = ({
             Tiện ích khách sạn
           </Typography>
           <Grid container spacing={2}>
-            {amenities.map((item, i) => {
-              if (info?.amenities?.includes(item.id))
+          {(() => {
+                // Parse facilities từ DB (là JSON string dạng array id)
+                const facilityIds = () => {
+                  if (!info?.amenities) return [];
+                  try {
+                    const parsed =
+                      typeof info.amenities === "string"
+                        ? JSON.parse(info.amenities)
+                        : Array.isArray(info.amenities)
+                        ? info.amenities
+                        : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    console.warn("Parse facilities error:", e);
+                    return [];
+                  }
+                };
+
+                // Map id → object đầy đủ (label + icon)
+                const selectedFacilities = facilities.filter((fac) =>
+                  facilityIds().includes(fac.id)
+                );
+
+                if (selectedFacilities.length === 0) {
+                  return (
+                    <Typography color='#999' fontStyle='italic'>
+                      Chưa có tiện ích nào được thiết lập
+                    </Typography>
+                  );
+                }
+
                 return (
-                  <Box display={"flex"} key={i}>
-                    <Stack
-                      direction='row'
-                      alignItems='center'
-                      flexDirection={"column"}
-                      justifyContent={"center"}
-                      gap={"8px"}
-                      sx={{
-                        bgcolor: "#f9f9f9",
-                        borderRadius: "12px",
-                        p: i == 0 ? 0 : 2,
-                        pr: i == 0 ? 2 : 2,
-                      }}>
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                    {selectedFacilities.map((fac) => (
                       <Box
+                        key={fac.id}
                         sx={{
-                          width: 50,
-                          height: 50,
-                          bgcolor: "white",
-                          borderRadius: "50%",
                           display: "flex",
                           alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                          gap: 1.5,
+                          bgcolor: "#f8f9fa",
+                          border: "1px solid #e9ecef",
+                          borderRadius: 3,
+                          px: 1,
+                          py: .5,
+                          minWidth: 140,
                         }}>
-                        <img
-                          src={item?.icon}
-                          width={"50%"}
-                          height={"50%"}
-                          alt=''
+                        <Box
+                          component='img'
+                          src={fac.icon}
+                          alt={fac.name.vi}
+                          sx={{ width: 20, height: 20, objectFit: "contain" }}
                         />
+                        <Typography fontWeight={500} fontSize='0.85rem'>
+                          {fac.name.vi}
+                        </Typography>
                       </Box>
-                      <Typography fontSize='0.9rem' color='#666'>
-                        {item?.name?.vi}
-                      </Typography>
-                    </Stack>
+                    ))}
                   </Box>
                 );
-            })}
+              })()}
           </Grid>
         </Stack>
 

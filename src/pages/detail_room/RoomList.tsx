@@ -37,7 +37,7 @@ import { Login, checkUser } from "../../service/admin";
 import { toast } from "react-toastify";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import no_room from "../../images/Calendar.svg";
-import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import { facilities, getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
 interface Room {
   id: number;
   name: string;
@@ -48,13 +48,7 @@ interface Room {
   remaining: number | null; // null = hết phòng
 }
 
-const amenityIcons: Record<string, React.ReactNode> = {
-  Wifi: <WifiIcon sx={{ fontSize: 16 }} />,
-  "Điều hòa": <AcIcon sx={{ fontSize: 16 }} />,
-  "Smart TV": <TvIcon sx={{ fontSize: 16 }} />,
-  "Ghế tình yêu": <HeartIcon sx={{ fontSize: 16 }} />,
-  "Bồn tắm": <BathIcon sx={{ fontSize: 16 }} />,
-};
+
 
 const RoomCard = ({
   room,
@@ -170,7 +164,7 @@ const RoomCard = ({
       <Box
         sx={{ position: "relative", borderRadius: "16px", overflow: "hidden" }}>
         <Slider ref={sliderRef} {...settings}>
-          {room.images.map((img, i) => (
+          {room?.images.map((img, i) => (
             <div key={i}>
               <img
                 src={img}
@@ -257,35 +251,72 @@ const RoomCard = ({
         </Stack>
 
         {/* TIỆN ÍCH */}
-        <Stack direction='row' gap={1} flexWrap='wrap'>
-          {amenities.map((amenity) => {
-            if (room?.amenities?.includes(amenity.id)) {
-              return (
-                <Chip
-                  key={amenity?.name?.vi}
-                  icon={
-                    <img
-                      src={amenity.icon}
-                      width={"20px"}
-                      style={{ objectFit: "cover", borderRadius: "50%" }}
-                      height={20}
-                      alt=''
-                    />
+        {/* <Stack direction='row' gap={1} flexWrap='wrap'>
+        {(() => {
+                // Parse facilities từ DB (là JSON string dạng array id)
+                console.log("AAA room?.amenities",room?.amenities)
+                const facilityIds = () => {
+                  if (!room?.amenities) return [];
+                  try {
+                    const parsed =
+                      typeof room.amenities === "string"
+                        ? JSON.parse(room.amenities)
+                        : Array.isArray(room.amenities)
+                        ? room.amenities
+                        : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    console.warn("Parse facilities error:", e);
+                    return [];
                   }
-                  label={amenity?.name?.vi}
-                  size='small'
-                  sx={{
-                    bgcolor: "#f0f8f0",
-                    color: "#98b720",
-                    fontSize: "0.75rem",
-                    height: 32,
-                    "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
-                  }}
-                />
-              );
-            }
-          })}
-        </Stack>
+                };
+                console.log("AAA facilityIds",facilityIds())
+                // Map id → object đầy đủ (label + icon)
+                const selectedFacilities = facilities.filter((fac) =>
+                  facilityIds().includes(fac.id)
+                );
+
+                console.log("AAA selectedFacilities",selectedFacilities)
+                if (selectedFacilities.length === 0) {
+                  return (
+                    <Typography color='#999' fontStyle='italic'>
+                      Chưa có tiện ích nào được thiết lập
+                    </Typography>
+                  );
+                }
+
+                return (
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                    {selectedFacilities.map((fac) => (
+                      <Box
+                        key={fac.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          bgcolor: "#f8f9fa",
+                          border: "1px solid #e9ecef",
+                          borderRadius: 3,
+                          px: 1,
+                          py: .5,
+                          minWidth: 140,
+                        }}>
+                        <Box
+                          component='img'
+                          src={fac.icon}
+                          alt={fac?.name?.vi}
+                          sx={{ width: 20, height: 20, objectFit: "contain" }}
+                        />
+                        <Typography fontWeight={500} fontSize='0.85rem'>
+                          {fac?.name?.vi}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                );
+              })()}
+        </Stack> */}
         <Divider />
         {/* GIÁ + NÚT */}
         <Stack
@@ -954,33 +985,69 @@ const RoomDetailModal = ({
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
-              {amenities.map((amenity) => {
-                if (room?.amenities?.includes(amenity.id)) {
+            {/* {(() => {
+                // Parse facilities từ DB (là JSON string dạng array id)
+                console.log("AAA room?.amenities",room?.amenities)
+                const facilityIds = () => {
+                  if (!room?.amenities) return [];
+                  try {
+                    const parsed =
+                      typeof room.amenities === "string"
+                        ? JSON.parse(room.amenities)
+                        : Array.isArray(room.amenities)
+                        ? room.amenities
+                        : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch (e) {
+                    console.warn("Parse facilities error:", e);
+                    return [];
+                  }
+                };
+
+                // Map id → object đầy đủ (label + icon)
+                const selectedFacilities = facilities.filter((fac) =>
+                  facilityIds().includes(fac.id)
+                );
+
+                if (selectedFacilities.length === 0) {
                   return (
-                    <Chip
-                      key={amenity?.name?.vi}
-                      icon={
-                        <img
-                          src={amenity.icon}
-                          width={"20px"}
-                          style={{ objectFit: "cover", borderRadius: "50%" }}
-                          height={20}
-                          alt=''
-                        />
-                      }
-                      label={amenity?.name?.vi}
-                      size='small'
-                      sx={{
-                        bgcolor: "#f0f8f0",
-                        color: "#98b720",
-                        fontSize: "0.75rem",
-                        height: 32,
-                        "& .MuiChip-icon": { color: "#98b720", fontSize: 16 },
-                      }}
-                    />
+                    <Typography color='#999' fontStyle='italic'>
+                      Chưa có tiện ích nào được thiết lập
+                    </Typography>
                   );
                 }
-              })}
+
+                return (
+                  <Box
+                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                    {selectedFacilities.map((fac) => (
+                      <Box
+                        key={fac.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.5,
+                          bgcolor: "#f8f9fa",
+                          border: "1px solid #e9ecef",
+                          borderRadius: 3,
+                          px: 1,
+                          py: .5,
+                          minWidth: 140,
+                        }}>
+                        <Box
+                          component='img'
+                          src={fac.icon}
+                          alt={fac?.name?.vi}
+                          sx={{ width: 20, height: 20, objectFit: "contain" }}
+                        />
+                        <Typography fontWeight={500} fontSize='0.85rem'>
+                          {fac?.name?.vi}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                );
+              })()} */}
             </Stack>
 
             <Typography fontWeight={600} my={2}>
