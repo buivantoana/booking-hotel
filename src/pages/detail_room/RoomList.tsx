@@ -41,6 +41,7 @@ import {
   facilities,
   getErrorMessage,
   normalizePhoneForAPI,
+  parseName,
 } from "../../utils/utils";
 interface Room {
   id: number;
@@ -234,7 +235,7 @@ const RoomCard = ({
           alignItems='flex-start'>
           <Box>
             <Typography fontWeight={600} fontSize='1rem' color='#333'>
-              {room.name}
+              {parseName(room?.name)}
             </Typography>
             <Typography fontSize='0.85rem' color='#666'>
               {room.type}
@@ -822,7 +823,7 @@ const RoomDetailModal = ({
         {/* HEADER */}
         <Stack direction='row' justifyContent='space-between' mb={2}>
           <Typography fontSize='1.4rem' fontWeight={700}>
-            {room.name}
+            {parseName(room.name)}
           </Typography>
 
           <IconButton
@@ -1053,7 +1054,7 @@ const RoomDetailModal = ({
               Mô tả phòng
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={3}>
-              {room?.description}
+              {parseName(room.description)}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {/* PRICE + BUTTON */}
