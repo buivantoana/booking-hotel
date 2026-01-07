@@ -72,7 +72,8 @@ const RoomCard = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const {t} = useTranslation()
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const context = useBookingContext();
   const sliderRef = useRef<any>(null);
   const settings = {
@@ -159,7 +160,7 @@ const RoomCard = ({
 
             zIndex: 10,
           }}>
-          {t('sold_out_badge')}
+          {t("sold_out_badge")}
         </Box>
       )}
 
@@ -250,7 +251,7 @@ const RoomCard = ({
             fontSize='0.8rem'
             color='#98b720'
             sx={{ cursor: "pointer", textDecoration: "underline" }}>
-               {t('room_details')}
+            {t("room_details")}
           </Typography>
         </Stack>
 
@@ -284,7 +285,7 @@ const RoomCard = ({
             if (selectedFacilities.length === 0) {
               return (
                 <Typography color='#999' fontStyle='italic'>
-                     {t('no_amenities')}
+                  {t("no_amenities")}
                 </Typography>
               );
             }
@@ -311,7 +312,7 @@ const RoomCard = ({
                       sx={{ width: 20, height: 20, objectFit: "contain" }}
                     />
                     <Typography fontWeight={500} fontSize='0.85rem'>
-                      {fac?.name?.vi}
+                      {fac?.name?.[currentLang]}
                     </Typography>
                   </Box>
                 ))}
@@ -333,8 +334,8 @@ const RoomCard = ({
                   fontSize='0.8rem'
                   color={isLowStock ? "#d32f2f" : "#666"}>
                   {isLowStock
-                    ?  t('low_stock_one')
-                    : t('low_stock',{count:room.available_rooms || 2}) }
+                    ? t("low_stock_one")
+                    : t("low_stock", { count: room.available_rooms || 2 })}
                 </Typography>
               )}
               <Typography
@@ -366,7 +367,7 @@ const RoomCard = ({
                 minWidth: 120,
                 "&:hover": { bgcolor: "#7a9a1a" },
               }}>
-              { t('book_room')}
+              {t("book_room")}
             </Button>
           )}
         </Stack>
@@ -374,7 +375,7 @@ const RoomCard = ({
         {/* THÔNG BÁO HẾT PHÒNG */}
         {isSoldOut && (
           <Typography fontSize='0.8rem' color='#d32f2f' mt={1}>
-          { t('no_room_available')}
+            {t("no_room_available")}
           </Typography>
         )}
       </Stack>
@@ -396,7 +397,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
   const [touched, setTouched] = useState(false);
   const [password, setPassword] = useState(false);
   const [searchParams] = useSearchParams();
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   console.log("AAAA searchParams", searchParams.get("type"));
   const navigate = useNavigate();
   const normalizePhone = (phone) => {
@@ -437,7 +438,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
           fontWeight={700}
           fontSize={{ xs: "1.25rem", md: "1.5rem" }}
           color='#333'>
-         { t('room_list_title')}
+          {t("room_list_title")}
         </Typography>
         <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box
@@ -467,7 +468,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   justifyContent='space-between'
                   alignItems='center'>
                   <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-                  { t('verify_phone_title')}
+                    {t("verify_phone_title")}
                   </Typography>
                   <IconButton onClick={() => setOpenModal(false)}>
                     <CloseIcon />
@@ -477,14 +478,14 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   my={3}
                   fontSize={"14px"}
                   color='rgba(152, 159, 173, 1)'>
-                    { t('verify_phone_desc')}
+                  {t("verify_phone_desc")}
                 </Typography>
                 <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                { t('phone_label')}
+                  {t("phone_label")}
                 </Typography>
                 <TextField
                   fullWidth
-                  placeholder={ t('phone_placeholder')}
+                  placeholder={t("phone_placeholder")}
                   variant='outlined'
                   value={phoneNumber}
                   onChange={(e) => {
@@ -498,7 +499,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   error={touched && !isValidVietnamPhone(phoneNumber)}
                   helperText={
                     touched && !isValidVietnamPhone(phoneNumber)
-                      ?  t('phone_invalid')
+                      ? t("phone_invalid")
                       : ""
                   }
                   sx={{
@@ -601,17 +602,17 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                         size={20}
                         sx={{ color: "#fff", mr: 1 }}
                       />
-                     { t('logging_in')}
+                      {t("logging_in")}
                     </>
                   ) : (
-                    t('login_button')
+                    t("login_button")
                   )}
                 </Button>
                 <Typography
                   my={2}
                   fontSize={"14px"}
                   color='rgba(152, 159, 173, 1)'>
-                  {t('no_account')}
+                  {t("no_account")}
                   <Typography
                     onClick={() => {
                       navigate("/register");
@@ -621,7 +622,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                     sx={{ textDecoration: "underline", cursor: "pointer" }}
                     color='#ff7a00'>
                     {" "}
-                    {t('register_now')}
+                    {t("register_now")}
                   </Typography>
                 </Typography>
               </>
@@ -695,10 +696,10 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   justifyContent={"center"}>
                   <img src={no_room} alt='' />
                   <Typography color='#2B2F38' fontWeight={600}>
-                  {t('no_room_title')}
+                    {t("no_room_title")}
                   </Typography>
                   <Typography color='#2B2F38'>
-                  {t('no_room_available')}
+                    {t("no_room_available")}
                   </Typography>
                 </Box>
               </>
@@ -754,7 +755,8 @@ const RoomDetailModal = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
-  const {t} = useTranslation()
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const sliderMain = useRef();
   const sliderThumb = useRef();
 
@@ -775,7 +777,6 @@ const RoomDetailModal = ({
   if (!room) return null;
 
   const handleBooking = () => {
-    
     if (localStorage.getItem("booking")) {
       localStorage.setItem(
         "booking",
@@ -971,19 +972,19 @@ const RoomDetailModal = ({
           {/* RIGHT: ROOM INFO */}
           <Box width={isMobile ? "100%" : "37%"}>
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
-            {t('room_info_title')}
+              {t("room_info_title")}
             </Typography>
             <FacilitiesList facilities={room?.facilities || {}} />
 
             <Typography fontWeight={600} mb={1}>
-            {t('booking_benefits')}
+              {t("booking_benefits")}
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={2}>
-            {t('all_payment_methods')}
+              {t("all_payment_methods")}
             </Typography>
 
             <Typography fontWeight={600} mb={1}>
-            {t('amenities_title')}
+              {t("amenities_title")}
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
@@ -1014,7 +1015,7 @@ const RoomDetailModal = ({
                 if (selectedFacilities.length === 0) {
                   return (
                     <Typography color='#999' fontStyle='italic'>
-                      {t('no_amenities')}
+                      {t("no_amenities")}
                     </Typography>
                   );
                 }
@@ -1042,7 +1043,7 @@ const RoomDetailModal = ({
                           sx={{ width: 20, height: 20, objectFit: "contain" }}
                         />
                         <Typography fontWeight={500} fontSize='0.85rem'>
-                          {fac?.name?.vi}
+                          {fac?.name?.[currentLang]}
                         </Typography>
                       </Box>
                     ))}
@@ -1052,7 +1053,7 @@ const RoomDetailModal = ({
             </Stack>
 
             <Typography fontWeight={600} my={2}>
-            {t('room_description_title')}
+              {t("room_description_title")}
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={3}>
               {parseName(room.description)}
@@ -1088,7 +1089,7 @@ const RoomDetailModal = ({
                     py: 1.2,
                     textTransform: "none",
                   }}>
-                        {t('book_room')}
+                  {t("book_room")}
                 </Button>
               )}
             </Stack>
@@ -1103,7 +1104,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {t}= useTranslation()
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const context = useBookingContext();
   const handleSubmit = async (e) => {
@@ -1170,7 +1171,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
         {/* NHẬP MÃ PIN */}
         <Box display={"flex"} mb={2} justifyContent={"space-between"}>
           <Typography fontSize={14} color='#5D6679' fontWeight={500} mb={1.5}>
-          {t("pin_label")}
+            {t("pin_label")}
           </Typography>
           <Typography
             color='#5D6679'
@@ -1183,7 +1184,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
               alignItems: "center",
               gap: 2,
             }}>
-            {showPin ?   t("hide") :  t("show")}
+            {showPin ? t("hide") : t("show")}
           </Typography>
         </Box>
 

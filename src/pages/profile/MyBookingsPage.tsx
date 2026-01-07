@@ -40,7 +40,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import no_room from "../../images/No Navigation.svg";
 import building from "../../images/building.png";
 import remove from "../../images/delete.png";
-import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
+import ReportGmailerrorredIcon from "@mui/icons-material/ReportGmailerrorred";
 import { format } from "date-fns";
 import {
   deleteBooking,
@@ -78,7 +78,7 @@ const getThumbnail = (booking: any) => {
     try {
       const arr = JSON.parse(imagesStr.replace(/\\"/g, '"'));
       return arr[0] || "";
-    } catch { }
+    } catch {}
   }
   return "";
 };
@@ -100,20 +100,19 @@ const getPaymentStatus = (payments = []) => {
   return null;
 };
 
-
-
 // ==================== BOOKING CARD (dùng data thật) ====================
 const BookingCard = ({
   booking,
   setDetailBooking,
   getHistoryBooking,
   hastag,
+  navigateToRoom,
 }: {
   booking: any;
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
- const {t} = useTranslation()
+  const { t } = useTranslation();
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -124,41 +123,53 @@ const BookingCard = ({
   const getBookingStatus = (booking: any) => {
     const paymentStatus = getPaymentStatus(booking.payments);
     const bookingStatus = booking.status;
-  
+
     // =======================
     // LOGIC BOOKING
     // =======================
-  
+
     if (bookingStatus === "checked_out") {
       return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
     }
-  
+
     if (bookingStatus === "cancelled") {
       return { label: t("cancelled_status"), color: "#E91E1E", bg: "#FFEBEE" };
     }
-  
+
     if (bookingStatus === "confirmed" && paymentStatus === "paid") {
-      return { label: t("waiting_checkin_status"), color: "#0066CC", bg: "#E6F0FA" };
+      return {
+        label: t("waiting_checkin_status"),
+        color: "#0066CC",
+        bg: "#E6F0FA",
+      };
     }
     if (bookingStatus === "no_show" && paymentStatus === "paid") {
-      return { label: t("no_show_status"),  color: "#E91E1E", bg: "#FFEBEE" };
+      return { label: t("no_show_status"), color: "#E91E1E", bg: "#FFEBEE" };
     }
-  
+
     if (paymentStatus === "paid") {
       return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
     }
-  
+
     if (
       paymentStatus === "failed" ||
       paymentStatus === "pending" ||
       bookingStatus === "pending"
     ) {
-      return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+      return {
+        label: t("waiting_payment_status"),
+        color: "#FF6D00",
+        bg: "#FFF4E5",
+      };
     }
-  
-    return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+
+    return {
+      label: t("waiting_payment_status"),
+      color: "#FF6D00",
+      bg: "#FFF4E5",
+    };
   };
-  
+
   const statusConfig = getBookingStatus(booking);
   const hotelName = parseJsonField(booking.hotel_name);
   const roomCount = booking.rooms.length;
@@ -183,38 +194,34 @@ const BookingCard = ({
   };
   const handleRetryPayment = async (body) => {
     setLoadingRetry(true);
-  
+
     try {
       // 1️⃣ GỌI API RETRY
       const result = await retryPayment(body);
-  
-      if(result?.payment_id){
+
+      if (result?.payment_id) {
         checkPaymentStatusLoop(result?.payment_id);
-      }else{
+      } else {
         toast.error(getErrorMessage(result.code) || result.message);
         setLoadingRetry(false);
       }
-      
-     
-  
     } catch (error) {
       console.log(error);
       setPaymentStatus("failed");
     } finally {
-      
     }
   };
-  
+
   const checkPaymentStatusLoop = async (paymentId) => {
     let retry = 0;
-  
+
     const interval = setInterval(async () => {
       retry++;
-  
+
       try {
         let result = await getStatusPayment(paymentId);
         const status = result?.status;
-  
+
         switch (status) {
           case "paid":
             clearInterval(interval);
@@ -222,25 +229,25 @@ const BookingCard = ({
             toast.success("Thanh toán thành công!");
             getHistoryBooking();
             return;
-  
+
           case "failed":
             clearInterval(interval);
             setLoadingRetry(false);
             toast.error("Thanh toán thất bại!");
             return;
-  
+
           case "refunded":
             clearInterval(interval);
             setLoadingRetry(false);
             toast.info("Thanh toán đã được hoàn tiền!");
             return;
-  
+
           case "cancelled":
             clearInterval(interval);
             setLoadingRetry(false);
             toast.warning("Thanh toán đã bị hủy!");
             return;
-  
+
           case "pending":
           default:
             // vẫn pending → tiếp tục call
@@ -249,7 +256,7 @@ const BookingCard = ({
       } catch (error) {
         console.log("Error:", error);
       }
-  
+
       // ❌ quá 30 lần → xem như fail
       if (retry >= 30) {
         clearInterval(interval);
@@ -260,8 +267,7 @@ const BookingCard = ({
       }
     }, 2000);
   };
-  
-  
+
   return (
     <>
       <IssueBooking
@@ -301,7 +307,7 @@ const BookingCard = ({
             justifyContent='space-between'
             alignItems='center'>
             <Typography fontSize='13px' color='#666'>
-            {t("booking_code_label")} {booking.booking_code}
+              {t("booking_code_label")} {booking.booking_code}
             </Typography>
             <Box display='flex' alignItems='center' gap={2}>
               <Chip
@@ -354,7 +360,7 @@ const BookingCard = ({
                 {hotelName}
               </Typography>
               <Typography fontSize='15px' fontWeight={500} color='#333' mb={1}>
-                {roomCount}  {t("room")} {" "}
+                {roomCount} {t("room")}{" "}
                 {booking.rent_type === "hourly" ? "(theo giờ)" : ""}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1}>
@@ -393,7 +399,7 @@ const BookingCard = ({
                   }}>
                   <img src={building} alt='' style={{ height: 16 }} />
                   {booking.payments[0]?.method === "momo"
-                    ?  t("momo_payment_label")
+                    ? t("momo_payment_label")
                     : t("vnpay_payment_label")}
                 </Box>
               </Stack>
@@ -428,7 +434,7 @@ const BookingCard = ({
                       borderColor: "#ddd",
                       minWidth: 120,
                     }}>
-                     {t("review_button")}
+                    {t("review_button")}
                   </Button>
                 )}
                 <Button
@@ -440,7 +446,7 @@ const BookingCard = ({
                     bgcolor: "#98b720",
                     "&:hover": { bgcolor: "#8ab020" },
                   }}>
-                    {t("rebook_button")}
+                  {t("rebook_button")}
                 </Button>
               </>
             )}
@@ -449,7 +455,17 @@ const BookingCard = ({
               <Button
                 variant='contained'
                 disabled={loadingRetry}
-                onClick={isWaitingPayment ? ()=>handleRetryPayment({booking_id:booking?.booking_id,method:booking.payments[0]?.method}):()=>{}}
+                onClick={
+                  isWaitingPayment
+                    ? () =>
+                        handleRetryPayment({
+                          booking_id: booking?.booking_id,
+                          method: booking.payments[0]?.method,
+                        })
+                    : () => {
+                        navigateToRoom(booking);
+                      }
+                }
                 sx={{
                   borderRadius: "24px",
                   textTransform: "none",
@@ -460,12 +476,14 @@ const BookingCard = ({
                 {loadingRetry ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    {isWaitingPayment ?     t("pay_button") : t("rebook_button")}...
+                    {isWaitingPayment ? t("pay_button") : t("rebook_button")}...
                   </>
                 ) : (
-                  <> {isWaitingPayment ?  t("pay_button") : t("rebook_button")}</>
+                  <>
+                    {" "}
+                    {isWaitingPayment ? t("pay_button") : t("rebook_button")}
+                  </>
                 )}
-
               </Button>
             )}
           </Stack>
@@ -506,7 +524,7 @@ const BookingCard = ({
           </ListItemIcon>
           <ListItemText>
             <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
-             {t("delete_history_menu")}
+              {t("delete_history_menu")}
             </Typography>
           </ListItemText>
         </MenuItem>
@@ -523,7 +541,7 @@ const BookingCard = ({
           </ListItemIcon>
           <ListItemText>
             <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
-            {t("report_menu")}
+              {t("report_menu")}
             </Typography>
           </ListItemText>
         </MenuItem>
@@ -561,10 +579,10 @@ const BookingCard = ({
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-          {t("delete_history_menu")}
+            {t("delete_history_menu")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-          {t("delete_dialog_description")}
+            {t("delete_dialog_description")}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -587,7 +605,7 @@ const BookingCard = ({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-               {t("agree")}
+            {t("agree")}
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -599,7 +617,7 @@ const BookingCard = ({
               color: "#666",
               width: "100%",
             }}>
-           {t("reason_cancel_button")}
+            {t("reason_cancel_button")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -611,19 +629,19 @@ const BookingCard = ({
 const SortButton = ({
   selected,
   onSelect,
-  isMobile
+  isMobile,
 }: {
   selected: string;
   onSelect: (v: string) => void;
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const sortOptions = [
     { label: t("all_states"), value: "all" },
-    { label:  t("waiting_checkin_status"), value: "waiting_checkin" },
-    { label:  t("waiting_payment_status"), value: "waiting_payment" },
-    { label:  t("completed_status"), value: "completed" },
+    { label: t("waiting_checkin_status"), value: "waiting_checkin" },
+    { label: t("waiting_payment_status"), value: "waiting_payment" },
+    { label: t("completed_status"), value: "completed" },
     { label: t("cancelled_status"), value: "cancelled" },
   ];
 
@@ -650,7 +668,9 @@ const SortButton = ({
           bgcolor: "white",
           "&:hover": { borderColor: "#98b720", bgcolor: "transparent" },
         }}
-        startIcon={!isMobile&&<SwapVertIcon sx={{ fontSize: "22px !important" }} />}
+        startIcon={
+          !isMobile && <SwapVertIcon sx={{ fontSize: "22px !important" }} />
+        }
         endIcon={
           open ? (
             <ArrowDropUpIcon
@@ -722,7 +742,7 @@ function ReviewModal({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [rating, setRating] = useState<number | null>(0);
   const [reviewText, setReviewText] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -825,10 +845,10 @@ function ReviewModal({
       }}>
       <DialogTitle sx={{ pb: 1, position: "relative" }}>
         <Typography variant='h6' fontWeight={700}>
-        {t("review_modal_title")}
+          {t("review_modal_title")}
         </Typography>
         <Typography variant='body2' color='#666' sx={{ mt: 1 }}>
-        {t("review_modal_subtitle")}
+          {t("review_modal_subtitle")}
         </Typography>
         <IconButton
           onClick={onClose}
@@ -839,7 +859,7 @@ function ReviewModal({
 
       <DialogContent>
         <Typography fontWeight={600} mb={2}>
-        {t("write_review_label")}
+          {t("write_review_label")}
         </Typography>
         <Box textAlign='center' mb={3}>
           <Rating
@@ -881,7 +901,7 @@ function ReviewModal({
         <TextField
           multiline
           rows={4}
-          placeholder=   {t("review_placeholder")}
+          placeholder={t("review_placeholder")}
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           fullWidth
@@ -902,7 +922,7 @@ function ReviewModal({
 
         <Box>
           <Typography fontWeight={600} mb={2}>
-          {t("upload_media_label")}
+            {t("upload_media_label")}
           </Typography>
           <Stack direction='row' gap={2} flexWrap='wrap'>
             <label htmlFor='upload-images'>
@@ -996,57 +1016,76 @@ export default function MyBookingsPage({
   loading,
   pagination,
   onPageChange,
+  navigateToRoom,
 }: {
   setDetailBooking: (open: boolean) => void;
   historyBooking?: any[];
 }) {
   const [sortValue, setSortValue] = useState("all");
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const getBookingStatus = (booking: any) => {
     const paymentStatus = getPaymentStatus(booking.payments);
     const bookingStatus = booking.status;
-  
+
     // =======================
     // LOGIC BOOKING
     // =======================
-  
+
     if (bookingStatus === "checked_out") {
       return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
     }
-  
+
     if (bookingStatus === "cancelled") {
       return { label: t("cancelled_status"), color: "#E91E1E", bg: "#FFEBEE" };
     }
-  
+
     if (bookingStatus === "confirmed" && paymentStatus === "paid") {
-      return { label: t("waiting_checkin_status"), color: "#0066CC", bg: "#E6F0FA" };
+      return {
+        label: t("waiting_checkin_status"),
+        color: "#0066CC",
+        bg: "#E6F0FA",
+      };
     }
     if (bookingStatus === "no_show" && paymentStatus === "paid") {
-      return { label: t("no_show_status"),  color: "#E91E1E", bg: "#FFEBEE" };
+      return { label: t("no_show_status"), color: "#E91E1E", bg: "#FFEBEE" };
     }
-  
+
     if (paymentStatus === "paid") {
       return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
     }
-  
+
     if (
       paymentStatus === "failed" ||
       paymentStatus === "pending" ||
       bookingStatus === "pending"
     ) {
-      return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+      return {
+        label: t("waiting_payment_status"),
+        color: "#FF6D00",
+        bg: "#FFF4E5",
+      };
     }
-  
-    return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+
+    return {
+      label: t("waiting_payment_status"),
+      color: "#FF6D00",
+      bg: "#FFF4E5",
+    };
   };
   const filtered = historyBooking.filter((booking) => {
     if (sortValue === "all") return true;
     const status = getBookingStatus(booking).label;
-    if (sortValue === "waiting_checkin" && status === t("waiting_checkin_status"))
+    if (
+      sortValue === "waiting_checkin" &&
+      status === t("waiting_checkin_status")
+    )
       return true;
-    if (sortValue === "waiting_payment" && status === t("waiting_payment_status"))
+    if (
+      sortValue === "waiting_payment" &&
+      status === t("waiting_payment_status")
+    )
       return true;
     if (sortValue === "completed" && status === "Hoàn thành") return true;
     if (sortValue === "cancelled" && status === "Đã hủy") return true;
@@ -1060,10 +1099,17 @@ export default function MyBookingsPage({
         alignItems='center'
         mb={3}
         justifyContent='space-between'>
-        <Typography variant={isMobile?"h6":'h5'} fontWeight={600} color='#212529'>
+        <Typography
+          variant={isMobile ? "h6" : "h5"}
+          fontWeight={600}
+          color='#212529'>
           {t("my_bookings_title")}
         </Typography>
-        <SortButton selected={sortValue} isMobile={isMobile} onSelect={setSortValue} />
+        <SortButton
+          selected={sortValue}
+          isMobile={isMobile}
+          onSelect={setSortValue}
+        />
       </Box>
 
       <Box>
@@ -1081,59 +1127,59 @@ export default function MyBookingsPage({
                 justifyContent={"center"}>
                 <img src={no_room} alt='' />
                 <Typography textAlign='center' color='#999' fontSize='1.1rem'>
-                {t("no_bookings_message")}
+                  {t("no_bookings_message")}
                 </Typography>
               </Box>
             ) : (
               <>
-              {  filtered.map((booking) => (
-                <BookingCard
-                  key={booking.booking_id}
-                  booking={booking}
-                  setDetailBooking={setDetailBooking}
-                  getHistoryBooking={getHistoryBooking}
-                  hastag={hastag}
-                />
-              ))}
-              
-              <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
-            <Pagination
-              key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
-              count={pagination.total_pages}
-              page={pagination.page}
-              onChange={onPageChange}
-              siblingCount={1}
-              boundaryCount={1}
-              color='primary'
-              size={isMobile ? "medium" : "large"}
-              sx={{
-                // Tùy chỉnh trang active
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
-                  color: "white",
-                  fontWeight: "bold",
-                  boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
-                  "&:hover": {
-                    backgroundColor: "#7cb342 !important",
-                  },
-                },
-                // Tùy chỉnh các trang thường (nếu muốn)
-                "& .MuiPaginationItem-root": {
-                  borderRadius: "8px",
-                  margin: "0 4px",
-                  "&:hover": {
-                    backgroundColor: "#e8f5e9",
-                  },
-                },
-                // Tùy chỉnh nút ellipsis (...) nếu cần
-                "& .MuiPaginationItem-ellipsis": {
-                  color: "#666",
-                },
-              }}
-            />
-          </Stack>
+                {filtered.map((booking) => (
+                  <BookingCard
+                    key={booking.booking_id}
+                    booking={booking}
+                    setDetailBooking={setDetailBooking}
+                    getHistoryBooking={getHistoryBooking}
+                    hastag={hastag}
+                    navigateToRoom={navigateToRoom}
+                  />
+                ))}
+
+                <Stack spacing={2} sx={{ mt: 3, alignItems: "center" }}>
+                  <Pagination
+                    key={pagination.page} // ← THÊM DÒNG NÀY ĐỂ FORCE RE-RENDER KHI PAGE THAY ĐỔI
+                    count={pagination.total_pages}
+                    page={pagination.page}
+                    onChange={onPageChange}
+                    siblingCount={1}
+                    boundaryCount={1}
+                    color='primary'
+                    size={isMobile ? "medium" : "large"}
+                    sx={{
+                      // Tùy chỉnh trang active
+                      "& .MuiPaginationItem-root.Mui-selected": {
+                        backgroundColor: "#98b720 !important", // Màu xanh lá bạn đang dùng trong app
+                        color: "white",
+                        fontWeight: "bold",
+                        boxShadow: "0 4px 8px rgba(139,195,74,0.4)",
+                        "&:hover": {
+                          backgroundColor: "#7cb342 !important",
+                        },
+                      },
+                      // Tùy chỉnh các trang thường (nếu muốn)
+                      "& .MuiPaginationItem-root": {
+                        borderRadius: "8px",
+                        margin: "0 4px",
+                        "&:hover": {
+                          backgroundColor: "#e8f5e9",
+                        },
+                      },
+                      // Tùy chỉnh nút ellipsis (...) nếu cần
+                      "& .MuiPaginationItem-ellipsis": {
+                        color: "#666",
+                      },
+                    }}
+                  />
+                </Stack>
               </>
-            
             )}
           </>
         )}
@@ -1201,7 +1247,6 @@ const BookingCardSkeleton = () => {
     </Card>
   );
 };
-
 
 function IssueBooking({
   open,

@@ -410,5 +410,29 @@
   "search_bar_search_button": "Search",
   "search_bar_update_search_button": "Update search",
   "search_bar_update_button": "Update",
-  "language" :"Language"
+  "language": "Language",
+
+  "keep_loving_nights": "Cherish every loving night",
+  "short_moments_long_memories": "Short moments, lasting memories",
+  "enjoy_your_days_your_way": "Enjoy every day your way",
+  "sort.most_relevant": "Most relevant",
+  "sort.distance_near_to_far": "Distance: nearest first",
+  "sort.rating_high_to_low": "Rating: high to low",
+  "sort.price_low_to_high": "Price: low to high",
+  "sort.price_high_to_low": "Price: high to low",
+  "cancel_booking": {
+    "title": "Cancel booking",
+    "submit": "Cancel booking",
+    "placeholder_other": "Enter reason",
+    "reasons": {
+      "change_time": "Change date or time",
+      "change_room": "Change room type",
+      "change_hotel": "Change hotel",
+      "no_need": "No longer needed",
+      "hotel_request": "Hotel requested cancellation",
+      "try_experience": "Booked for trial, no longer needed",
+      "price_higher": "Higher price than hotel",
+      "other": "Other reason"
+    }
+  }
 }

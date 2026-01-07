@@ -409,5 +409,30 @@
   "search_bar_select_datetime": "날짜 및 시간 선택",
   "search_bar_search_button": "검색",
   "search_bar_update_search_button": "검색 업데이트",
-  "search_bar_update_button": "업데이트"
+  "search_bar_update_button": "업데이트",
+  "language": "언어",
+  "keep_loving_nights": "사랑 가득한 밤을 소중히",
+  "short_moments_long_memories": "짧은 순간, 오래 남는 추억",
+  "enjoy_your_days_your_way": "당신만의 방식으로 매일을 즐기세요",
+
+  "sort.most_relevant": "관련성 순",
+  "sort.distance_near_to_far": "거리 가까운 순",
+  "sort.rating_high_to_low": "평점 높은 순",
+  "sort.price_low_to_high": "가격 낮은 순",
+  "sort.price_high_to_low": "가격 높은 순",
+  "cancel_booking": {
+    "title": "예약 취소",
+    "submit": "예약 취소",
+    "placeholder_other": "사유를 입력하세요",
+    "reasons": {
+      "change_time": "날짜 또는 시간 변경",
+      "change_room": "객실 유형 변경",
+      "change_hotel": "호텔 변경",
+      "no_need": "더 이상 필요 없음",
+      "hotel_request": "호텔 요청으로 인한 취소",
+      "try_experience": "체험용 예약, 필요 없음",
+      "price_higher": "호텔보다 가격이 높음",
+      "other": "기타 사유"
+    }
+  }
 }

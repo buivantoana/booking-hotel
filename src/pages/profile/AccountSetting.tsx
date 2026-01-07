@@ -32,16 +32,20 @@ import { useBookingContext } from "../../App";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
-import LanguageIcon from '@mui/icons-material/Language';
+import LanguageIcon from "@mui/icons-material/Language";
+import vn from "../../images/vn.png";
+import ja from "../../images/ja.png";
+import ko from "../../images/ko.png";
+import en from "../../images/en.png";
 
 const LANGUAGES = [
-  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "ko", label: "Hàn Quốc", flag: "🇰🇷" },
-  { code: "ja", label: "Nhật Bản", flag: "🇯🇵" },
+  { code: "vi", label: "Tiếng Việt", flag: vn },
+  { code: "en", label: "English", flag: en },
+  { code: "ko", label: "Hàn Quốc", flag: ko },
+  { code: "ja", label: "Nhật Bản", flag: ja },
 ];
 
-const AccountSettingsPage = ({setActiveMenu}) => {
+const AccountSettingsPage = ({ setActiveMenu }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [openModal, setOpenModal] = useState(false);
@@ -73,27 +77,26 @@ const AccountSettingsPage = ({setActiveMenu}) => {
     }
   }, [open, i18n.language]);
 
-  const [openLanguage,setOpenLanguage] = useState(false)
-  const context = useBookingContext()
-  const handleSubmit = async(e) => {
-    setLoading(true)
+  const [openLanguage, setOpenLanguage] = useState(false);
+  const context = useBookingContext();
+  const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
-    if (pin.length === 6 ) {
+    if (pin.length === 6) {
       let result = await Login({
-        "platform": "ios",
-        "type": "phone",
-        "value": context?.state?.user?.phone,
-        "password": pin
-    })
-    if(result.access_token){
-        setPin("")
-        setState("create")
-    }else{
-      toast.error(getErrorMessage(result.code)|| result.message)
+        platform: "ios",
+        type: "phone",
+        value: context?.state?.user?.phone,
+        password: pin,
+      });
+      if (result.access_token) {
+        setPin("");
+        setState("create");
+      } else {
+        toast.error(getErrorMessage(result.code) || result.message);
+      }
     }
-     
-    }
-    setLoading(false)
+    setLoading(false);
   };
   const handleChangePassword = async (e: React.FormEvent) => {
     setLoading(true);
@@ -101,25 +104,23 @@ const AccountSettingsPage = ({setActiveMenu}) => {
     if (pin.length === 6 && pinConfirm == pin) {
       try {
         let result = await userUpdate({
-          "password": pin,
-        })
+          password: pin,
+        });
         if (result.code == "OK") {
-          toast.success(result.message)
+          toast.success(result.message);
           setState("verify");
           setPin("");
           setPinConfirm("");
-          setOpenModal(false)
-        }else{
-          toast.error(getErrorMessage(result.code)|| result.message)
+          setOpenModal(false);
+        } else {
+          toast.error(getErrorMessage(result.code) || result.message);
         }
-
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
       setLoading(false);
-
-    }else{
-      setShowConfirm(true)
+    } else {
+      setShowConfirm(true);
     }
     setLoading(false);
   };
@@ -135,7 +136,7 @@ const AccountSettingsPage = ({setActiveMenu}) => {
         color='#212529'
         mb={3}
         textAlign={isMobile ? "center" : "left"}>
-     {t("account_settings_title")}
+        {t("account_settings_title")}
       </Typography>
 
       {/* Card chính */}
@@ -163,7 +164,7 @@ const AccountSettingsPage = ({setActiveMenu}) => {
                 }
                 secondary={
                   <Typography variant='body2' color='#adb5bd' mt={0.5}>
-                       {t("change_pin_description")}
+                    {t("change_pin_description")}
                   </Typography>
                 }
               />
@@ -179,20 +180,30 @@ const AccountSettingsPage = ({setActiveMenu}) => {
 
           {/* Liên kết tài khoản */}
           <ListItem disablePadding>
-            <ListItemButton  onClick={() => setOpenLanguage(true)} sx={{ py: 3, px: 3 }}>
+            <ListItemButton
+              onClick={() => setOpenLanguage(true)}
+              sx={{ py: 3, px: 3 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>
                 <LanguageIcon sx={{ color: "#6c757d" }} />
               </ListItemIcon>
               <ListItemText
                 primary={
                   <Typography fontWeight={600} color='#212529'>
-                 {t("language")}
+                    {t("language")}
                   </Typography>
                 }
               />
               <Box sx={{ ml: 2 }}>
-                <Typography color='#6c757d' fontSize='1.5rem' display={"flex"} alignItems={"center"} gap={2}>
-                  <Typography fontSize='1rem'>{LANGUAGES.find((item)=>item.code==selectedLang)?.label}</Typography> ›
+                <Typography
+                  color='#6c757d'
+                  fontSize='1.5rem'
+                  display={"flex"}
+                  alignItems={"center"}
+                  gap={2}>
+                  <Typography fontSize='1rem'>
+                    {LANGUAGES.find((item) => item.code == selectedLang)?.label}
+                  </Typography>{" "}
+                  ›
                 </Typography>
               </Box>
             </ListItemButton>
@@ -241,393 +252,386 @@ const AccountSettingsPage = ({setActiveMenu}) => {
           </ListItem> */}
         </List>
       </Box>
-      <Modal open={openModal} onClose={() => {
-        setState("verify");
-        setPin("");
-        setPinConfirm("");
-        setOpenModal(false)}}>
-        <>
-        {state == "verify" && <Box
-          className='hidden-add-voice'
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "95%", sm: 500 },
-            maxHeight: "90vh",
-            bgcolor: "white",
-            borderRadius: "16px",
-            boxShadow: 24,
-            p: 4,
-            overflow: "auto",
-          }}>
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-            mb={3}>
-            <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            {t("verify_pin_modal_title")}
-            </Typography>
-            <IconButton onClick={() => {setState("verify");
+      <Modal
+        open={openModal}
+        onClose={() => {
+          setState("verify");
           setPin("");
           setPinConfirm("");
-          setOpenModal(false)}}>
-              <Close />
-            </IconButton>
-          </Stack>
-          <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          {t("verify_pin_modal_description")}
-          </Typography>
-          <Box
-            sx={{
-              my: 3,
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-            <MuiOtpInput
-              value={pin}
-              onChange={setPin}
-              length={6}
-              TextFieldsProps={{
-                type: "password",
-                inputProps: { maxLength: 1 },
-              }}
+          setOpenModal(false);
+        }}>
+        <>
+          {state == "verify" && (
+            <Box
+              className='hidden-add-voice'
               sx={{
-                gap: 1.5,
-                width: "100%",
-                justifyContent: "space-between",
-                "& .MuiOtpInput-TextField": {
-                  "& .MuiOutlinedInput-root": {
-                    width: { xs: 50, sm: 60 },
-                    height: { xs: 50, sm: 60 },
-                    borderRadius: "16px",
-                    backgroundColor: "#fff",
-                    "& fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: { xs: "95%", sm: 500 },
+                maxHeight: "90vh",
+                bgcolor: "white",
+                borderRadius: "16px",
+                boxShadow: 24,
+                p: 4,
+                overflow: "auto",
+              }}>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                mb={3}>
+                <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
+                  {t("verify_pin_modal_title")}
+                </Typography>
+                <IconButton
+                  onClick={() => {
+                    setState("verify");
+                    setPin("");
+                    setPinConfirm("");
+                    setOpenModal(false);
+                  }}>
+                  <Close />
+                </IconButton>
+              </Stack>
+              <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
+                {t("verify_pin_modal_description")}
+              </Typography>
+              <Box
+                sx={{
+                  my: 3,
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}>
+                <MuiOtpInput
+                  value={pin}
+                  onChange={setPin}
+                  length={6}
+                  TextFieldsProps={{
+                    type: "password",
+                    inputProps: { maxLength: 1 },
+                  }}
+                  sx={{
+                    gap: 1.5,
+                    width: "100%",
+                    justifyContent: "space-between",
+                    "& .MuiOtpInput-TextField": {
+                      "& .MuiOutlinedInput-root": {
+                        width: { xs: 50, sm: 60 },
+                        height: { xs: 50, sm: 60 },
+                        borderRadius: "16px",
+                        backgroundColor: "#fff",
+                        "& fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#7cb400",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                      },
+                      "& input": {
+                        textAlign: "center",
+                        fontSize: { xs: "20px", sm: "24px" },
+                        fontWeight: 700,
+                        color: "#9AC700",
+                        "&::placeholder": {
+                          color: "#9AC700",
+                          opacity: 0.6,
+                        },
+                      },
                     },
-                    "&:hover fieldset": {
-                      borderColor: "#7cb400",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
-                    },
-                  },
-                  "& input": {
-                    textAlign: "center",
-                    fontSize: { xs: "20px", sm: "24px" },
-                    fontWeight: 700,
-                    color: "#9AC700",
-                    "&::placeholder": {
-                      color: "#9AC700",
-                      opacity: 0.6,
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
+                  }}
+                />
+              </Box>
 
-          <Button
-               onClick={handleSubmit}
+              <Button
+                onClick={handleSubmit}
                 fullWidth
-                disabled={pin.length !== 6||loading }
+                disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor:
-                    pin.length === 6 
-                      ? "#9AC700"
-                      : "#e0e0e0",
-                  color:
-                    pin.length === 6  ? "#fff" : "#888",
+                  backgroundColor: pin.length === 6 ? "#9AC700" : "#e0e0e0",
+                  color: pin.length === 6 ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
-                    backgroundColor:
-                      pin.length === 6 
-                        ? "#7cb400"
-                        : "#e0e0e0",
+                    backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
-                }}
-              >
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                   {  t("verifying_button")}
+                    {t("verifying_button")}
                   </>
                 ) : (
                   t("verify_button")
                 )}
               </Button>
-        </Box>}
-        {state == "create" && <Box
-          className='hidden-add-voice'
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "95%", sm: 500 },
-            maxHeight: "90vh",
-            bgcolor: "white",
-            borderRadius: "16px",
-            boxShadow: 24,
-            p: 4,
-            overflow: "auto",
-          }}>
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-            mb={3}>
-            <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            {  t("create_pin_modal_title")}
-            </Typography>
-            <IconButton onClick={() => {
-        setState("verify");
-        setPin("");
-        setPinConfirm("");
-        setOpenModal(false)}}>
-              <Close />
-            </IconButton>
-          </Stack>
-          <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          {  t("confirm_pin_modal_title")}
-          </Typography>
-          <Box
-            sx={{
-              my: 3,
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-            <MuiOtpInput
-              value={pin}
-              onChange={setPin}
-              length={6}
-              TextFieldsProps={{
-                type: "password",
-                inputProps: { maxLength: 1 },
-              }}
+            </Box>
+          )}
+          {state == "create" && (
+            <Box
+              className='hidden-add-voice'
               sx={{
-                gap: 1.5,
-                width: "100%",
-                justifyContent: "space-between",
-                "& .MuiOtpInput-TextField": {
-                  "& .MuiOutlinedInput-root": {
-                    width: { xs: 50, sm: 60 },
-                    height: { xs: 50, sm: 60 },
-                    borderRadius: "16px",
-                    backgroundColor: "#fff",
-                    "& fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: { xs: "95%", sm: 500 },
+                maxHeight: "90vh",
+                bgcolor: "white",
+                borderRadius: "16px",
+                boxShadow: 24,
+                p: 4,
+                overflow: "auto",
+              }}>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                mb={3}>
+                <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
+                  {t("create_pin_modal_title")}
+                </Typography>
+                <IconButton
+                  onClick={() => {
+                    setState("verify");
+                    setPin("");
+                    setPinConfirm("");
+                    setOpenModal(false);
+                  }}>
+                  <Close />
+                </IconButton>
+              </Stack>
+              <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
+                {t("confirm_pin_modal_title")}
+              </Typography>
+              <Box
+                sx={{
+                  my: 3,
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}>
+                <MuiOtpInput
+                  value={pin}
+                  onChange={setPin}
+                  length={6}
+                  TextFieldsProps={{
+                    type: "password",
+                    inputProps: { maxLength: 1 },
+                  }}
+                  sx={{
+                    gap: 1.5,
+                    width: "100%",
+                    justifyContent: "space-between",
+                    "& .MuiOtpInput-TextField": {
+                      "& .MuiOutlinedInput-root": {
+                        width: { xs: 50, sm: 60 },
+                        height: { xs: 50, sm: 60 },
+                        borderRadius: "16px",
+                        backgroundColor: "#fff",
+                        "& fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#7cb400",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                      },
+                      "& input": {
+                        textAlign: "center",
+                        fontSize: { xs: "20px", sm: "24px" },
+                        fontWeight: 700,
+                        color: "#9AC700",
+                        "&::placeholder": {
+                          color: "#9AC700",
+                          opacity: 0.6,
+                        },
+                      },
                     },
-                    "&:hover fieldset": {
-                      borderColor: "#7cb400",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
-                    },
-                  },
-                  "& input": {
-                    textAlign: "center",
-                    fontSize: { xs: "20px", sm: "24px" },
-                    fontWeight: 700,
-                    color: "#9AC700",
-                    "&::placeholder": {
-                      color: "#9AC700",
-                      opacity: 0.6,
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
+                  }}
+                />
+              </Box>
 
-          <Button
-                onClick={()=>setState("confirm")}
+              <Button
+                onClick={() => setState("confirm")}
                 fullWidth
-                disabled={pin.length !== 6 }
+                disabled={pin.length !== 6}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor:
-                    pin.length === 6 
-                      ? "#9AC700"
-                      : "#e0e0e0",
-                  color:
-                    pin.length === 6  ? "#fff" : "#888",
+                  backgroundColor: pin.length === 6 ? "#9AC700" : "#e0e0e0",
+                  color: pin.length === 6 ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
-                    backgroundColor:
-                      pin.length === 6 
-                        ? "#7cb400"
-                        : "#e0e0e0",
+                    backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
-                }}
-              >
-              
-              {  t("continue_button")}
-                
+                }}>
+                {t("continue_button")}
               </Button>
-        </Box>}
-        {state == "confirm" && <Box
-          className='hidden-add-voice'
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "95%", sm: 500 },
-            maxHeight: "90vh",
-            bgcolor: "white",
-            borderRadius: "16px",
-            boxShadow: 24,
-            p: 4,
-            overflow: "auto",
-          }}>
-          <Stack
-            direction='row'
-            justifyContent='space-between'
-            alignItems='center'
-            mb={3}>
-            <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            {  t("confirm_pin_modal_title")}
-            </Typography>
-            <IconButton onClick={() => {
-        setState("verify");
-        setPin("");
-        setPinConfirm("");
-        setOpenModal(false)}}>
-              <Close />
-            </IconButton>
-          </Stack>
-          <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          {  t("verify_pin_modal_description")}
-          </Typography>
-          <Box
-            sx={{
-              my: 3,
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-            <MuiOtpInput
-              value={pinConfirm}
-              onChange={setPinConfirm}
-              length={6}
-              TextFieldsProps={{
-                type: "password",
-                inputProps: { maxLength: 1 },
-              }}
+            </Box>
+          )}
+          {state == "confirm" && (
+            <Box
+              className='hidden-add-voice'
               sx={{
-                gap: 1.5,
-                width: "100%",
-                justifyContent: "space-between",
-                "& .MuiOtpInput-TextField": {
-                  "& .MuiOutlinedInput-root": {
-                    width: { xs: 50, sm: 60 },
-                    height: { xs: 50, sm: 60 },
-                    borderRadius: "16px",
-                    backgroundColor: "#fff",
-                    "& fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: { xs: "95%", sm: 500 },
+                maxHeight: "90vh",
+                bgcolor: "white",
+                borderRadius: "16px",
+                boxShadow: 24,
+                p: 4,
+                overflow: "auto",
+              }}>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                mb={3}>
+                <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
+                  {t("confirm_pin_modal_title")}
+                </Typography>
+                <IconButton
+                  onClick={() => {
+                    setState("verify");
+                    setPin("");
+                    setPinConfirm("");
+                    setOpenModal(false);
+                  }}>
+                  <Close />
+                </IconButton>
+              </Stack>
+              <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
+                {t("verify_pin_modal_description")}
+              </Typography>
+              <Box
+                sx={{
+                  my: 3,
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}>
+                <MuiOtpInput
+                  value={pinConfirm}
+                  onChange={setPinConfirm}
+                  length={6}
+                  TextFieldsProps={{
+                    type: "password",
+                    inputProps: { maxLength: 1 },
+                  }}
+                  sx={{
+                    gap: 1.5,
+                    width: "100%",
+                    justifyContent: "space-between",
+                    "& .MuiOtpInput-TextField": {
+                      "& .MuiOutlinedInput-root": {
+                        width: { xs: 50, sm: 60 },
+                        height: { xs: 50, sm: 60 },
+                        borderRadius: "16px",
+                        backgroundColor: "#fff",
+                        "& fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#7cb400",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#9AC700",
+                          borderWidth: "1px",
+                        },
+                      },
+                      "& input": {
+                        textAlign: "center",
+                        fontSize: { xs: "20px", sm: "24px" },
+                        fontWeight: 700,
+                        color: "#9AC700",
+                        "&::placeholder": {
+                          color: "#9AC700",
+                          opacity: 0.6,
+                        },
+                      },
                     },
-                    "&:hover fieldset": {
-                      borderColor: "#7cb400",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#9AC700",
-                      borderWidth: "1px",
-                    },
-                  },
-                  "& input": {
-                    textAlign: "center",
-                    fontSize: { xs: "20px", sm: "24px" },
-                    fontWeight: 700,
-                    color: "#9AC700",
-                    "&::placeholder": {
-                      color: "#9AC700",
-                      opacity: 0.6,
-                    },
-                  },
-                },
-              }}
-            />
-          </Box>
+                  }}
+                />
+              </Box>
 
-          {showConfirm && pinConfirm && pin !== pinConfirm && (
+              {showConfirm && pinConfirm && pin !== pinConfirm && (
                 <Typography
                   sx={{
                     color: "#f44336",
                     fontSize: "14px",
                     mb: 2,
                     fontWeight: 500,
-                  }}
-                >
-               {  t("pin_mismatch_error")}
+                  }}>
+                  {t("pin_mismatch_error")}
                 </Typography>
               )}
 
-          <Button
-                  onClick={handleChangePassword}
+              <Button
+                onClick={handleChangePassword}
                 fullWidth
-                disabled={pin.length !== 6 ||loading}
+                disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor:
-                    pin.length === 6 
-                      ? "#9AC700"
-                      : "#e0e0e0",
-                  color:
-                    pin.length === 6  ? "#fff" : "#888",
+                  backgroundColor: pin.length === 6 ? "#9AC700" : "#e0e0e0",
+                  color: pin.length === 6 ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
                   "&:hover": {
-                    backgroundColor:
-                      pin.length === 6 
-                        ? "#7cb400"
-                        : "#e0e0e0",
+                    backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
-                }}
-              >
-              {loading ? (
+                }}>
+                {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                   {   t("changing_button")}
+                    {t("changing_button")}
                   </>
                 ) : (
-                    t("change_button")
+                  t("change_button")
                 )}
-                  
-                
               </Button>
-        </Box>}
-        
+            </Box>
+          )}
         </>
       </Modal>
-      <LanguageModal open={openLanguage} onClose={()=>{setOpenLanguage(false)
-      setActiveMenu(t("account_settings_menu"))
-      }} />
+      <LanguageModal
+        open={openLanguage}
+        onClose={() => {
+          setTimeout(() => {
+            setActiveMenu(t("account_settings_menu"));
+          }, 100);
+
+          setOpenLanguage(false);
+        }}
+      />
     </Box>
   );
 };
@@ -639,13 +643,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
- 
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useEffect } from "react";
 
-
- function LanguageModal({ open, onClose }) {
+function LanguageModal({ open, onClose }) {
   const { i18n, t } = useTranslation();
 
   // Chuẩn hóa ngôn ngữ ban đầu (vi-VN -> vi)
@@ -681,14 +683,13 @@ import { useEffect } from "react";
       open={open}
       onClose={onClose}
       fullWidth
-      maxWidth="xs"
+      maxWidth='xs'
       PaperProps={{
         sx: {
           borderRadius: 4,
           minHeight: 500,
         },
-      }}
-    >
+      }}>
       <DialogTitle sx={{ fontWeight: 600 }}>
         {t("language", "Ngôn ngữ")}
       </DialogTitle>
@@ -703,10 +704,9 @@ import { useEffect } from "react";
                 borderRadius: 2,
                 mx: 1,
                 mb: 0.5,
-              }}
-            >
+              }}>
               <ListItemIcon sx={{ fontSize: 22 }}>
-                {lang.flag}
+                <img src={lang.flag} alt='' />
               </ListItemIcon>
 
               <ListItemText primary={lang.label} />
@@ -722,7 +722,7 @@ import { useEffect } from "react";
       <DialogActions sx={{ p: 2 }}>
         <Button
           fullWidth
-          variant="contained"
+          variant='contained'
           onClick={handleUpdate}
           sx={{
             borderRadius: 999,
@@ -733,9 +733,8 @@ import { useEffect } from "react";
             "&:hover": {
               backgroundColor: "#8DBA2E",
             },
-          }}
-        >
-          Cập nhật
+          }}>
+          {t("search_bar_update_button")}
         </Button>
       </DialogActions>
     </Dialog>

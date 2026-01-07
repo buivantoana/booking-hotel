@@ -130,22 +130,39 @@ export function formattedDateHHMMDDMMYYYY(data) {
   return formatted;
 }
 
-const ERROR_MESSAGES = {
+export const ERROR_MESSAGES = {
+  OK: "Thành công",
+
   USER_NOT_FOUND: "Không tìm thấy tài khoản",
   USER_NOT_PW: "Tài khoản chưa cấu hình mã pin",
-  WRONG_PW: "Sai mã Pin",
+  WRONG_PW: "Sai mã PIN",
+
   UPDATE_ERROR: "Cập nhật thất bại",
   UNAUTHORIZED: "Lỗi đăng nhập",
+
   INVALID_DATETIME_FORMAT: "Sai định dạng thời gian",
-  ROOM_TYPE_NOT_FOUND: "Không tìm thấy hạng phòng",
-  ROOM_NOT_FREE: "Phòng không còn trống hoặc mới bị giữ chỗ",
-  EMAIL_USED: "Email đã được sử dụng",
   INVALID_BODY: "Vui lòng điền đầy đủ các thông tin cần thiết",
   INVALID_PARTNER: "Đối tác không hợp lệ hoặc bị khoá",
-  ACCOUNT_LOCKED: "Tài khoản bị khoá",
-  MISSING_BODY:"Vui điền đầy đủ thông tin",
-};
+  INVALID_STATUS: "Trạng thái không hợp lệ, vui lòng kiểm tra lại",
+  INVALID_ACTION: "Hành động không hợp lệ, vui lòng kiểm tra lại",
 
+  ROOM_TYPE_NOT_FOUND: "Không tìm thấy hạng phòng",
+  RENT_TYPE_NOT_FOUND:
+    "Không tìm thấy kiểu thuê phù hợp, vui lòng kiểm tra cấu hình thuê theo giờ, đêm hoặc ngày",
+  ROOM_NOT_FREE: "Phòng không còn trống hoặc mới bị giữ chỗ",
+
+  EMAIL_USED: "Email đã được sử dụng",
+  PHONE_USED: "Số điện thoại đã được sử dụng",
+
+  ACCOUNT_LOCKED: "Tài khoản bị khoá",
+  NOT_PERMISSION: "Không có quyền truy cập",
+
+  BOOKING_NOT_FOUND: "Mã đặt phòng không tồn tại",
+  HOTEL_NOT_FOUND: "Không tìm thấy khách sạn",
+  NOT_FOUND: "Không tìm thấy dữ liệu",
+
+  INTERNAL_ERROR: "Lỗi nội bộ hệ thống",
+};
 // Hàm lấy message từ code lỗi
 export const getErrorMessage = (errorCode) => {
   return ERROR_MESSAGES[errorCode] || null;
@@ -163,17 +180,17 @@ export const normalizePhoneForAPI = (phone) => {
   return p;
 };
 
-export  const parseName = (name?: string) => {
+export const parseName = (name?: string) => {
   if (!name) return "Không có tên";
 
   try {
-    if(typeof name == "object"){
+    if (typeof name == "object") {
       return name?.vi || name?.en || "Không có tên";
     }
     const parsed = JSON.parse(name);
     return parsed?.vi || parsed?.en || "Không có tên";
   } catch {
-    console.log("AAAAA test")
+    console.log("AAAAA test");
     // name là plain text (ví dụ: "Suite")
     return name;
   }
@@ -182,67 +199,132 @@ export  const parseName = (name?: string) => {
 export const facilities = [
   {
     id: "luggage_storage",
-    name: { en: "Luggage Storage", vi: "Bảo quản hành lý" },
+    name: {
+      en: "Luggage Storage",
+      vi: "Bảo quản hành lý",
+      ja: "荷物預かり",
+      ko: "수하물 보관",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/double%20shopping%20bag.png",
   },
   {
     id: "elevator",
-    name: { en: "Elevator", vi: "Thang máy" },
+    name: {
+      en: "Elevator",
+      vi: "Thang máy",
+      ja: "エレベーター",
+      ko: "엘리베이터",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%20(1).png",
   },
   {
     id: "safe_box",
-    name: { en: "Safe Box", vi: "Két sắt" },
+    name: {
+      en: "Safe Box",
+      vi: "Két sắt",
+      ja: "セーフティボックス",
+      ko: "금고",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317930%20(1).png",
   },
   {
     id: "parking",
-    name: { en: "Parking", vi: "Bãi đỗ xe" },
+    name: {
+      en: "Parking",
+      vi: "Bãi đỗ xe",
+      ja: "駐車場",
+      ko: "주차장",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317935%20(1).png",
   },
   {
     id: "pool",
-    name: { en: "Swimming Pool", vi: "Bể bơi" },
+    name: {
+      en: "Swimming Pool",
+      vi: "Bể bơi",
+      ja: "プール",
+      ko: "수영장",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317932%20(1).png",
   },
   {
     id: "air_conditioner",
-    name: { en: "Air Conditioner", vi: "Điều hòa" },
+    name: {
+      en: "Air Conditioner",
+      vi: "Điều hòa",
+      ja: "エアコン",
+      ko: "에어컨",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/hotel-air-conditioner--heating-ac-air-hvac-cool-cooling-cold-hot-conditioning-hotel.png",
   },
   {
     id: "smart_tv",
-    name: { en: "Smart TV", vi: "Smart TV" },
+    name: {
+      en: "Smart TV",
+      vi: "Smart TV",
+      ja: "スマートテレビ",
+      ko: "스마트 TV",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Display.png",
   },
   {
     id: "love_chair",
-    name: { en: "Love Chair", vi: "Ghế tình yêu" },
+    name: {
+      en: "Love Chair",
+      vi: "Ghế tình yêu",
+      ja: "ラブチェア",
+      ko: "러브 체어",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Armchair%202.png",
   },
   {
     id: "bathtub",
-    name: { en: "Bathtub", vi: "Bồn tắm" },
+    name: {
+      en: "Bathtub",
+      vi: "Bồn tắm",
+      ja: "バスタブ",
+      ko: "욕조",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Bath.png",
   },
   {
     id: "kitchenware",
-    name: { en: "Kitchenware", vi: "Đồ bếp" },
+    name: {
+      en: "Kitchenware",
+      vi: "Đồ bếp",
+      ja: "キッチン用品",
+      ko: "주방용품",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/pot-01%20(1).png",
   },
   {
     id: "refrigerator",
-    name: { en: "Refrigerator", vi: "Tủ lạnh" },
+    name: {
+      en: "Refrigerator",
+      vi: "Tủ lạnh",
+      ja: "冷蔵庫",
+      ko: "냉장고",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Fridge.png",
   },
   {
     id: "wifi",
-    name: { en: "WiFi", vi: "Wifi" },
+    name: {
+      en: "WiFi",
+      vi: "Wifi",
+      ja: "Wi-Fi",
+      ko: "와이파이",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317936.png",
   },
   {
     id: "hair_dryer",
-    name: { en: "Hair Dryer", vi: "Máy sấy tóc" },
+    name: {
+      en: "Hair Dryer",
+      vi: "Máy sấy tóc",
+      ja: "ヘアドライヤー",
+      ko: "헤어드라이어",
+    },
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317937%20(1).png",
   },
 ];

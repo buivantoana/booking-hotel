@@ -409,5 +409,29 @@
   "search_bar_select_datetime": "日時を選択",
   "search_bar_search_button": "検索",
   "search_bar_update_search_button": "検索を更新",
-  "search_bar_update_button": "更新"
+  "search_bar_update_button": "更新",
+  "language": "言語",
+  "keep_loving_nights": "愛に満ちた夜を大切に",
+  "short_moments_long_memories": "短い瞬間、長く続く思い出",
+  "enjoy_your_days_your_way": "あなたらしく毎日を楽しむ",
+  "sort.most_relevant": "おすすめ順",
+  "sort.distance_near_to_far": "距離が近い順",
+  "sort.rating_high_to_low": "評価が高い順",
+  "sort.price_low_to_high": "価格が安い順",
+  "sort.price_high_to_low": "価格が高い順",
+  "cancel_booking": {
+    "title": "予約のキャンセル",
+    "submit": "予約をキャンセル",
+    "placeholder_other": "理由を入力してください",
+    "reasons": {
+      "change_time": "日時を変更したい",
+      "change_room": "部屋タイプを変更したい",
+      "change_hotel": "ホテルを変更したい",
+      "no_need": "不要になった",
+      "hotel_request": "ホテルからキャンセルを依頼された",
+      "try_experience": "試しに予約したが不要になった",
+      "price_higher": "ホテルより料金が高い",
+      "other": "その他の理由"
+    }
+  }
 }

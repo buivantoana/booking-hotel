@@ -66,7 +66,8 @@ const HotelDetailInfo = ({
   amenities,
 }) => {
   const theme = useTheme();
-  const {t} = useTranslation()
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewDetail, setReviewDetail] = useState(null);
@@ -137,78 +138,76 @@ const HotelDetailInfo = ({
         {/* === 2. TIỆN ÍCH KHÁCH SẠN === */}
         <Stack ref={section3Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-          {t("hotel_amenities_title")}
+            {t("hotel_amenities_title")}
           </Typography>
           <Grid container spacing={2}>
-          {(() => {
-                // Parse facilities từ DB (là JSON string dạng array id)
-                const facilityIds = () => {
-                  if (!info?.amenities) return [];
-                  try {
-                    const parsed =
-                      typeof info.amenities === "string"
-                        ? JSON.parse(info.amenities)
-                        : Array.isArray(info.amenities)
-                        ? info.amenities
-                        : [];
-                    return Array.isArray(parsed) ? parsed : [];
-                  } catch (e) {
-                    console.warn("Parse facilities error:", e);
-                    return [];
-                  }
-                };
-
-                // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
-                  facilityIds().includes(fac.id)
-                );
-
-                if (selectedFacilities.length === 0) {
-                  return (
-                    <Typography color='#999' fontStyle='italic'>
-                         {t("no_amenities")}
-                    </Typography>
-                  );
+            {(() => {
+              // Parse facilities từ DB (là JSON string dạng array id)
+              const facilityIds = () => {
+                if (!info?.amenities) return [];
+                try {
+                  const parsed =
+                    typeof info.amenities === "string"
+                      ? JSON.parse(info.amenities)
+                      : Array.isArray(info.amenities)
+                      ? info.amenities
+                      : [];
+                  return Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                  console.warn("Parse facilities error:", e);
+                  return [];
                 }
+              };
 
+              // Map id → object đầy đủ (label + icon)
+              const selectedFacilities = facilities.filter((fac) =>
+                facilityIds().includes(fac.id)
+              );
+
+              if (selectedFacilities.length === 0) {
                 return (
-                  <Box
-                    sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-                    {selectedFacilities.map((fac) => (
-                      <Box
-                        key={fac.id}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1.5,
-                          bgcolor: "#f8f9fa",
-                          border: "1px solid #e9ecef",
-                          borderRadius: 3,
-                          px: 1,
-                          py: .5,
-                          
-                        }}>
-                        <Box
-                          component='img'
-                          src={fac.icon}
-                          alt={fac.name.vi}
-                          sx={{ width: 20, height: 20, objectFit: "contain" }}
-                        />
-                        <Typography fontWeight={500} fontSize='0.85rem'>
-                          {fac.name.vi}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Box>
+                  <Typography color='#999' fontStyle='italic'>
+                    {t("no_amenities")}
+                  </Typography>
                 );
-              })()}
+              }
+
+              return (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
+                  {selectedFacilities.map((fac) => (
+                    <Box
+                      key={fac.id}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        bgcolor: "#f8f9fa",
+                        border: "1px solid #e9ecef",
+                        borderRadius: 3,
+                        px: 1,
+                        py: 0.5,
+                      }}>
+                      <Box
+                        component='img'
+                        src={fac.icon}
+                        alt={fac.name.vi}
+                        sx={{ width: 20, height: 20, objectFit: "contain" }}
+                      />
+                      <Typography fontWeight={500} fontSize='0.85rem'>
+                        {fac.name[currentLang]}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              );
+            })()}
           </Grid>
         </Stack>
 
         {/* === 3. ĐÁNH GIÁ === */}
         <Stack ref={section4Ref} spacing={4}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-          {t("reviews")}
+            {t("reviews")}
           </Typography>
 
           {/* TỔNG ĐIỂM */}
@@ -244,10 +243,10 @@ const HotelDetailInfo = ({
                       fontWeight={600}
                       fontSize='1.4rem'
                       color='rgba(152, 183, 32, 1)'>
-                    {t("excellent")}
+                      {t("excellent")}
                     </Typography>
                     <Typography fontSize='0.85rem' color='rgba(43, 47, 56, 1)'>
-                    {t("from_reviews", { count: reviews.length })}
+                      {t("from_reviews", { count: reviews.length })}
                     </Typography>
                     {/* <Typography fontSize='0.8rem' color='#999'>
                     {t("from_reviews")}
@@ -413,7 +412,7 @@ const HotelDetailInfo = ({
                 "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
               }}
               onClick={() => setOpenModal(true)}>
-             {t("show_all_reviews")}
+              {t("show_all_reviews")}
             </Button>
           )}
         </Stack>
@@ -421,12 +420,12 @@ const HotelDetailInfo = ({
         {/* === 4. CHÍNH SÁCH NHẬN - TRẢ PHÒNG === */}
         <Stack ref={section5Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-          {t("checkin_policy_title")}
+            {t("checkin_policy_title")}
           </Typography>
           <Grid container>
             {[
               info?.rent_types?.hourly && {
-                label:    t("rent_type_hourly"),
+                label: t("rent_type_hourly"),
                 time: `${info?.rent_types?.hourly.from} - ${info?.rent_types?.hourly.to}`,
               },
               info?.rent_types?.overnight && {
@@ -453,24 +452,23 @@ const HotelDetailInfo = ({
               ))}
           </Grid>
           <Typography fontSize='0.85rem' color='#999'>
-           {t("cancellation_note")}
+            {t("cancellation_note")}
           </Typography>
         </Stack>
 
         {/* === 5. CHÍNH SÁCH KHÁCH SẠN === */}
         <Stack ref={section6Ref} spacing={2}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-          {t("hotel_policy_title")}
+            {t("hotel_policy_title")}
           </Typography>
           <Typography fontSize='0.9rem' color='#666' lineHeight={1.7}>
-          <strong>{t("policy_checkin_out_label")}</strong>{" "}
-    {t("policy_checkin_time")} - {t("policy_checkout_time")} - {t("policy_early_checkin")}
-    <br />
-   
-
-    {/* Phần trả phòng muộn */}
-    <strong>{t("policy_late_checkout_label")}</strong>{" "}
-    {t("policy_late_checkout_desc")} - {t("policy_after_17")}
+            <strong>{t("policy_checkin_out_label")}</strong>{" "}
+            {t("policy_checkin_time")} - {t("policy_checkout_time")} -{" "}
+            {t("policy_early_checkin")}
+            <br />
+            {/* Phần trả phòng muộn */}
+            <strong>{t("policy_late_checkout_label")}</strong>{" "}
+            {t("policy_late_checkout_desc")} - {t("policy_after_17")}
           </Typography>
         </Stack>
 
@@ -490,7 +488,6 @@ const HotelDetailInfo = ({
               boxShadow: 24,
               p: 4,
               overflow: "auto",
-              
             }}>
             <Stack
               direction='row'
@@ -498,7 +495,7 @@ const HotelDetailInfo = ({
               alignItems='center'
               mb={3}>
               <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-              {t("reviews_title")}
+                {t("reviews_title")}
               </Typography>
               <IconButton onClick={() => setOpenModal(false)}>
                 <CloseIcon />
@@ -536,15 +533,15 @@ const HotelDetailInfo = ({
                           fontWeight={600}
                           fontSize='1.4rem'
                           color='rgba(152, 183, 32, 1)'>
-                              {t("excellent")}
+                          {t("excellent")}
                         </Typography>
                         <Typography
                           fontSize='0.85rem'
                           color='rgba(43, 47, 56, 1)'>
-                         {t("from_reviews", { count: reviews.length })}
+                          {t("from_reviews", { count: reviews.length })}
                         </Typography>
                         <Typography fontSize='0.8rem' color='#999'>
-                        {t("by_users")}
+                          {t("by_users")}
                         </Typography>
                       </Box>
                     </Box>
@@ -705,10 +702,10 @@ const HotelDetailInfo = ({
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-          {t("delete_review_title")}
+            {t("delete_review_title")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-          {t("delete_confirm")}
+            {t("delete_confirm")}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -748,7 +745,7 @@ const HotelDetailInfo = ({
               color: "#666",
               width: "100%",
             }}>
-         { t("cancel")}
+            {t("cancel")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -788,7 +785,7 @@ function ReviewModal({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [rating, setRating] = useState<number | null>(0);
   const [reviewText, setReviewText] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -917,7 +914,7 @@ function ReviewModal({
       fullScreen={isMobile}>
       <DialogTitle sx={{ pb: 1, position: "relative" }}>
         <Typography variant='h6' fontWeight={700}>
-          {reviewDetail ?t("edit_title") : t("create_title") }
+          {reviewDetail ? t("edit_title") : t("create_title")}
         </Typography>
 
         <IconButton
@@ -964,12 +961,12 @@ function ReviewModal({
         </Stack>
 
         <Typography fontWeight={600} mb={1}>
-         {t("write_review") }
+          {t("write_review")}
         </Typography>
         <TextField
           multiline
           rows={4}
-          placeholder={t("placeholder") }
+          placeholder={t("placeholder")}
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           fullWidth
@@ -980,7 +977,7 @@ function ReviewModal({
         />
 
         <Typography fontWeight={600} mb={2}>
-        {t("images_videos") }
+          {t("images_videos")}
         </Typography>
         <Stack direction='row' gap={2} flexWrap='wrap'>
           <label htmlFor='upload-review-images'>
@@ -1053,7 +1050,7 @@ function ReviewModal({
           {loading ? (
             <>
               <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-              {t("updating") }
+              {t("updating")}
             </>
           ) : (
             t("submit_button")

@@ -16,13 +16,13 @@ import {
   Stack,
   Typography,
   useMediaQuery,
-  useTheme
+  useTheme,
 } from "@mui/material";
 import {
   GoogleMap,
   InfoWindow,
   LoadScript,
-  Marker
+  Marker,
 } from "@react-google-maps/api";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 // === ICONS (giữ nguyên) ===
@@ -30,7 +30,10 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import no_room from "../../images/No Navigation.svg";
 import map from "../../images/maps.png";
-import { default as starActive, default as starInactive } from "../../images/star.svg";
+import {
+  default as starActive,
+  default as starInactive,
+} from "../../images/star.svg";
 interface Amenity {
   label: string;
   icon: string;
@@ -72,7 +75,8 @@ const RoomsView = ({
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
   const context = useBookingContext();
-  const {t} = useTranslation()
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
   const [center, setCenter] = useState({
     lat: 21.0285,
     lng: 105.8542,
@@ -172,7 +176,6 @@ const RoomsView = ({
   }, []);
   const [locationAddress, setLocationAddress] = useState([]);
 
-
   useEffect(() => {
     (async () => {
       try {
@@ -196,7 +199,9 @@ const RoomsView = ({
         py: { xs: 2, md: activeMap ? 0 : 3 },
         mb: activeMap ? 3 : 0,
       }}>
-      {isMobile && !activeMap&& <SearchBarWithDropdown locationAddress={locationAddress} />}
+      {isMobile && !activeMap && (
+        <SearchBarWithDropdown locationAddress={locationAddress} />
+      )}
       {activeMap ? (
         <FilterMap
           setActiveMap={setActiveMap}
@@ -221,10 +226,11 @@ const RoomsView = ({
             <Grid item xs={12} md={4} lg={3.3}>
               {/* NÚT MỞ FILTER - CHỈ HIỆN TRÊN MOBILE */}
 
-
               {/* FILTER DESKTOP - GIỮ NGUYÊN 100% */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <Paper elevation={0} sx={{ borderRadius: "16px", p: 3, bgcolor: "white" }}>
+                <Paper
+                  elevation={0}
+                  sx={{ borderRadius: "16px", p: 3, bgcolor: "white" }}>
                   <Stack spacing={4}>
                     {/* MAP */}
                     <Box
@@ -258,18 +264,24 @@ const RoomsView = ({
                           height: "40px",
                           cursor: "pointer",
                         }}>
-                        <LocationOnIcon sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }} />
-                       {t("view_on_map")}
+                        <LocationOnIcon
+                          sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }}
+                        />
+                        {t("view_on_map")}
                       </Box>
                     </Box>
 
                     {/* KHOẢNG GIÁ */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={2}>
-                      {t("price_range")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={2}>
+                        {t("price_range")}
                       </Typography>
                       <Typography fontSize='0.8rem' color='#666' mb={2}>
-                      {t("price_includes_all")}
+                        {t("price_includes_all")}
                       </Typography>
 
                       <Box display={"flex"} justifyContent={"center"}>
@@ -294,23 +306,52 @@ const RoomsView = ({
                                 boxShadow: "0 0 0 8px rgba(152, 183, 32, 0.16)",
                               },
                             },
-                            "& .MuiSlider-track": { bgcolor: "#98b720", border: "none" },
-                            "& .MuiSlider-rail": { bgcolor: "#e0e0e0", opacity: 1 },
+                            "& .MuiSlider-track": {
+                              bgcolor: "#98b720",
+                              border: "none",
+                            },
+                            "& .MuiSlider-rail": {
+                              bgcolor: "#e0e0e0",
+                              opacity: 1,
+                            },
                           }}
                         />
                       </Box>
 
-                      <Stack direction='row' alignItems='center' justifyContent='space-evenly' mt={2} spacing={1}>
-                        <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                        {t("min_price")}
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-evenly'
+                        mt={2}
+                        spacing={1}>
+                        <Typography
+                          fontSize='0.75rem'
+                          color='#666'
+                          whiteSpace='nowrap'>
+                          {t("min_price")}
                         </Typography>
-                        <Box sx={{ width: "100px", height: 1, bgcolor: "#e0e0e0", mx: 1 }} />
-                        <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                        {t("max_price")}
+                        <Box
+                          sx={{
+                            width: "100px",
+                            height: 1,
+                            bgcolor: "#e0e0e0",
+                            mx: 1,
+                          }}
+                        />
+                        <Typography
+                          fontSize='0.75rem'
+                          color='#666'
+                          whiteSpace='nowrap'>
+                          {t("max_price")}
                         </Typography>
                       </Stack>
 
-                      <Stack direction='row' alignItems='center' justifyContent='space-between' mt={1} spacing={2}>
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        mt={1}
+                        spacing={2}>
                         <Box
                           sx={{
                             flex: 1,
@@ -327,7 +368,12 @@ const RoomsView = ({
                           {formatPrice(priceRange[0])}
                         </Box>
 
-                        <Box sx={{ color: "#666", fontSize: "1.2rem", fontWeight: 300 }}>
+                        <Box
+                          sx={{
+                            color: "#666",
+                            fontSize: "1.2rem",
+                            fontWeight: 300,
+                          }}>
                           —
                         </Box>
 
@@ -344,7 +390,9 @@ const RoomsView = ({
                             fontWeight: 600,
                             color: "#98b720",
                           }}>
-                          {priceRange[1] >= 10000000 ? "10.000.000đ+" : formatPrice(priceRange[1])}
+                          {priceRange[1] >= 10000000
+                            ? "10.000.000đ+"
+                            : formatPrice(priceRange[1])}
                         </Box>
                       </Stack>
                     </Stack>
@@ -352,22 +400,34 @@ const RoomsView = ({
 
                     {/* ĐIỂM ĐÁNH GIÁ */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                      {t("rating_title")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={1.5}>
+                        {t("rating_title")}
                       </Typography>
                       <Stack direction='row' flexWrap='wrap' gap={1}>
                         {ratingList.map((rating, i) => (
                           <Chip
                             key={i}
                             icon={
-                              <Box component='img' src={rating.active ? starActive : starInactive} sx={{ width: 16, height: 16 }} />
+                              <Box
+                                component='img'
+                                src={rating.active ? starActive : starInactive}
+                                sx={{ width: 16, height: 16 }}
+                              />
                             }
                             label={rating.label}
                             onClick={() => handleRatingToggle(i)}
                             sx={{
                               bgcolor: rating.active ? "#f0f8f0" : "#fff",
-                              color: rating.active ? "#98b720" : "rgba(185, 189, 199, 1)",
-                              border: `1px solid ${rating.active ? "#98b720" : "#eee"}`,
+                              color: rating.active
+                                ? "#98b720"
+                                : "rgba(185, 189, 199, 1)",
+                              border: `1px solid ${
+                                rating.active ? "#98b720" : "#eee"
+                              }`,
                               borderRadius: "50px",
                               fontSize: "0.85rem",
                               height: 36,
@@ -384,8 +444,12 @@ const RoomsView = ({
 
                     {/* TIỆN ÍCH */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                      {t("amenities_title")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={1.5}>
+                        {t("amenities_title")}
                       </Typography>
                       <Grid container spacing={1}>
                         {amenityList.map((item, i) => (
@@ -403,13 +467,17 @@ const RoomsView = ({
                                   }}
                                 />
                               }
-                              label={item.name.vi}
+                              label={item.name[currentLang] || item.name.vi}
                               onClick={() => handleAmenityToggle(i)}
                               sx={{
                                 justifyContent: "flex-start",
                                 bgcolor: item.active ? "#f0f8f0" : "white",
-                                color: item.active ? "#98b720" : "rgba(185, 189, 199, 1)",
-                                border: `1px solid ${item.active ? "#98b720" : "#eee"}`,
+                                color: item.active
+                                  ? "#98b720"
+                                  : "rgba(185, 189, 199, 1)",
+                                border: `1px solid ${
+                                  item.active ? "#98b720" : "#eee"
+                                }`,
                                 borderRadius: "50px",
                                 fontSize: "0.8rem",
                                 height: 40,
@@ -429,9 +497,9 @@ const RoomsView = ({
 
               {/* DRAWER FILTER CHO MOBILE - MỞ TỪ DƯỚI LÊN */}
               <Drawer
-                anchor="bottom"
+                anchor='bottom'
                 open={drawerOpen}
-                className="hidden-story"
+                className='hidden-story'
                 onClose={() => setDrawerOpen(false)}
                 sx={{
                   "& .MuiDrawer-paper": {
@@ -440,17 +508,28 @@ const RoomsView = ({
 
                     bgcolor: "white",
                   },
-                }}
-              >
-                <Box className="hidden-story" sx={{ width: "100%" }}>
+                }}>
+                <Box className='hidden-story' sx={{ width: "100%" }}>
                   {/* Nút kéo */}
                   <Box sx={{ textAlign: "center", mb: 2 }}>
-                    <Box sx={{ width: 40, height: 5, bgcolor: "#ddd", borderRadius: "10px", mx: "auto" }} />
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 5,
+                        bgcolor: "#ddd",
+                        borderRadius: "10px",
+                        mx: "auto",
+                      }}
+                    />
                   </Box>
 
                   {/* Tiêu đề */}
-                  <Typography fontWeight={700} fontSize="1.3rem" textAlign="center" mb={3}>
-                  {t("filter_title")}
+                  <Typography
+                    fontWeight={700}
+                    fontSize='1.3rem'
+                    textAlign='center'
+                    mb={3}>
+                    {t("filter_title")}
                   </Typography>
 
                   {/* Copy nguyên phần filter ở trên vào đây */}
@@ -487,18 +566,24 @@ const RoomsView = ({
                           height: "40px",
                           cursor: "pointer",
                         }}>
-                        <LocationOnIcon sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }} />
+                        <LocationOnIcon
+                          sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }}
+                        />
                         {t("view_on_map")}
                       </Box>
                     </Box>
 
                     {/* KHOẢNG GIÁ */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={2}>
-                      {t("price_range")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={2}>
+                        {t("price_range")}
                       </Typography>
                       <Typography fontSize='0.8rem' color='#666' mb={2}>
-                      {t("price_includes_all")}
+                        {t("price_includes_all")}
                       </Typography>
 
                       <Box display={"flex"} justifyContent={"center"}>
@@ -523,23 +608,52 @@ const RoomsView = ({
                                 boxShadow: "0 0 0 8px rgba(152, 183, 32, 0.16)",
                               },
                             },
-                            "& .MuiSlider-track": { bgcolor: "#98b720", border: "none" },
-                            "& .MuiSlider-rail": { bgcolor: "#e0e0e0", opacity: 1 },
+                            "& .MuiSlider-track": {
+                              bgcolor: "#98b720",
+                              border: "none",
+                            },
+                            "& .MuiSlider-rail": {
+                              bgcolor: "#e0e0e0",
+                              opacity: 1,
+                            },
                           }}
                         />
                       </Box>
 
-                      <Stack direction='row' alignItems='center' justifyContent='space-evenly' mt={2} spacing={1}>
-                        <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                        {t("min_price")}
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-evenly'
+                        mt={2}
+                        spacing={1}>
+                        <Typography
+                          fontSize='0.75rem'
+                          color='#666'
+                          whiteSpace='nowrap'>
+                          {t("min_price")}
                         </Typography>
-                        <Box sx={{ width: "100px", height: 1, bgcolor: "#e0e0e0", mx: 1 }} />
-                        <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                        {t("max_price")}
+                        <Box
+                          sx={{
+                            width: "100px",
+                            height: 1,
+                            bgcolor: "#e0e0e0",
+                            mx: 1,
+                          }}
+                        />
+                        <Typography
+                          fontSize='0.75rem'
+                          color='#666'
+                          whiteSpace='nowrap'>
+                          {t("max_price")}
                         </Typography>
                       </Stack>
 
-                      <Stack direction='row' alignItems='center' justifyContent='space-between' mt={1} spacing={2}>
+                      <Stack
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        mt={1}
+                        spacing={2}>
                         <Box
                           sx={{
                             flex: 1,
@@ -556,7 +670,12 @@ const RoomsView = ({
                           {formatPrice(priceRange[0])}
                         </Box>
 
-                        <Box sx={{ color: "#666", fontSize: "1.2rem", fontWeight: 300 }}>
+                        <Box
+                          sx={{
+                            color: "#666",
+                            fontSize: "1.2rem",
+                            fontWeight: 300,
+                          }}>
                           —
                         </Box>
 
@@ -573,7 +692,9 @@ const RoomsView = ({
                             fontWeight: 600,
                             color: "#98b720",
                           }}>
-                          {priceRange[1] >= 10000000 ? "10.000.000đ+" : formatPrice(priceRange[1])}
+                          {priceRange[1] >= 10000000
+                            ? "10.000.000đ+"
+                            : formatPrice(priceRange[1])}
                         </Box>
                       </Stack>
                     </Stack>
@@ -581,22 +702,34 @@ const RoomsView = ({
 
                     {/* ĐIỂM ĐÁNH GIÁ */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                      {t("rating_title")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={1.5}>
+                        {t("rating_title")}
                       </Typography>
                       <Stack direction='row' flexWrap='wrap' gap={1}>
                         {ratingList.map((rating, i) => (
                           <Chip
                             key={i}
                             icon={
-                              <Box component='img' src={rating.active ? starActive : starInactive} sx={{ width: 16, height: 16 }} />
+                              <Box
+                                component='img'
+                                src={rating.active ? starActive : starInactive}
+                                sx={{ width: 16, height: 16 }}
+                              />
                             }
                             label={rating.label}
                             onClick={() => handleRatingToggle(i)}
                             sx={{
                               bgcolor: rating.active ? "#f0f8f0" : "#fff",
-                              color: rating.active ? "#98b720" : "rgba(185, 189, 199, 1)",
-                              border: `1px solid ${rating.active ? "#98b720" : "#eee"}`,
+                              color: rating.active
+                                ? "#98b720"
+                                : "rgba(185, 189, 199, 1)",
+                              border: `1px solid ${
+                                rating.active ? "#98b720" : "#eee"
+                              }`,
                               borderRadius: "50px",
                               fontSize: "0.85rem",
                               height: 36,
@@ -613,8 +746,12 @@ const RoomsView = ({
 
                     {/* TIỆN ÍCH */}
                     <Stack>
-                      <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                      {t("amenities_title")}
+                      <Typography
+                        fontWeight={600}
+                        fontSize='1rem'
+                        color='#333'
+                        mb={1.5}>
+                        {t("amenities_title")}
                       </Typography>
                       <Grid container spacing={1}>
                         {amenityList.map((item, i) => (
@@ -632,13 +769,17 @@ const RoomsView = ({
                                   }}
                                 />
                               }
-                              label={item.name.vi}
+                              label={item.name[currentLang] || item.name.vi}
                               onClick={() => handleAmenityToggle(i)}
                               sx={{
                                 justifyContent: "flex-start",
                                 bgcolor: item.active ? "#f0f8f0" : "white",
-                                color: item.active ? "#98b720" : "rgba(185, 189, 199, 1)",
-                                border: `1px solid ${item.active ? "#98b720" : "#eee"}`,
+                                color: item.active
+                                  ? "#98b720"
+                                  : "rgba(185, 189, 199, 1)",
+                                border: `1px solid ${
+                                  item.active ? "#98b720" : "#eee"
+                                }`,
                                 borderRadius: "50px",
                                 fontSize: "0.8rem",
                                 height: 40,
@@ -655,8 +796,7 @@ const RoomsView = ({
                   </Stack>
                 </Box>
                 <Button
-                  variant="contained"
-                  
+                  variant='contained'
                   onClick={() => setDrawerOpen(false)}
                   sx={{
                     bgcolor: "rgba(152, 183, 32, 1)",
@@ -667,9 +807,8 @@ const RoomsView = ({
                     fontWeight: 600,
                     boxShadow: "0 4px 12px rgba(152,183,32,0.3)",
                     "&:hover": { bgcolor: "#43a047" },
-                    mt:1
-                  }}
-                >
+                    mt: 1,
+                  }}>
                   {t("apply_filter")}
                 </Button>
               </Drawer>
@@ -692,14 +831,13 @@ const RoomsView = ({
                   zIndex: 100,
                   borderBottom: "1px solid #eee",
                   borderRadius: "10px",
-                  mb: 2
-                }}
-              >
-                <Typography fontWeight={600} fontSize="1.1rem">
-                {t("filter_title")}
+                  mb: 2,
+                }}>
+                <Typography fontWeight={600} fontSize='1.1rem'>
+                  {t("filter_title")}
                 </Typography>
                 <Button
-                  variant="contained"
+                  variant='contained'
                   startIcon={<FilterListIcon />}
                   onClick={() => setDrawerOpen(true)}
                   sx={{
@@ -711,9 +849,8 @@ const RoomsView = ({
                     fontWeight: 600,
                     boxShadow: "0 4px 12px rgba(152,183,32,0.3)",
                     "&:hover": { bgcolor: "#43a047" },
-                  }}
-                >
-                   {t("apply_filter")}
+                  }}>
+                  {t("apply_filter")}
                 </Button>
               </Box>
               <Box
@@ -724,7 +861,7 @@ const RoomsView = ({
                   flexDirection: { xs: "row", sm: "row" },
                   gap: 2,
                   mb: 2,
-                  pl: isMobile?2:"unset"
+                  pl: isMobile ? 2 : "unset",
                 }}>
                 <Stack direction='row' alignItems='center' spacing={1}>
                   <Typography
@@ -738,7 +875,7 @@ const RoomsView = ({
                     ) : (
                       <>{totalAll}</>
                     )}{" "}
-                   {t("search_results")}
+                    {t("search_results")}
                   </Typography>
                 </Stack>
 
@@ -787,7 +924,7 @@ const FilterMap = ({
     height: "60vh",
     borderRadius: "10px",
   };
- 
+
   const itemRefs = useRef({});
   const mapRef = useRef(null);
   const navigate = useNavigate();
@@ -795,7 +932,7 @@ const FilterMap = ({
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   // Khi map dừng di chuyển (drag, zoom…)
   const onIdle = () => {
     if (!mapRef.current) return;
@@ -823,38 +960,45 @@ const FilterMap = ({
   };
   return (
     <>
-     {isMobile && <Typography
-            my={2}
-            onClick={() => {
-              getHotel();
-              setActiveMap(false);
-            }}
-            fontSize={"20px"}
-            color='#48505E'
-            display={"flex"}
-            sx={{ cursor: "pointer" }}
-            alignItems={"center"}
-            gap={1}>
-            <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
-              {t("view_list")}
-          </Typography>}
-      <Grid justifyContent={"space-between"} flexDirection={isMobile?"column-reverse":"row"} container>
+      {isMobile && (
+        <Typography
+          my={2}
+          onClick={() => {
+            getHotel();
+            setActiveMap(false);
+          }}
+          fontSize={"20px"}
+          color='#48505E'
+          display={"flex"}
+          sx={{ cursor: "pointer" }}
+          alignItems={"center"}
+          gap={1}>
+          <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
+          {t("view_list")}
+        </Typography>
+      )}
+      <Grid
+        justifyContent={"space-between"}
+        flexDirection={isMobile ? "column-reverse" : "row"}
+        container>
         <Grid item xs={12} md={5}>
-          {!isMobile && <Typography
-            my={2}
-            onClick={() => {
-              getHotel();
-              setActiveMap(false);
-            }}
-            fontSize={"20px"}
-            color='#48505E'
-            display={"flex"}
-            sx={{ cursor: "pointer" }}
-            alignItems={"center"}
-            gap={1}>
-            <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
+          {!isMobile && (
+            <Typography
+              my={2}
+              onClick={() => {
+                getHotel();
+                setActiveMap(false);
+              }}
+              fontSize={"20px"}
+              color='#48505E'
+              display={"flex"}
+              sx={{ cursor: "pointer" }}
+              alignItems={"center"}
+              gap={1}>
+              <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
               {t("view_list")}
-          </Typography>}
+            </Typography>
+          )}
           <Box
             height={"50vh"}
             className='hidden-add-voice'
@@ -997,7 +1141,11 @@ const FilterMap = ({
                           </Typography>
 
                           <Typography sx={{ fontSize: 14, color: "#FF5722" }}>
-                            Từ {activeHotel?.price_min?.[searchParams.get("type")]?.toLocaleString("vi-VN")}đ / đêm
+                            Từ{" "}
+                            {activeHotel?.price_min?.[
+                              searchParams.get("type")
+                            ]?.toLocaleString("vi-VN")}
+                            đ / đêm
                           </Typography>
                         </Box>
                       );
@@ -1031,7 +1179,7 @@ const ItemHotel = ({
   const navigate = useNavigate();
   const loadMoreRef = useRef(null);
   const isRequesting = useRef(false);
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   useEffect(() => {
     if (!activeHotel) return;
 
@@ -1180,7 +1328,8 @@ const ItemHotel = ({
                     navigate(
                       `/room/${hotel.id}?${new URLSearchParams(
                         current
-                      ).toString()}&name=${JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
+                      ).toString()}&name=${
+                        JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
                       }`
                     );
                   }}
@@ -1281,7 +1430,7 @@ const ItemHotel = ({
                           alignItems='flex-end'>
                           <Stack alignItems={"end"}>
                             <Typography fontSize='14px' color='#999'>
-                            {t("price_for_short_stay")}
+                              {t("price_for_short_stay")}
                             </Typography>
                             <Typography
                               fontWeight={700}
@@ -1296,9 +1445,12 @@ const ItemHotel = ({
                                 fontSize='14px'
                                 lineHeight={2}
                                 color='#999'>
-                                  {t("from_price")}
+                                {t("from_price")}
                               </Typography>{" "}
-                              {hotel?.price_min?.[searchParams.get("type")]?.toLocaleString("vi-VN")}đ
+                              {hotel?.price_min?.[
+                                searchParams.get("type")
+                              ]?.toLocaleString("vi-VN")}
+                              đ
                             </Typography>
 
                             {/* <Box
@@ -1424,9 +1576,7 @@ const ItemHotel = ({
                 flexDirection={"column"}
                 alignItems={"center"}>
                 <img src={no_room} alt='' />
-                <Typography mt={3}>
-                {t("no_results")}
-                </Typography>
+                <Typography mt={3}>{t("no_results")}</Typography>
               </Box>
             </Box>
           )}
@@ -1442,16 +1592,17 @@ import CheckIcon from "@mui/icons-material/Check";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
-const sortOptions = [
-  { label: "Phù hợp nhất", value: "all" },
-  { label: "Khoảng cách từ gần đến xa", value: "distance" },
-  { label: "Điểm đánh giá từ cao đến thấp", value: "rating" },
-  { label: "Giá từ thấp đến cao", value: "price_asc" },
-  { label: "Giá từ cao đến thấp", value: "price_desc" },
-];
 
 const SortButton = ({ queryHotel, setQueryHotel }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { t } = useTranslation();
+  const sortOptions = [
+    { label: t("sort.most_relevant"), value: "all" },
+    { label: t("sort.distance_near_to_far"), value: "distance" },
+    { label: t("sort.rating_high_to_low"), value: "rating" },
+    { label: t("sort.price_low_to_high"), value: "price_asc" },
+    { label: t("sort.price_high_to_low"), value: "price_desc" },
+  ];
   const [selected, setSelected] = useState(sortOptions[0].value);
 
   const open = Boolean(anchorEl);
@@ -1569,7 +1720,7 @@ import { parseName } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 
 function PromotionBanner() {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const navigate = useNavigate();
   return (
     <Box
@@ -1580,7 +1731,7 @@ function PromotionBanner() {
         position: "relative",
         overflow: "hidden",
         background: "white",
-        py: { xs: 2, md: 0 }
+        py: { xs: 2, md: 0 },
       }}>
       <Container maxWidth='lg'>
         <Stack
@@ -1618,10 +1769,10 @@ function PromotionBanner() {
                 color='#2B2F38'
                 gutterBottom
                 sx={{ lineHeight: 1.3, fontSize: "17px" }}>
-                 {t("promotion_title")}
+                {t("promotion_title")}
               </Typography>
               <Typography fontSize={"12px"} color='#5D6679'>
-              {t("promotion_desc")}
+                {t("promotion_desc")}
               </Typography>
             </Box>
           </Stack>
@@ -1640,7 +1791,7 @@ function PromotionBanner() {
               py: 1.2,
               textTransform: "none",
             }}>
-              {t("register_now")}
+            {t("register_now")}
           </Button>
         </Stack>
       </Container>

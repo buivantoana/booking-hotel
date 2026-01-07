@@ -58,11 +58,11 @@ const ProfileView = ({
   hastag,
   loading,
   pagination,
-  onPageChange
+  onPageChange,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(`${t("profile_menu")}`);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -70,7 +70,8 @@ const ProfileView = ({
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loadingSubmit, setLoadingSubmit] = useState(false);
- 
+  const [openCancelBooking, setOpenCancelBooking] = useState(false);
+  const navigateToRoom = useNavigateToRoom();
   const menuItems = [
     { text: t("profile_menu"), icon: <PersonIcon />, active: false },
     { text: t("account_settings_menu"), icon: <SettingsIcon />, active: false },
@@ -107,26 +108,25 @@ const ProfileView = ({
     setActiveMenu(active);
   };
 
-  
-  const Sidebar = ({  }) => {
+  const Sidebar = ({}) => {
     // Thêm state để quản lý trạng thái mở/đóng sidebar trên mobile
     const [mobileOpen, setMobileOpen] = useState(false);
-    
+
     // Sử dụng theme breakpoints
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
+    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
     // Hàm đóng sidebar trên mobile
     const handleDrawerToggle = () => {
       setMobileOpen(!mobileOpen);
     };
-  
+
     const sidebarContent = (
       <Paper
         elevation={0}
         sx={{
-          width: { xs: '100%', md: 280 },
-          height: { xs: '100vh', md: "fit-content" },
+          width: { xs: "100%", md: 280 },
+          height: { xs: "100vh", md: "fit-content" },
           borderRadius: { xs: 0, md: "16px" },
           bgcolor: "white",
           p: { xs: 2, md: 3 },
@@ -139,16 +139,20 @@ const ProfileView = ({
         }}>
         {/* Header cho mobile */}
         {isMobile && (
-          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-            <Typography variant="h6" fontWeight={600} color="#333">
+          <Stack
+            direction='row'
+            justifyContent='space-between'
+            alignItems='center'
+            mb={2}>
+            <Typography variant='h6' fontWeight={600} color='#333'>
               Menu
             </Typography>
-            <IconButton onClick={handleDrawerToggle} sx={{ color: '#98b720' }}>
+            <IconButton onClick={handleDrawerToggle} sx={{ color: "#98b720" }}>
               <Close />
             </IconButton>
           </Stack>
         )}
-  
+
         <Stack spacing={3}>
           {/* USER INFO */}
           <Stack direction='row' spacing={2} alignItems='center'>
@@ -158,20 +162,27 @@ const ProfileView = ({
                 height: { xs: 40, md: 48 },
                 bgcolor: "#e8f5e8",
               }}>
-              <PersonIcon sx={{ color: "#98b720", fontSize: { xs: 24, md: 28 } }} />
+              <PersonIcon
+                sx={{ color: "#98b720", fontSize: { xs: 24, md: 28 } }}
+              />
             </Avatar>
             <Stack>
-              <Typography fontWeight={600} fontSize={{ xs: '0.9rem', md: '1rem' }} color='#333'>
+              <Typography
+                fontWeight={600}
+                fontSize={{ xs: "0.9rem", md: "1rem" }}
+                color='#333'>
                 {context?.state?.user?.name || "Người dùng"}
               </Typography>
-              <Typography fontSize={{ xs: '0.75rem', md: '0.8rem' }} color='#666'>
+              <Typography
+                fontSize={{ xs: "0.75rem", md: "0.8rem" }}
+                color='#666'>
                 +84 {context?.state?.user?.phone?.slice(3) || "123456789"}
               </Typography>
             </Stack>
           </Stack>
-  
+
           <Divider sx={{ bgcolor: "#eee" }} />
-  
+
           {/* MENU */}
           <List disablePadding sx={{ cursor: "pointer" }}>
             {menuItems.map((item) => (
@@ -193,14 +204,15 @@ const ProfileView = ({
                   sx={{
                     borderRadius: "12px",
                     mb: 1,
-                    bgcolor: activeMenu === item.text ? "#f0f8f0" : "transparent",
+                    bgcolor:
+                      activeMenu === item.text ? "#f0f8f0" : "transparent",
                     border:
                       activeMenu === item.text ? "1px solid #98b720" : "none",
                     px: 1,
                     py: { xs: 1.5, md: 1 },
-                    '&:hover': {
+                    "&:hover": {
                       bgcolor: activeMenu === item.text ? "#f0f8f0" : "#f9f9f9",
-                    }
+                    },
                   }}>
                   <ListItemIcon
                     sx={{
@@ -209,9 +221,9 @@ const ProfileView = ({
                         activeMenu === item.text
                           ? "rgba(152, 183, 32, 1)"
                           : "#999",
-                      '& .MuiSvgIcon-root': {
-                        fontSize: { xs: '1.25rem', md: '1.375rem' }
-                      }
+                      "& .MuiSvgIcon-root": {
+                        fontSize: { xs: "1.25rem", md: "1.375rem" },
+                      },
                     }}>
                     {React.cloneElement(item.icon)}
                   </ListItemIcon>
@@ -219,7 +231,7 @@ const ProfileView = ({
                     primary={
                       <Typography
                         fontWeight={activeMenu === item.text ? 600 : 500}
-                        fontSize={{ xs: '0.85rem', md: '0.9rem' }}
+                        fontSize={{ xs: "0.85rem", md: "0.9rem" }}
                         color={
                           activeMenu === item.text
                             ? "rgba(152, 183, 32, 1)"
@@ -236,7 +248,7 @@ const ProfileView = ({
         </Stack>
       </Paper>
     );
-  
+
     // Nếu là mobile, hiển thị với Drawer
     if (isMobile) {
       return (
@@ -245,59 +257,60 @@ const ProfileView = ({
           <IconButton
             onClick={handleDrawerToggle}
             sx={{
-              position: 'fixed',
+              position: "fixed",
               bottom: 20,
               right: 20,
-              bgcolor: '#98b720',
-              color: 'white',
-              '&:hover': {
-                bgcolor: '#7a9a1a',
+              bgcolor: "#98b720",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#7a9a1a",
               },
               zIndex: 1100,
               width: 56,
               height: 56,
               boxShadow: 3,
-              display: { xs: 'flex', md: 'none' }
-            }}
-          >
+              display: { xs: "flex", md: "none" },
+            }}>
             <MenuIcon />
           </IconButton>
-  
+
           <Drawer
-            variant="temporary"
+            variant='temporary'
             open={mobileOpen}
             onClose={handleDrawerToggle}
             ModalProps={{
               keepMounted: true, // Better open performance on mobile
             }}
             sx={{
-              display: { xs: 'block', md: 'none' },
-              '& .MuiDrawer-paper': {
-                boxSizing: 'border-box',
-                width: '100%',
-                bgcolor: 'transparent',
-                boxShadow: 'none',
+              display: { xs: "block", md: "none" },
+              "& .MuiDrawer-paper": {
+                boxSizing: "border-box",
+                width: "100%",
+                bgcolor: "transparent",
+                boxShadow: "none",
               },
-            }}
-          >
+            }}>
             {sidebarContent}
           </Drawer>
         </>
       );
     }
-  
+
     // Nếu là desktop, hiển thị bình thường
     return sidebarContent;
   };
-  
 
   const MainContent = () => {
     if (!detailBooking) return null;
-
+    console.log("AAAAAA detailBooking", detailBooking);
     // Parse JSON string fields
     const hotelName =
       JSON.parse(detailBooking.hotel_name)?.vi ||
       JSON.parse(detailBooking.hotel_name)?.en ||
+      "Khách sạn";
+    const roomName =
+      detailBooking.rooms[0]?.room_name ||
+      detailBooking.rooms[0]?.room_name ||
       "Khách sạn";
     const hotelAddress =
       JSON.parse(detailBooking.hotel_address)?.vi ||
@@ -386,15 +399,15 @@ const ProfileView = ({
         case "paid":
           return t("payment_status_paid");
         case "pending":
-          return  t("payment_status_pending");
+          return t("payment_status_pending");
         case "failed":
           return t("payment_status_failed");
         case "cancelled":
           return t("payment_status_cancelled");
         case "refunded":
-          return  t("payment_status_refunded");
+          return t("payment_status_refunded");
         default:
-          return   t("payment_status_refunded");
+          return t("payment_status_refunded");
       }
     };
     // Trạng thái thanh toán
@@ -412,8 +425,8 @@ const ProfileView = ({
         ? "Ví MoMo"
         : bestPayment.method === "vnpay"
         ? "VNPay"
-        :t("payment_status_at_hotel")
-      :t("payment_status_at_hotel");
+        : t("payment_status_at_hotel")
+      : t("payment_status_at_hotel");
     const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
       "vi-VN"
     );
@@ -444,13 +457,17 @@ const ProfileView = ({
       // -----------------------------
 
       // booking đã hoàn thành hoặc bị hủy -> nút "Đặt lại"
-      if (bookingStatus === "checked_out" || bookingStatus === "cancelled" ||detailBooking.status === "no_show" ) {
+      if (
+        bookingStatus === "checked_out" ||
+        bookingStatus === "cancelled" ||
+        detailBooking.status === "no_show"
+      ) {
         return t("button_rebook");
       }
 
       // đã xác nhận và đã thanh toán → có thể hủy
       if (bookingStatus === "confirmed" && paymentStatus === "paid") {
-        return  t("button_cancel_booking");
+        return t("button_cancel_booking");
       }
 
       // chưa thanh toán đủ hoặc payment lỗi
@@ -459,24 +476,26 @@ const ProfileView = ({
         paymentStatus === "pending" ||
         bookingStatus === "pending"
       ) {
-        return  t("button_continue_payment");
+        return t("button_continue_payment");
       }
 
       // fallback – mặc định vẫn hiển thị tiếp tục thanh toán
-      return  t("button_continue_payment");
+      return t("button_continue_payment");
     };
     const handleSubmit = async () => {
       setLoadingSubmit(true);
       try {
-        if (getBookingNameStatus(detailBooking) ==  t("button_cancel_booking")) {
+        if (getBookingNameStatus(detailBooking) == t("button_cancel_booking")) {
           setOpenReason(true);
           // let result = await cancelBooking(detailBooking.booking_id);
           // if (result?.code == "OK") {
           //   toast.success(result?.message);
           //   getHistoryBooking();
           // }
+        } else if (getBookingNameStatus(detailBooking) == t("rebook_button")) {
+          navigateToRoom(detailBooking);
         } else if (
-          getBookingNameStatus(detailBooking) ==  t("button_continue_payment")
+          getBookingNameStatus(detailBooking) == t("button_continue_payment")
         ) {
           handleRetryPayment({
             booking_id: detailBooking?.booking_id,
@@ -486,7 +505,9 @@ const ProfileView = ({
       } catch (error) {
         console.log(error);
       }
-      if (!(getBookingNameStatus(detailBooking) == t("button_continue_payment"))) {
+      if (
+        !(getBookingNameStatus(detailBooking) == t("button_continue_payment"))
+      ) {
         setLoadingSubmit(false);
       }
     };
@@ -589,17 +610,11 @@ const ProfileView = ({
       <Stack spacing={3}>
         {/* HEADER */}
         <Stack direction='row' alignItems='center' spacing={1}>
-          <IconButton
-            size='small'
-            onClick={() =>
-              setDetailBooking(false)
-            }>
-           
-              <ArrowBackIcon sx={{ fontSize: 20 }} />
-           
+          <IconButton size='small' onClick={() => setDetailBooking(false)}>
+            <ArrowBackIcon sx={{ fontSize: 20 }} />
           </IconButton>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-        {t("booking_detail_title")}
+            {t("booking_detail_title")}
           </Typography>
         </Stack>
         <ReasonModal
@@ -621,10 +636,10 @@ const ProfileView = ({
                 <img src={success} alt='Thành công' width={48} />
                 <Stack>
                   <Typography fontWeight={700} fontSize='1rem' color='#98b720'>
-                  {t("status_completed")}
+                    {t("status_completed")}
                   </Typography>
                   <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                  {t("completed_message")}
+                    {t("completed_message")}
                   </Typography>
                 </Stack>
               </Stack>
@@ -663,10 +678,10 @@ const ProfileView = ({
                       fontWeight={700}
                       fontSize='1rem'
                       color='#98b720'>
-                        {t("status_waiting_checkin")}
+                      {t("status_waiting_checkin")}
                     </Typography>
                     <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                    {t("waiting_checkin_message")}
+                      {t("waiting_checkin_message")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -691,10 +706,10 @@ const ProfileView = ({
                       fontWeight={700}
                       fontSize='1rem'
                       color='#98b720'>
-                          {t("status_waiting_payment")}
+                      {t("status_waiting_payment")}
                     </Typography>
                     <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                    {t("waiting_payment_message")}
+                      {t("waiting_payment_message")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -725,62 +740,68 @@ const ProfileView = ({
                         size={20}
                         sx={{ color: "#fff", mr: 1 }}
                       />
-                        {t("button_loading_continue")}
+                      {t("button_loading_continue")}
                     </>
                   ) : (
-                    <>    {t("button_continue_payment")}</>
+                    <> {t("button_continue_payment")}</>
                   )}
                 </Button>
               </Stack>
             </Paper>
           )}
-        {detailBooking.status === "cancelled" ||detailBooking.status === "no_show"  && (
-          <Paper
-            elevation={0}
-            sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
-            <Stack
-              direction='row'
-              justifyContent='space-between'
-              alignItems='center'>
-              <Stack direction='row' spacing={2} alignItems='center'>
-                <img src={cancel} alt='Thành công' width={48} />
-                <Stack>
-                  <Typography fontWeight={700} fontSize='1rem' color='red'>
-                  {t("status_no_show")}
-                  </Typography>
-                  <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                  {t("no_show_message")}
-                  </Typography>
+        {detailBooking.status === "cancelled" ||
+          (detailBooking.status === "no_show" && (
+            <Paper
+              elevation={0}
+              sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
+              <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'>
+                <Stack direction='row' spacing={2} alignItems='center'>
+                  <img src={cancel} alt='Thành công' width={48} />
+                  <Stack>
+                    <Typography fontWeight={700} fontSize='1rem' color='red'>
+                      {t("status_no_show")}
+                    </Typography>
+                    <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
+                      {t("no_show_message")}
+                    </Typography>
+                  </Stack>
                 </Stack>
-              </Stack>
-              <Button
-                variant='contained'
-                sx={{
-                  bgcolor: "#98b720",
-                  color: "white",
-                  borderRadius: "50px",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  px: 3,
-                  py: 1,
-                  fontSize: "0.9rem",
-                  minWidth: 120,
-                  "&:hover": { bgcolor: "#7a9a1a" },
-                }}>
+                <Button
+                  variant='contained'
+                  sx={{
+                    bgcolor: "#98b720",
+                    color: "white",
+                    borderRadius: "50px",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    px: 3,
+                    py: 1,
+                    fontSize: "0.9rem",
+                    minWidth: 120,
+                    "&:hover": { bgcolor: "#7a9a1a" },
+                  }}>
                   {t("button_rebook")}
-              </Button>
-            </Stack>
-          </Paper>
-        )}
+                </Button>
+              </Stack>
+            </Paper>
+          ))}
 
         {/* LỰA CHỌN CỦA BẠN */}
         <Paper
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-          {t("your_choice_title")}
+            {t("your_choice_title")}
           </Typography>
-          <Stack direction={'row'} flexWrap={"wrap"} gap={2}  spacing={2} alignItems='flex-start'>
+          <Stack
+            direction={"row"}
+            flexWrap={"wrap"}
+            gap={2}
+            spacing={2}
+            alignItems='flex-start'>
             {/* HÌNH ẢNH PHÒNG */}
             <Box
               sx={{
@@ -805,7 +826,7 @@ const ProfileView = ({
                 {hotelName}
               </Typography>
               <Typography fontSize='0.9rem' fontWeight={500} color='#333'>
-              {t("standard_room")}
+                {roomName}
               </Typography>
               <Typography fontSize='0.8rem' color='#666'>
                 {hotelAddress}
@@ -838,7 +859,7 @@ const ProfileView = ({
               <Grid container spacing={0.5} mt={1} fontSize='0.7rem'>
                 <Grid item xs={4}>
                   <Typography color='#888' fontSize='0.75rem'>
-                  {t("checkin_label")}
+                    {t("checkin_label")}
                   </Typography>
                   <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                     {checkInTime}
@@ -849,7 +870,7 @@ const ProfileView = ({
                   xs={4}
                   sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
                   <Typography color='#888' fontSize='0.75rem'>
-                  {t("checkout_label")}
+                    {t("checkout_label")}
                   </Typography>
                   <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                     {checkOutTime}
@@ -876,7 +897,7 @@ const ProfileView = ({
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-          {t("checkin_info_title")}
+            {t("checkin_info_title")}
           </Typography>
           <Stack spacing={2}>
             <Stack
@@ -884,7 +905,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("booking_code_label")}
+                {t("booking_code_label")}
               </Typography>
               <Stack direction='row' spacing={0.5} alignItems='center'>
                 <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
@@ -903,7 +924,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("phone_label")}
+                {t("phone_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 +84 {context.state?.user?.phone?.slice(3)}
@@ -914,7 +935,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("full_name_label")}
+                {t("full_name_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {context.state?.user?.name}
@@ -928,12 +949,12 @@ const ProfileView = ({
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-          {t("payment_details_title")}
+            {t("payment_details_title")}
           </Typography>
           <Stack spacing={2}>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("payment_status_label")}
+                {t("payment_status_label")}
               </Typography>
               <Typography
                 fontWeight={600}
@@ -944,7 +965,7 @@ const ProfileView = ({
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("payment_method_label")}
+                {t("payment_method_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {paymentMethodLabel}
@@ -952,7 +973,7 @@ const ProfileView = ({
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-              {t("room_price_label")}
+                {t("room_price_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {totalPrice}đ
@@ -961,7 +982,7 @@ const ProfileView = ({
             <Divider sx={{ bgcolor: "#eee" }} />
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='1rem' fontWeight={700} color='#333'>
-              {t("total_payment_label")}
+                {t("total_payment_label")}
               </Typography>
               <Typography fontSize='1.1rem' fontWeight={700} color='#333'>
                 {totalPrice}đ
@@ -979,10 +1000,13 @@ const ProfileView = ({
           flexDirection={isMobile ? "column" : "row"}
           spacing={2}>
           <Typography
+            onClick={() => {
+              setOpenCancelBooking(true);
+            }}
             fontSize='16px'
             color='rgba(43, 47, 56, 1)'
             sx={{ textDecoration: "underline", cursor: "pointer" }}>
-               {t("cancellation_policy")}
+            {t("cancellation_policy")}
           </Typography>
           <Button
             fullWidth={isMobile}
@@ -1053,10 +1077,10 @@ const ProfileView = ({
 
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-          {t("logout_dialog_title")}
+            {t("logout_dialog_title")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-          {t("logout_dialog_message")}
+            {t("logout_dialog_message")}
           </Typography>
         </DialogContent>
 
@@ -1091,7 +1115,7 @@ const ProfileView = ({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-           {t("logout_confirm_button")}
+            {t("logout_confirm_button")}
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -1109,32 +1133,41 @@ const ProfileView = ({
         </DialogActions>
       </Dialog>
       <Container maxWidth='lg'>
-      
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={4} lg={3.5}>
-              <Sidebar />
-            </Grid>
-            <Grid item xs={12} md={8} lg={8.5}>
-              {detailBooking && (
-                <MainContent setDetailBooking={setDetailBooking} />
-              )}
-              {activeMenu ==   t("profile_menu") && <Account context={context} />}
-              {activeMenu == t("account_settings_menu") && <AccountSettingsPage setActiveMenu={setActiveMenu} />}
-              {activeMenu ==  t("my_bookings_menu") && !detailBooking && (
-                <MyBookingsPage
-                  historyBooking={historyBooking}
-                  setDetailBooking={setDetailBooking}
-                  getHistoryBooking={getHistoryBooking}
-                  hastag={hastag}
-                  loading={loading}
-                  pagination={pagination}
-                  onPageChange={onPageChange}
-                />
-              )}
-            </Grid>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4} lg={3.5}>
+            <Sidebar />
           </Grid>
-        
+          <Grid item xs={12} md={8} lg={8.5}>
+            {detailBooking && (
+              <MainContent setDetailBooking={setDetailBooking} />
+            )}
+            {activeMenu == t("profile_menu") && <Account context={context} />}
+            {activeMenu == t("account_settings_menu") && (
+              <AccountSettingsPage setActiveMenu={setActiveMenu} />
+            )}
+            {activeMenu == t("my_bookings_menu") && !detailBooking && (
+              <MyBookingsPage
+                historyBooking={historyBooking}
+                setDetailBooking={setDetailBooking}
+                getHistoryBooking={getHistoryBooking}
+                hastag={hastag}
+                loading={loading}
+                pagination={pagination}
+                onPageChange={onPageChange}
+                navigateToRoom={navigateToRoom}
+              />
+            )}
+          </Grid>
+        </Grid>
       </Container>
+      <CancelBookingModal
+        open={openCancelBooking}
+        onClose={() => {
+          setOpenCancelBooking(false);
+        }}
+        detailBooking={detailBooking}
+        getHistoryBooking={getHistoryBooking}
+      />
     </Box>
   );
 };
@@ -1148,8 +1181,8 @@ import { useTranslation } from "react-i18next";
 
 const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
   const [reason, setReason] = React.useState("");
-  const {t} = useTranslation()
-  const handleSubmit = () => {
+  const { t } = useTranslation();
+  const handleSubmit = async () => {
     onSubmit(reason); // trả lý do về parent
     setReason(""); // clear input
   };
@@ -1192,7 +1225,7 @@ const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
           variant='outlined'
           sx={{ borderColor: "#98b720", color: "#98b720" }}
           onClick={handleClose}>
-        {t("reason_cancel_button")}
+          {t("reason_cancel_button")}
         </Button>
         <Button
           variant='contained'
@@ -1209,3 +1242,146 @@ const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
     </Dialog>
   );
 };
+
+import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import { useNavigateToRoom } from "../../components/useNavigateToRoom";
+
+const REASON_KEYS = [
+  "change_time",
+  "change_room",
+  "change_hotel",
+  "no_need",
+  "hotel_request",
+  "try_experience",
+  "price_higher",
+  "other",
+];
+
+function CancelBookingModal({
+  open,
+  onClose,
+  getHistoryBooking,
+  detailBooking,
+}) {
+  const { t } = useTranslation();
+
+  const [reason, setReason] = useState("");
+  const [note, setNote] = useState("");
+
+  // reset state khi đóng modal
+  useEffect(() => {
+    if (!open) {
+      setReason("");
+      setNote("");
+    }
+  }, [open]);
+
+  const handleSubmit = async () => {
+    if (!reason) return;
+    try {
+      let result = await cancelBooking({
+        id: detailBooking.booking_id,
+        reason: reason,
+      });
+      if (result?.code == "OK") {
+        toast.success(result?.message);
+        getHistoryBooking();
+        onClose();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const isDisableSubmit = !reason || (reason === "other" && !note.trim());
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
+      {/* ===== HEADER ===== */}
+      <DialogTitle
+        sx={{
+          fontWeight: 600,
+          fontSize: "1.1rem",
+        }}>
+        {t("cancel_booking.title")}
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 40,
+            top: 26,
+          }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+
+      {/* ===== CONTENT ===== */}
+      <DialogContent>
+        <RadioGroup value={reason} onChange={(e) => setReason(e.target.value)}>
+          {REASON_KEYS.map((key) => (
+            <FormControlLabel
+              key={key}
+              value={key}
+              control={<Radio />}
+              label={t(`cancel_booking.reasons.${key}`)}
+              labelPlacement='start'
+              sx={{
+                mb: 0.5,
+                justifyContent: "space-between",
+                width: "100%",
+                marginLeft: 0,
+              }}
+            />
+          ))}
+        </RadioGroup>
+
+        {/* ===== OTHER REASON ===== */}
+        {reason === "other" && (
+          <Box mt={1}>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              placeholder={t("cancel_booking.placeholder_other")}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              inputProps={{ maxLength: 1000 }}
+            />
+            <Typography
+              variant='caption'
+              color='text.secondary'
+              sx={{
+                display: "block",
+                textAlign: "right",
+                mt: 0.5,
+              }}>
+              {note.length}/1000
+            </Typography>
+          </Box>
+        )}
+      </DialogContent>
+
+      {/* ===== FOOTER ===== */}
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button
+          fullWidth
+          variant='contained'
+          disabled={isDisableSubmit}
+          onClick={handleSubmit}
+          sx={{
+            height: 44,
+            borderRadius: 999,
+            fontWeight: 600,
+            bgcolor: "#98b720",
+            "&.Mui-disabled": {
+              bgcolor: "#e0e0e0",
+              color: "#9e9e9e",
+            },
+          }}>
+          {t("cancel_booking.submit")}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
