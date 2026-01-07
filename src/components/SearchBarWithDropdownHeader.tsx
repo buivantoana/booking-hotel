@@ -37,6 +37,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 // === DROPDOWN CHỌN LOẠI (giống ảnh) ===
 const BookingTypeDropdown: React.FC<{
@@ -130,6 +131,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [duration, setDuration] = useState<number>(initialDuration || 2);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const {t} = useTranslation()
   const now = dayjs();
   const hours = Array.from({ length: 24 }, (_, i) =>
   String(i).padStart(2, "0") + ":00"
@@ -300,7 +302,7 @@ const disabledHours = isToday
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      Giờ nhận phòng
+                     {t("search_bar_checkin_time_label")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -382,7 +384,7 @@ const disabledHours = isToday
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      Số giờ sử dụng
+                        {t("search_bar_duration_label")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -425,7 +427,7 @@ const disabledHours = isToday
                                       : "#e0e0e0",
                                 },
                               }}>
-                              {d} Giờ
+                              {d}      {t("search_bar_hour_suffix")}
                             </Button>
                           ))}
                       </Stack>
@@ -455,12 +457,12 @@ const disabledHours = isToday
                       color='#666'
                       fontSize='0.9rem'
                       mb={0.5}>
-                      Trả phòng
+                     {t("search_bar_checkout_label")}
                     </Typography>
                     <Typography fontWeight={600} color='#333'>
                       {endTime
                         ? `${endTime.format("HH:mm, DD/MM/YYYY")}`
-                        : "Chưa chọn"}
+                        :    t("search_bar_not_selected")}
                     </Typography>
                   </Box>
                 </Box>
@@ -591,7 +593,7 @@ const disabledHours = isToday
                   textTransform: "none",
                   fontSize: "0.9rem",
                 }}>
-                {bookingType === "hourly" ? "Ngày giờ bất kỳ" : "Ngày bất kỳ"}
+                {bookingType === "hourly" ? t("any_date_time") : t("any_date")}
               </Button>
               <Button
                 variant='contained'
@@ -605,7 +607,7 @@ const disabledHours = isToday
                   fontSize: "0.9rem",
                   "&:hover": { bgcolor: "#43a047" },
                 }}>
-                Áp dụng
+               { t("search_bar_apply_button")}
               </Button>
             </Stack>
           </Stack>
@@ -644,6 +646,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const addressOldRef = useRef("");
   const isMobile = useMediaQuery('(max-width:900px)'); // Thêm breakpoint cho mobile
   const selectingRef = useRef(false);
+  const {t} = useTranslation()
   useEffect(() => {
     // Giữ nguyên logic
     const locationParam = searchParams.get("location") || "";
@@ -732,7 +735,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   );
 
   const formatDateDisplay = () => {
-    if (!checkIn) return "Chọn ngày";
+    if (!checkIn) return t("search_bar_select_date");
   
     if (bookingType === "hourly") {
       if (!checkInTime || !checkInDuration) {
@@ -756,9 +759,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   };
 
   const getTypeLabel = () => {
-    if (bookingType === "hourly") return "Theo giờ";
-    if (bookingType === "overnight") return "Qua đêm";
-    return "Qua ngày";
+    if (bookingType === "hourly") return t("search_bar_hourly_label");
+    if (bookingType === "overnight") return t("search_bar_overnight_label");
+    return  t("search_bar_daily_label");
   };
   
   const handleSearch = () => {
@@ -833,7 +836,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                     <TextField
                       fullWidth
                       disabled={name}
-                      placeholder='Bạn muốn đi đâu?'
+                      placeholder={ t("search_bar_location_placeholder")}
                       variant='outlined'
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
@@ -1020,7 +1023,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       fontWeight: 600,
                       "&:hover": { bgcolor: "#7a8f1a" },
                     }}>
-                    {name ? "Cập nhật tìm kiếm" : "Tìm kiếm"}
+                    {name ?  t("search_bar_update_search_button") : t("search_bar_search_button") }
                   </Button>
                 </Box>
               ) : (
@@ -1093,7 +1096,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                             overflowY: "auto",
                           }}>
                           <Typography color='rgba(152, 159, 173, 1)'>
-                            Không tìm thấy dữ liệu
+                           {t("search_bar_no_data_found")}
                           </Typography>
                         </Paper>
                       ) : (
@@ -1222,7 +1225,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                           fontWeight: 500,
                           fontSize: "0.9rem",
                         }}>
-                        {formatDateDisplay() || "Chọn ngày giờ"}
+                        {formatDateDisplay() || t("search_bar_select_datetime")}
                       </Typography>
                     </Box>
                   </Box>
@@ -1241,7 +1244,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       height: 35,
                       "&:hover": { bgcolor: "#7a8f1a" },
                     }}>
-                   {name?"Cập nhật" : <Search sx={{ fontSize: 22 }} />}
+                   {name?t("search_bar_update_button") : <Search sx={{ fontSize: 22 }} />}
                   </Button>
                 </Stack>
               )}

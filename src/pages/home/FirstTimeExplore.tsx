@@ -40,7 +40,7 @@ const PhonePerson = () => (
 
 const FirstTimeExplore = ({ location, setAddress, address }) => {
   const theme = useTheme();
-
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openLocation, setOpenLocation] = useState(
     localStorage.getItem("location") ? false : true
@@ -72,7 +72,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
             sx={{
               fontSize: { xs: "1.2rem", md: "1.875rem" },
             }}>
-            Lần đầu khám phá
+           {t('first_time_explore')}
           </Typography>
 
           <Chip
@@ -84,7 +84,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
             }
             label={
               location &&
-              "Khu vực:" +
+              t('area') +
                 " " +
                 location.find(
                   (item) => item.id == localStorage.getItem("location")
@@ -135,13 +135,13 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
                     color='#2e7d32'
                     gutterBottom
                     sx={{ fontSize: { xs: "1rem", sm: "1.1rem" } }}>
-                    Thành viên mới? Quà chất đang đợi!
+                   {t('new_member_gift')}
                   </Typography>
                   <Typography
                     variant='body2'
                     color='#555'
                     sx={{ mb: 3, fontSize: { xs: "0.85rem", sm: "0.9rem" } }}>
-                    Giá phòng hợp lý kèm theo nhiều ưu đãi
+                     {t('reasonable_price_with_offers')}
                   </Typography>
                   <Button
                     onClick={() => navigate("/register")}
@@ -158,7 +158,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
                       boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
                       "&:hover": { bgcolor: "#43a047" },
                     }}>
-                    Đăng ký ngay
+                       {t('register_now')}
                   </Button>
                 </Grid>
                 <Grid item xs={12} sm={5} sx={{ textAlign: "center" }}>
@@ -193,13 +193,13 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
                     color='#ff8f00'
                     gutterBottom
                     sx={{ fontSize: { xs: "1rem", sm: "1.1rem" } }}>
-                    Nhận ưu đãi liền tay khi tải app!
+                      {t('download_app_get_offer')}
                   </Typography>
                   <Typography
                     variant='body2'
                     color='#555'
                     sx={{ mb: 2, fontSize: { xs: "0.85rem", sm: "0.9rem" } }}>
-                    Sử dụng ứng dụng để săn deal mới ngay
+                      {t('use_app_hunt_deals')}
                   </Typography>
                 </Grid>
                 <Grid item xs={12} sm={5} sx={{ textAlign: "center" }}>
@@ -250,8 +250,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CheckIcon from "@mui/icons-material/Check";
+import { useTranslation } from "react-i18next";
 
 function LocationModal({ open, onClose, onSelect, location, address }: any) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [filter, setFilter] = useState([]);
@@ -319,22 +321,21 @@ function LocationModal({ open, onClose, onSelect, location, address }: any) {
         {/* Header */}
         <Box sx={{ pb: 2 }}>
           <Typography variant='h6' fontWeight={700} textAlign='center'>
-            Hãy chọn địa điểm của bạn
+          {t('choose_your_location')}
           </Typography>
           <Typography
             variant='body2'
             color='text.secondary'
             textAlign='center'
             mt={1}>
-            Hotel Booking sẽ gợi ý những khách sạn phù hợp gần nhất với ưu đãi
-            hấp dẫn nhất dựa theo khu vực bạn chọn
+               {t('location_suggestion_description')}
           </Typography>
 
           {/* Search Input */}
           <TextField
             inputRef={inputRef}
             fullWidth
-            placeholder='Tên khu vực của bạn'
+            placeholder={t('your_area_name')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{ mt: 3 }}
@@ -392,7 +393,7 @@ function LocationModal({ open, onClose, onSelect, location, address }: any) {
                 fontWeight: 600,
                 color: "text.primary",
               }}>
-              Địa điểm khác
+                {t('other_location')}
             </Typography>
             {filter.length > 0 ? (
               filter.map((loc) => (
@@ -423,7 +424,7 @@ function LocationModal({ open, onClose, onSelect, location, address }: any) {
                 variant='body2'
                 color='text.secondary'
                 sx={{ px: 4, py: 2 }}>
-                Không tìm thấy địa điểm nào
+                {t('no_location_found')}
               </Typography>
             )}
           </List>
@@ -461,7 +462,7 @@ function LocationModal({ open, onClose, onSelect, location, address }: any) {
               onClose();
             }} // Có thể thay bằng hành động tiếp theo
           >
-            Tiếp tục
+             {t('continue')}
           </Button>
         </Box>
       </DialogContent>

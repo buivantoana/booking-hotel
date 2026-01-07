@@ -35,6 +35,7 @@ const Header = () => {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+  const {t} = useTranslation()
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [locationAddress, setLocationAddress] = useState([]);
   const context: any = useBookingContext();
@@ -103,7 +104,7 @@ const Header = () => {
                       letterSpacing: "0.5px",
                       display:isMobile?"none":"block"
                     }}>
-                    Dành cho đối tác
+                    {t("header_for_partners")}
                   </Typography>
                 </>
              
@@ -135,7 +136,7 @@ const Header = () => {
                           textTransform: "none",
                         }}
                       >
-                        Đăng nhập
+                        {t("header_login")}
                       </Button>
 
                       <Button
@@ -152,7 +153,7 @@ const Header = () => {
                           textTransform: "none",
                         }}
                       >
-                        Đăng ký
+                          {t("header_register")}
                       </Button>
                     </Box>
                   ) : (
@@ -192,7 +193,7 @@ const Header = () => {
                             <Typography
                               fontSize='14px'
                               color='rgba(93, 102, 121, 1)'>
-                              Đăng nhập
+                             {t("header_login")}
                             </Typography>
                           </ListItemText>
                         </MenuItem>
@@ -205,7 +206,7 @@ const Header = () => {
                             <Typography
                               fontSize='14px'
                               color='rgba(93, 102, 121, 1)'>
-                              Đăng ký
+                                {t("header_register")}
                             </Typography>
                           </ListItemText>
                         </MenuItem>
@@ -261,10 +262,12 @@ import {
 } from "@mui/icons-material";
 import { getLocation } from "../service/hotel";
 import { useBookingContext } from "../App";
+import { useTranslation } from "react-i18next";
 
 function UserDropdownMenuV2({ context }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const {t} = useTranslation()
   const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -374,7 +377,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-                Hồ sơ của tôi
+              {t("header_profile")}
               </Typography>
             </ListItemText>
           </MenuItem>
@@ -391,7 +394,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-                Đặt phòng của tôi
+              {t("header_my_bookings")}
               </Typography>
             </ListItemText>
           </MenuItem>
@@ -411,7 +414,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-                Đăng xuất
+              {t("header_logout")}
               </Typography>
             </ListItemText>
           </MenuItem>

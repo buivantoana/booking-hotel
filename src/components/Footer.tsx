@@ -27,10 +27,11 @@ import fb from "../../src/images/Logos (1).png"
 import tiktok from "../../src/images/Logos (2).png"
 import youtube from "../../src/images/Logos (3).png"
 import logo from "../../src/images/Frame 1321318033.png"
+import { useTranslation } from "react-i18next";
 const Footer = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const {t} = useTranslation();
   return (
     <Box sx={{ bgcolor: "#f9f9f9", borderTop: "1px solid #eee", py: 4, }}>
       <Container maxWidth='lg'>
@@ -46,15 +47,15 @@ const Footer = () => {
                 typesetting
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
-                Liên hệ hợp tác:{" "}
+               {t("footer_contact_cooperation")}{" "}
                 <strong style={{ color: "#666" }}>LoremIpsum@gmail.com</strong>
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
-                Hỗ trợ khách hàng:{" "}
+              {t("footer_customer_support")}{" "}
                 <strong style={{ color: "#666" }}>LoremIpsum@gmail.com</strong>
               </Typography>
               <Typography fontSize='0.9rem' color='#666'>
-                Điện thoại: <strong style={{ color: "#666" }}>123456789</strong>
+              {t("footer_phone")} <strong style={{ color: "#666" }}>123456789</strong>
               </Typography>
 
               {/* SOCIAL ICONS */}
@@ -79,22 +80,22 @@ const Footer = () => {
           <Grid item xs={12} sm={6} md={2.5}>
             <Stack spacing={2.5}>
               <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                Giới thiệu
+              {t("footer_about_title")} 
               </Typography>
               <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
-                Về chúng tôi
+              {t("footer_about_us")} 
               </Link>
               <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
-                Trang Blog
+              {t("footer_blog")} 
               </Link>
               <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
-                Quy chế hoạt động website
+              {t("footer_terms_of_service")} 
               </Link>
               <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
-                Cơ hội nghề nghiệp
+              {t("footer_careers")} 
               </Link>
               <Link href='#' underline='hover' color='#666' fontSize='0.9rem'>
-                Dành cho đối tác
+              {t("footer_partners")} 
               </Link>
             </Stack>
           </Grid>
@@ -110,7 +111,7 @@ const Footer = () => {
               {/* ĐỐI TÁC */}
               <Stack spacing={1.5}>
                 <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                  Đối tác thanh toán
+               {t("footer_payment_partners_title")}
                 </Typography>
                 <Box display={"flex"} gap={2}>
                   <Box
@@ -151,7 +152,7 @@ const Footer = () => {
               {/* TẢI ỨNG DỤNG */}
               <Stack spacing={1.5}>
                 <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                  Tải ứng dụng
+                {t("footer_download_app_title")}
                 </Typography>
                 <Box display={"flex"} gap={2}>
                   <Box
@@ -201,17 +202,17 @@ const Footer = () => {
           spacing={1}
           textAlign={{ xs: "center", sm: "left" }}>
           <Typography fontSize='0.85rem' color='#999'>
-            © 2025 Booking Hotel. Bảo lưu mọi quyền
+          {t("footer_copyright")}
           </Typography>
           <Stack direction='row' spacing={2}>
             <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
-              Điều khoản
+            {t("footer_terms")}
             </Link>
             <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
-              Bảo mật
+            {t("footer_privacy")}
             </Link>
             <Link href='#' underline='hover' color='#666' fontSize='0.85rem'>
-              Cookie
+            {t("footer_cookie")}
             </Link>
           </Stack>
         </Stack>

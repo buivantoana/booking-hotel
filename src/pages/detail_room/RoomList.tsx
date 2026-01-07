@@ -43,6 +43,7 @@ import {
   normalizePhoneForAPI,
   parseName,
 } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 interface Room {
   id: number;
   name: string;
@@ -71,7 +72,7 @@ const RoomCard = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const {t} = useTranslation()
   const context = useBookingContext();
   const sliderRef = useRef<any>(null);
   const settings = {
@@ -158,7 +159,7 @@ const RoomCard = ({
 
             zIndex: 10,
           }}>
-          Hết phòng
+          {t('sold_out_badge')}
         </Box>
       )}
 
@@ -249,7 +250,7 @@ const RoomCard = ({
             fontSize='0.8rem'
             color='#98b720'
             sx={{ cursor: "pointer", textDecoration: "underline" }}>
-            Chi tiết phòng
+               {t('room_details')}
           </Typography>
         </Stack>
 
@@ -283,7 +284,7 @@ const RoomCard = ({
             if (selectedFacilities.length === 0) {
               return (
                 <Typography color='#999' fontStyle='italic'>
-                  Chưa có tiện ích nào được thiết lập
+                     {t('no_amenities')}
                 </Typography>
               );
             }
@@ -332,8 +333,8 @@ const RoomCard = ({
                   fontSize='0.8rem'
                   color={isLowStock ? "#d32f2f" : "#666"}>
                   {isLowStock
-                    ? "Chỉ còn 1 phòng"
-                    : `Chỉ còn ${room.available_rooms || 1} phòng`}
+                    ?  t('low_stock_one')
+                    : t('low_stock',{count:room.available_rooms || 2}) }
                 </Typography>
               )}
               <Typography
@@ -365,7 +366,7 @@ const RoomCard = ({
                 minWidth: 120,
                 "&:hover": { bgcolor: "#7a9a1a" },
               }}>
-              Đặt phòng
+              { t('book_room')}
             </Button>
           )}
         </Stack>
@@ -373,8 +374,7 @@ const RoomCard = ({
         {/* THÔNG BÁO HẾT PHÒNG */}
         {isSoldOut && (
           <Typography fontSize='0.8rem' color='#d32f2f' mt={1}>
-            Rất tiếc, khách sạn đã hết phòng vào thời gian này. Hãy chọn thời
-            gian khác để đặt phòng
+          { t('no_room_available')}
           </Typography>
         )}
       </Stack>
@@ -396,6 +396,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
   const [touched, setTouched] = useState(false);
   const [password, setPassword] = useState(false);
   const [searchParams] = useSearchParams();
+  const {t} = useTranslation()
   console.log("AAAA searchParams", searchParams.get("type"));
   const navigate = useNavigate();
   const normalizePhone = (phone) => {
@@ -436,7 +437,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
           fontWeight={700}
           fontSize={{ xs: "1.25rem", md: "1.5rem" }}
           color='#333'>
-          Danh sách phòng
+         { t('room_list_title')}
         </Typography>
         <Modal open={openModal} onClose={() => setOpenModal(false)}>
           <Box
@@ -466,7 +467,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   justifyContent='space-between'
                   alignItems='center'>
                   <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-                    Xác minh số điện thoại
+                  { t('verify_phone_title')}
                   </Typography>
                   <IconButton onClick={() => setOpenModal(false)}>
                     <CloseIcon />
@@ -476,14 +477,14 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   my={3}
                   fontSize={"14px"}
                   color='rgba(152, 159, 173, 1)'>
-                  Vui lòng nhập số điện thoại để tiếp tục đặt phòng
+                    { t('verify_phone_desc')}
                 </Typography>
                 <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                  Số điện thoại
+                { t('phone_label')}
                 </Typography>
                 <TextField
                   fullWidth
-                  placeholder='Nhập số điện thoại'
+                  placeholder={ t('phone_placeholder')}
                   variant='outlined'
                   value={phoneNumber}
                   onChange={(e) => {
@@ -497,7 +498,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   error={touched && !isValidVietnamPhone(phoneNumber)}
                   helperText={
                     touched && !isValidVietnamPhone(phoneNumber)
-                      ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
+                      ?  t('phone_invalid')
                       : ""
                   }
                   sx={{
@@ -600,17 +601,17 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                         size={20}
                         sx={{ color: "#fff", mr: 1 }}
                       />
-                      Đăng nhập...
+                     { t('logging_in')}
                     </>
                   ) : (
-                    "Đăng nhập"
+                    t('login_button')
                   )}
                 </Button>
                 <Typography
                   my={2}
                   fontSize={"14px"}
                   color='rgba(152, 159, 173, 1)'>
-                  Bạn chưa có tài khoản Booking Hotel?{" "}
+                  {t('no_account')}
                   <Typography
                     onClick={() => {
                       navigate("/register");
@@ -620,7 +621,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                     sx={{ textDecoration: "underline", cursor: "pointer" }}
                     color='#ff7a00'>
                     {" "}
-                    Đăng ký ngay
+                    {t('register_now')}
                   </Typography>
                 </Typography>
               </>
@@ -694,11 +695,10 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
                   justifyContent={"center"}>
                   <img src={no_room} alt='' />
                   <Typography color='#2B2F38' fontWeight={600}>
-                    Không còn phòng trống
+                  {t('no_room_title')}
                   </Typography>
                   <Typography color='#2B2F38'>
-                    Rất tiệc, khách sạn đã hết phòng vào thời này. hãy trọn thời
-                    khác để đặt phòng
+                  {t('no_room_available')}
                   </Typography>
                 </Box>
               </>
@@ -754,7 +754,7 @@ const RoomDetailModal = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [navMain, setNavMain] = useState(null);
   const [navThumb, setNavThumb] = useState(null);
-
+  const {t} = useTranslation()
   const sliderMain = useRef();
   const sliderThumb = useRef();
 
@@ -775,6 +775,7 @@ const RoomDetailModal = ({
   if (!room) return null;
 
   const handleBooking = () => {
+    
     if (localStorage.getItem("booking")) {
       localStorage.setItem(
         "booking",
@@ -970,19 +971,19 @@ const RoomDetailModal = ({
           {/* RIGHT: ROOM INFO */}
           <Box width={isMobile ? "100%" : "37%"}>
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
-              Thông tin phòng
+            {t('room_info_title')}
             </Typography>
             <FacilitiesList facilities={room?.facilities || {}} />
 
             <Typography fontWeight={600} mb={1}>
-              Quyền lợi đặt phòng
+            {t('booking_benefits')}
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={2}>
-              Tất cả phương thức thanh toán
+            {t('all_payment_methods')}
             </Typography>
 
             <Typography fontWeight={600} mb={1}>
-              Tiện ích
+            {t('amenities_title')}
             </Typography>
 
             <Stack direction='row' gap={1} flexWrap='wrap'>
@@ -1013,7 +1014,7 @@ const RoomDetailModal = ({
                 if (selectedFacilities.length === 0) {
                   return (
                     <Typography color='#999' fontStyle='italic'>
-                      Chưa có tiện ích nào được thiết lập
+                      {t('no_amenities')}
                     </Typography>
                   );
                 }
@@ -1051,7 +1052,7 @@ const RoomDetailModal = ({
             </Stack>
 
             <Typography fontWeight={600} my={2}>
-              Mô tả phòng
+            {t('room_description_title')}
             </Typography>
             <Typography color='gray' fontSize='0.9rem' mb={3}>
               {parseName(room.description)}
@@ -1087,7 +1088,7 @@ const RoomDetailModal = ({
                     py: 1.2,
                     textTransform: "none",
                   }}>
-                  Đặt phòng
+                        {t('book_room')}
                 </Button>
               )}
             </Stack>
@@ -1102,6 +1103,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {t}= useTranslation()
   const navigate = useNavigate();
   const context = useBookingContext();
   const handleSubmit = async (e) => {
@@ -1168,7 +1170,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
         {/* NHẬP MÃ PIN */}
         <Box display={"flex"} mb={2} justifyContent={"space-between"}>
           <Typography fontSize={14} color='#5D6679' fontWeight={500} mb={1.5}>
-            Mã PIN của sẽ được dùng để đăng nhập
+          {t("pin_label")}
           </Typography>
           <Typography
             color='#5D6679'
@@ -1181,7 +1183,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
               alignItems: "center",
               gap: 2,
             }}>
-            {showPin ? "Ẩn" : "Hiện"}
+            {showPin ?   t("hide") :  t("show")}
           </Typography>
         </Box>
 
@@ -1253,7 +1255,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
               color: "#FF7A00",
               textDecoration: "underline",
             }}>
-            Quên mã PIN?
+            {t("forgot_pin")}
           </Link>
         </Typography>
 
@@ -1277,10 +1279,10 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
           {loading ? (
             <>
               <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-              Đang xác thực...
+              {t("authenticating")}
             </>
           ) : (
-            "Tiếp tục"
+            t("continue_button")
           )}
         </Button>
       </Box>

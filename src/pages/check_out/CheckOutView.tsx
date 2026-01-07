@@ -42,6 +42,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/utils";
 import Flag from "react-country-flag";
+import { useTranslation } from "react-i18next";
 
 const CheckOutView = ({ dataCheckout }) => {
   const theme = useTheme();
@@ -59,6 +60,7 @@ const CheckOutView = ({ dataCheckout }) => {
   const [name, setName] = useState(
     JSON.parse(localStorage.getItem("user"))?.name
   );
+  const {t} = useTranslation()
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -81,10 +83,10 @@ const CheckOutView = ({ dataCheckout }) => {
 
   // Xử lý hiển thị loại phòng + thời gian
   const getBookingTypeLabel = () => {
-    if (type === "hourly") return "Theo giờ";
-    if (type === "overnight") return "Qua đêm";
-    if (type === "daily") return "Qua ngày";
-    return "Theo giờ";
+    if (type === "hourly") return t("booking_type_hourly");
+    if (type === "overnight") return t("booking_type_overnight");
+    if (type === "daily") return t("booking_type_daily");
+    return t("booking_type_hourly");
   };
 
   const getBookingTypeIcon = () => {
@@ -353,7 +355,7 @@ const CheckOutView = ({ dataCheckout }) => {
               <ArrowBackIcon sx={{ fontSize: 20 }} />
             </IconButton>
             <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-              Ấn thay đổi thời gian
+             { t("checkout_back_hint")}
             </Typography>
           </Stack>
 
@@ -396,7 +398,7 @@ const CheckOutView = ({ dataCheckout }) => {
                     <Grid container mt={1} spacing={1}>
                       <Grid item xs={4}>
                         <Typography fontSize='0.75rem' color='#666'>
-                          Nhận phòng
+                        { t("check_in_label")}
                         </Typography>
                         <Typography
                           fontWeight={600}
@@ -416,7 +418,7 @@ const CheckOutView = ({ dataCheckout }) => {
                           alignItems: "center",
                         }}>
                         <Typography fontSize='0.75rem' color='#666'>
-                          Trả phòng
+                        { t("check_out_label")}
                         </Typography>
                         <Typography
                           fontWeight={600}
@@ -451,7 +453,7 @@ const CheckOutView = ({ dataCheckout }) => {
                   {/* LỰA CHỌN CỦA BẠN */}
                   <Stack spacing={2}>
                     <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                      Lựa chọn của bạn
+                    { t("your_selection")}
                     </Typography>
                     <Stack direction='row' spacing={2} alignItems='flex-start'>
                       <Box
@@ -472,12 +474,12 @@ const CheckOutView = ({ dataCheckout }) => {
                           color='rgba(93, 102, 121, 1)'>
                           {hotelName}
                         </Typography>
-                        <Typography
+                        {/* <Typography
                           fontSize='18px'
                           fontWeight={500}
                           color='rgba(43, 47, 56, 1)'>
-                          Deluxe room
-                        </Typography>
+                          {}
+                        </Typography> */}
                         <Typography
                           fontSize='0.8rem'
                           color='rgba(152, 159, 173, 1)'>
@@ -505,7 +507,7 @@ const CheckOutView = ({ dataCheckout }) => {
                     justifyContent='space-between'
                     alignItems='center'>
                     <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                      Người đặt phòng
+                    { t("booker_info_title")}
                     </Typography>
                     <IconButton
                       size='small'
@@ -523,7 +525,7 @@ const CheckOutView = ({ dataCheckout }) => {
                       fontSize='0.9rem'
                       color='#666'
                       sx={{ minWidth: 80 }}>
-                      Số điện thoại
+                      { t("phone_label")}
                     </Typography>
 
                     <Box sx={{ position: "relative", width: 200 }}>
@@ -537,7 +539,7 @@ const CheckOutView = ({ dataCheckout }) => {
                         }}
                         onBlur={() => setTouched(true)} // chỉ validate khi blur
                         error={touched && !isValidVietnamPhone(phone)}
-                        placeholder='Nhập số điện thoại'
+                        placeholder=  { t("phone_placeholder")}
                         variant='outlined'
                         size='small'
                         InputProps={{
@@ -600,13 +602,13 @@ const CheckOutView = ({ dataCheckout }) => {
                       fontSize='0.9rem'
                       color='#666'
                       sx={{ minWidth: 80 }}>
-                      Họ tên
+                      {t("name_label")}
                     </Typography>
                     <Box sx={{ position: "relative", width: 200 }}>
                       <TextField
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder='Nhập tên'
+                        placeholder= {t("name_placeholder")}
                         variant='outlined'
                         size='small'
                         disabled={!isEditing}
@@ -690,11 +692,11 @@ const CheckOutView = ({ dataCheckout }) => {
                   }}>
                   <Stack spacing={2}>
                     <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                      Chi tiết thanh toán
+                    {t("payment_details_title")}
                     </Typography>
                     <Stack direction='row' justifyContent='space-between'>
                       <Typography fontSize='0.9rem' color='#666'>
-                        Tiền phòng
+                      {t("room_price")}
                       </Typography>
                       <Typography color='#666'>{formattedPrice}đ</Typography>
                     </Stack>
@@ -704,7 +706,7 @@ const CheckOutView = ({ dataCheckout }) => {
                         fontSize='0.9rem'
                         fontWeight={700}
                         color='rgba(43, 47, 56, 1)'>
-                        Tổng tiền thanh toán
+                        {t("total_payment")}
                       </Typography>
                       <Typography
                         fontWeight={700}
@@ -727,7 +729,7 @@ const CheckOutView = ({ dataCheckout }) => {
                   }}>
                   <Stack spacing={3}>
                     <Typography fontWeight={600} fontSize='1rem' color='#333'>
-                      Chọn phương thức thanh toán
+                    {t("payment_method_title")}
                     </Typography>
                     <RadioGroup
                       value={paymentMethod}
@@ -744,7 +746,7 @@ const CheckOutView = ({ dataCheckout }) => {
                             alt='Momo'
                             sx={{ width: 32, height: 32 }}
                           />
-                          <Typography fontWeight={600}>Ví Momo</Typography>
+                          <Typography fontWeight={600}>{t("payment_momo")}</Typography>
                         </Stack>
                         <Radio value='momo' size='small' />
                       </Stack>
@@ -760,7 +762,7 @@ const CheckOutView = ({ dataCheckout }) => {
                             alt='VN Pay'
                             sx={{ width: 32, height: 32 }}
                           />
-                          <Typography fontWeight={600}>VN pay</Typography>
+                          <Typography fontWeight={600}>{t("payment_vnpay")}</Typography>
                         </Stack>
                         <Radio value='vnpay' size='small' />
                       </Stack>
@@ -777,7 +779,7 @@ const CheckOutView = ({ dataCheckout }) => {
                             sx={{ width: 32, height: 32 }}
                           />
                           <Stack spacing={0.5}>
-                            <Typography fontWeight={600}>Thẻ ATM</Typography>
+                            <Typography fontWeight={600}>{t("payment_card")}</Typography>
                           </Stack>
                         </Stack>
                         <Radio value='card' size='small' />
@@ -799,14 +801,13 @@ const CheckOutView = ({ dataCheckout }) => {
                           />
                           <Stack spacing={0.5}>
                             <Typography fontWeight={600}>
-                              Trả tại khách sạn
+                            {t("payment_hotel")}
                             </Typography>
                             <Typography
                               fontSize='0.8rem'
                               color='#999'
                               lineHeight={1.4}>
-                              Khách sạn có thể hủy phòng tùy theo tình trạng
-                              phòng
+                               {t("payment_hotel_note")}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -828,7 +829,7 @@ const CheckOutView = ({ dataCheckout }) => {
                     sx={{ textDecoration: "underline", cursor: "pointer" }}
                     color='rgba(43, 47, 56, 1)'
                     onClick={() => setOpenCancelPolicyModal(true)}>
-                    Chính sách hủy phòng
+                      {t("cancel_policy_title")}
                   </Typography>
                   <Button
                     onClick={handleCreateBooking}
@@ -852,10 +853,10 @@ const CheckOutView = ({ dataCheckout }) => {
                           size={20}
                           sx={{ color: "#fff", mr: 1 }}
                         />
-                        Thanh toán...
+                         {t("paying_button")}
                       </>
                     ) : (
-                      "Thanh toán"
+                      t("pay_button")
                     )}
                   </Button>
                 </Stack>
@@ -888,14 +889,14 @@ const CheckOutView = ({ dataCheckout }) => {
             alignItems='center'
             mb={2}>
             <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-              Chọn mã ưu đãi
+             {   t("offer_modal_title")}
             </Typography>
             <IconButton onClick={() => setOpenOfferModal(false)} size='small'>
               <CloseIcon />
             </IconButton>
           </Stack>
           <Typography fontSize='0.85rem' color='#666' mb={3}>
-            Mã ưu đãi sẵn có
+          {   t("available_offers")}
           </Typography>
           <RadioGroup
             value={selectedOffer}
@@ -964,7 +965,7 @@ const CheckOutView = ({ dataCheckout }) => {
               "&:hover": { bgcolor: "#e0e0e0" },
             }}
             onClick={() => setOpenOfferModal(false)}>
-            Áp dụng mã
+                      {   t("apply_offer")}
           </Button>
         </Box>
       </Modal>
@@ -990,7 +991,7 @@ const CheckOutView = ({ dataCheckout }) => {
             alignItems='center'
             mb={2}>
             <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-              Chính sách hủy phòng
+            {   t("cancel_policy_title")}
             </Typography>
             <IconButton
               onClick={() => setOpenCancelPolicyModal(false)}
@@ -1002,36 +1003,30 @@ const CheckOutView = ({ dataCheckout }) => {
             spacing={2}
             sx={{ fontSize: "0.9rem", color: "#666", lineHeight: 1.6 }}>
             <Typography>
-              Hủy miễn phí trước{" "}
-              <strong>
-                10:05,{" "}
-                {checkIn
+              {t("cancel_policy_free",{date:checkIn
                   ? dayjs(checkIn).format("D/M/YYYY")
-                  : "ngày nhận phòng"}
-              </strong>{" "}
-              đối với tất cả các phương thức thanh toán
+                  : "ngày nhận phòng"})}
             </Typography>
             <Typography>
-              Gợi ý nhỏ: hãy lựa chọn phương thức thanh toán để xem chi tiết
-              chính sách nhé
+             {t("cancel_policy_suggest")}
             </Typography>
             <Box display='flex' justifyContent='space-between'>
               <Typography fontSize='14px'>
-                Xem thêm{" "}
+              {t("view_more")}
                 <Typography
                   component='span'
                   color='#98b720'
                   sx={{ textDecoration: "underline", cursor: "pointer" }}>
-                  Điều khoản và chính sách đặt phòng
+                  {t("terms_link")}
                 </Typography>
               </Typography>
               <Typography fontSize='14px'>
-                Dịch vụ hỗ trợ khách hàng -{" "}
+              {t("support_prefix")}
                 <Typography
                   component='span'
                   color='#98b720'
                   sx={{ textDecoration: "underline", cursor: "pointer" }}>
-                  Liên hệ ngay
+                   {t("contact_support")}
                 </Typography>
               </Typography>
             </Box>

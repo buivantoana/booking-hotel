@@ -100,43 +100,6 @@ const getPaymentStatus = (payments = []) => {
   return null;
 };
 
-const getBookingStatus = (booking: any) => {
-  const paymentStatus = getPaymentStatus(booking.payments);
-  const bookingStatus = booking.status;
-
-  // =======================
-  // LOGIC BOOKING
-  // =======================
-
-  if (bookingStatus === "checked_out") {
-    return { label: "Hoàn thành", color: "#1A9A50", bg: "#E8F5E9" };
-  }
-
-  if (bookingStatus === "cancelled") {
-    return { label: "Đã hủy", color: "#E91E1E", bg: "#FFEBEE" };
-  }
-
-  if (bookingStatus === "confirmed" && paymentStatus === "paid") {
-    return { label: "Chờ nhận phòng", color: "#0066CC", bg: "#E6F0FA" };
-  }
-  if (bookingStatus === "no_show" && paymentStatus === "paid") {
-    return { label: "Không nhận phòng",  color: "#E91E1E", bg: "#FFEBEE" };
-  }
-
-  if (paymentStatus === "paid") {
-    return { label: "Hoàn thành", color: "#1A9A50", bg: "#E8F5E9" };
-  }
-
-  if (
-    paymentStatus === "failed" ||
-    paymentStatus === "pending" ||
-    bookingStatus === "pending"
-  ) {
-    return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
-  }
-
-  return { label: "Chờ thanh toán", color: "#FF6D00", bg: "#FFF4E5" };
-};
 
 
 // ==================== BOOKING CARD (dùng data thật) ====================
@@ -150,7 +113,7 @@ const BookingCard = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+ const {t} = useTranslation()
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -158,15 +121,53 @@ const BookingCard = ({
   const [loadingRetry, setLoadingRetry] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("");
 
+  const getBookingStatus = (booking: any) => {
+    const paymentStatus = getPaymentStatus(booking.payments);
+    const bookingStatus = booking.status;
+  
+    // =======================
+    // LOGIC BOOKING
+    // =======================
+  
+    if (bookingStatus === "checked_out") {
+      return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
+    }
+  
+    if (bookingStatus === "cancelled") {
+      return { label: t("cancelled_status"), color: "#E91E1E", bg: "#FFEBEE" };
+    }
+  
+    if (bookingStatus === "confirmed" && paymentStatus === "paid") {
+      return { label: t("waiting_checkin_status"), color: "#0066CC", bg: "#E6F0FA" };
+    }
+    if (bookingStatus === "no_show" && paymentStatus === "paid") {
+      return { label: t("no_show_status"),  color: "#E91E1E", bg: "#FFEBEE" };
+    }
+  
+    if (paymentStatus === "paid") {
+      return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
+    }
+  
+    if (
+      paymentStatus === "failed" ||
+      paymentStatus === "pending" ||
+      bookingStatus === "pending"
+    ) {
+      return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+    }
+  
+    return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+  };
+  
   const statusConfig = getBookingStatus(booking);
   const hotelName = parseJsonField(booking.hotel_name);
   const roomCount = booking.rooms.length;
   const timeDisplay = `${formatDateTime(booking.check_in)} - ${formatDateTime(
     booking.check_out
   )}`;
-  const isCompleted = statusConfig.label === "Hoàn thành";
-  const isWaitingPayment = statusConfig.label === "Chờ thanh toán";
-  const isCancelled = statusConfig.label === "Đã hủy";
+  const isCompleted = statusConfig.label === t("completed_status");
+  const isWaitingPayment = statusConfig.label === t("waiting_payment_status");
+  const isCancelled = statusConfig.label === t("cancelled_status");
   console.log("AAA booking ", booking);
   const handleDeleteBooking = async (id) => {
     try {
@@ -269,14 +270,14 @@ const BookingCard = ({
           setIssueModalOpen(false);
         }}
         id={booking.booking_id}
-        title={`Mã đặt phòng ${booking.booking_code}`}
+        title={`${t("booking_code_label")} ${booking.booking_code}`}
         setDeleteDialogOpen={setDeleteDialogOpen}
       />
       <ReviewModal
         open={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
         hotelName={hotelName}
-        roomType={`${roomCount} phòng`}
+        roomType={`${roomCount} ${t("room")}`}
         bookingTime={timeDisplay}
         id={booking.booking_id}
         hastag={hastag}
@@ -300,7 +301,7 @@ const BookingCard = ({
             justifyContent='space-between'
             alignItems='center'>
             <Typography fontSize='13px' color='#666'>
-              Mã đặt phòng: {booking.booking_code}
+            {t("booking_code_label")} {booking.booking_code}
             </Typography>
             <Box display='flex' alignItems='center' gap={2}>
               <Chip
@@ -353,7 +354,7 @@ const BookingCard = ({
                 {hotelName}
               </Typography>
               <Typography fontSize='15px' fontWeight={500} color='#333' mb={1}>
-                {roomCount} phòng{" "}
+                {roomCount}  {t("room")} {" "}
                 {booking.rent_type === "hourly" ? "(theo giờ)" : ""}
               </Typography>
               <Stack direction='row' alignItems='center' spacing={1}>
@@ -364,7 +365,7 @@ const BookingCard = ({
               </Stack>
               {booking.note && (
                 <Typography fontSize='12px' color='#888' mt={1}>
-                  Ghi chú: {booking.note}
+                  {t("note_label")} {booking.note}
                 </Typography>
               )}
             </Box>
@@ -392,8 +393,8 @@ const BookingCard = ({
                   }}>
                   <img src={building} alt='' style={{ height: 16 }} />
                   {booking.payments[0]?.method === "momo"
-                    ? "Thanh toán MoMo"
-                    : "Thanh toán VNPay"}
+                    ?  t("momo_payment_label")
+                    : t("vnpay_payment_label")}
                 </Box>
               </Stack>
               <Typography
@@ -401,7 +402,7 @@ const BookingCard = ({
                 fontSize='14px'
                 sx={{ textDecoration: "underline", cursor: "pointer" }}
                 color='rgba(72, 80, 94, 1)'>
-                Chi tiết
+                {t("details_link")}
               </Typography>
             </Box>
           </Stack>
@@ -427,7 +428,7 @@ const BookingCard = ({
                       borderColor: "#ddd",
                       minWidth: 120,
                     }}>
-                    Đánh giá
+                     {t("review_button")}
                   </Button>
                 )}
                 <Button
@@ -439,7 +440,7 @@ const BookingCard = ({
                     bgcolor: "#98b720",
                     "&:hover": { bgcolor: "#8ab020" },
                   }}>
-                  Đặt lại
+                    {t("rebook_button")}
                 </Button>
               </>
             )}
@@ -459,10 +460,10 @@ const BookingCard = ({
                 {loadingRetry ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    {isWaitingPayment ? "Thanh toán" : "Đặt lại"}...
+                    {isWaitingPayment ?     t("pay_button") : t("rebook_button")}...
                   </>
                 ) : (
-                  <> {isWaitingPayment ? "Thanh toán" : "Đặt lại"}</>
+                  <> {isWaitingPayment ?  t("pay_button") : t("rebook_button")}</>
                 )}
 
               </Button>
@@ -505,7 +506,7 @@ const BookingCard = ({
           </ListItemIcon>
           <ListItemText>
             <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
-              Xóa lịch sử đặt phòng
+             {t("delete_history_menu")}
             </Typography>
           </ListItemText>
         </MenuItem>
@@ -522,7 +523,7 @@ const BookingCard = ({
           </ListItemIcon>
           <ListItemText>
             <Typography fontSize='14px' color='rgba(93, 102, 121, 1)'>
-            Báo cáo
+            {t("report_menu")}
             </Typography>
           </ListItemText>
         </MenuItem>
@@ -560,11 +561,10 @@ const BookingCard = ({
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-            Xóa lịch sử đặt phòng
+          {t("delete_history_menu")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa lịch sử đặt
-            phòng?
+          {t("delete_dialog_description")}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -587,7 +587,7 @@ const BookingCard = ({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Đồng ý
+               {t("agree")}
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -599,7 +599,7 @@ const BookingCard = ({
               color: "#666",
               width: "100%",
             }}>
-            Hủy bỏ
+           {t("reason_cancel_button")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -618,13 +618,13 @@ const SortButton = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
+  const {t} = useTranslation()
   const sortOptions = [
-    { label: "Tất cả các trạng thái", value: "all" },
-    { label: "Chờ nhận phòng", value: "waiting_checkin" },
-    { label: "Chờ thanh toán", value: "waiting_payment" },
-    { label: "Hoàn thành", value: "completed" },
-    { label: "Đã hủy", value: "cancelled" },
+    { label: t("all_states"), value: "all" },
+    { label:  t("waiting_checkin_status"), value: "waiting_checkin" },
+    { label:  t("waiting_payment_status"), value: "waiting_payment" },
+    { label:  t("completed_status"), value: "completed" },
+    { label: t("cancelled_status"), value: "cancelled" },
   ];
 
   const selectedLabel =
@@ -722,7 +722,7 @@ function ReviewModal({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const {t} = useTranslation()
   const [rating, setRating] = useState<number | null>(0);
   const [reviewText, setReviewText] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -825,10 +825,10 @@ function ReviewModal({
       }}>
       <DialogTitle sx={{ pb: 1, position: "relative" }}>
         <Typography variant='h6' fontWeight={700}>
-          Đánh giá khách sạn
+        {t("review_modal_title")}
         </Typography>
         <Typography variant='body2' color='#666' sx={{ mt: 1 }}>
-          Bạn hài lòng với trải nghiệm của khách sạn chứ
+        {t("review_modal_subtitle")}
         </Typography>
         <IconButton
           onClick={onClose}
@@ -839,7 +839,7 @@ function ReviewModal({
 
       <DialogContent>
         <Typography fontWeight={600} mb={2}>
-          Viết đánh giá
+        {t("write_review_label")}
         </Typography>
         <Box textAlign='center' mb={3}>
           <Rating
@@ -881,7 +881,7 @@ function ReviewModal({
         <TextField
           multiline
           rows={4}
-          placeholder='Viết suy nghĩ cảm nhận của bạn'
+          placeholder=   {t("review_placeholder")}
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           fullWidth
@@ -902,7 +902,7 @@ function ReviewModal({
 
         <Box>
           <Typography fontWeight={600} mb={2}>
-            Tải ảnh hoặc video
+          {t("upload_media_label")}
           </Typography>
           <Stack direction='row' gap={2} flexWrap='wrap'>
             <label htmlFor='upload-images'>
@@ -976,10 +976,10 @@ function ReviewModal({
           {loading ? (
             <>
               <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-              Gửi đánh giá...
+              {t("submitting_review_button")}
             </>
           ) : (
-            "Gửi đánh giá"
+            t("submit_review_button")
           )}
         </Button>
       </Box>
@@ -1001,14 +1001,52 @@ export default function MyBookingsPage({
   historyBooking?: any[];
 }) {
   const [sortValue, setSortValue] = useState("all");
+  const {t} = useTranslation()
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const getBookingStatus = (booking: any) => {
+    const paymentStatus = getPaymentStatus(booking.payments);
+    const bookingStatus = booking.status;
+  
+    // =======================
+    // LOGIC BOOKING
+    // =======================
+  
+    if (bookingStatus === "checked_out") {
+      return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
+    }
+  
+    if (bookingStatus === "cancelled") {
+      return { label: t("cancelled_status"), color: "#E91E1E", bg: "#FFEBEE" };
+    }
+  
+    if (bookingStatus === "confirmed" && paymentStatus === "paid") {
+      return { label: t("waiting_checkin_status"), color: "#0066CC", bg: "#E6F0FA" };
+    }
+    if (bookingStatus === "no_show" && paymentStatus === "paid") {
+      return { label: t("no_show_status"),  color: "#E91E1E", bg: "#FFEBEE" };
+    }
+  
+    if (paymentStatus === "paid") {
+      return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
+    }
+  
+    if (
+      paymentStatus === "failed" ||
+      paymentStatus === "pending" ||
+      bookingStatus === "pending"
+    ) {
+      return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+    }
+  
+    return { label: t("waiting_payment_status"), color: "#FF6D00", bg: "#FFF4E5" };
+  };
   const filtered = historyBooking.filter((booking) => {
     if (sortValue === "all") return true;
     const status = getBookingStatus(booking).label;
-    if (sortValue === "waiting_checkin" && status === "Chờ nhận phòng")
+    if (sortValue === "waiting_checkin" && status === t("waiting_checkin_status"))
       return true;
-    if (sortValue === "waiting_payment" && status === "Chờ thanh toán")
+    if (sortValue === "waiting_payment" && status === t("waiting_payment_status"))
       return true;
     if (sortValue === "completed" && status === "Hoàn thành") return true;
     if (sortValue === "cancelled" && status === "Đã hủy") return true;
@@ -1023,7 +1061,7 @@ export default function MyBookingsPage({
         mb={3}
         justifyContent='space-between'>
         <Typography variant={isMobile?"h6":'h5'} fontWeight={600} color='#212529'>
-          Đặt phòng của tôi
+          {t("my_bookings_title")}
         </Typography>
         <SortButton selected={sortValue} isMobile={isMobile} onSelect={setSortValue} />
       </Box>
@@ -1043,8 +1081,7 @@ export default function MyBookingsPage({
                 justifyContent={"center"}>
                 <img src={no_room} alt='' />
                 <Typography textAlign='center' color='#999' fontSize='1.1rem'>
-                  Không có lịch sử đặt phòng. Vui lòng đặt chỗ để hưởng ưu đãi
-                  đặc biệt.
+                {t("no_bookings_message")}
                 </Typography>
               </Box>
             ) : (
@@ -1108,6 +1145,7 @@ export default function MyBookingsPage({
 import { Card, Skeleton } from "@mui/material";
 import { getErrorMessage } from "../../utils/utils";
 import { getStatusPayment, retryPayment } from "../../service/payment";
+import { useTranslation } from "react-i18next";
 
 const BookingCardSkeleton = () => {
   return (

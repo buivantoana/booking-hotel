@@ -31,8 +31,17 @@ import { Login, userUpdate } from "../../service/admin";
 import { useBookingContext } from "../../App";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
+import LanguageIcon from '@mui/icons-material/Language';
 
-const AccountSettingsPage = () => {
+const LANGUAGES = [
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "ko", label: "Hàn Quốc", flag: "🇰🇷" },
+  { code: "ja", label: "Nhật Bản", flag: "🇯🇵" },
+];
+
+const AccountSettingsPage = ({setActiveMenu}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [openModal, setOpenModal] = useState(false);
@@ -41,6 +50,30 @@ const AccountSettingsPage = () => {
   const [pinConfirm, setPinConfirm] = useState("");
   const [state, setState] = useState("verify");
   const [showConfirm, setShowConfirm] = useState(false);
+  const { i18n, t } = useTranslation();
+
+  // Chuẩn hóa ngôn ngữ ban đầu (vi-VN -> vi)
+  const getNormalizedLang = (lng) => {
+    if (!lng) return "en";
+    if (lng.startsWith("vi")) return "vi";
+    if (lng.startsWith("en")) return "en";
+    if (lng.startsWith("ko")) return "ko";
+    if (lng.startsWith("ja")) return "ja";
+    return lng;
+  };
+
+  const [selectedLang, setSelectedLang] = useState(
+    getNormalizedLang(i18n.language)
+  );
+
+  // Khi mở modal → sync lại state
+  useEffect(() => {
+    if (open) {
+      setSelectedLang(getNormalizedLang(i18n.language));
+    }
+  }, [open, i18n.language]);
+
+  const [openLanguage,setOpenLanguage] = useState(false)
   const context = useBookingContext()
   const handleSubmit = async(e) => {
     setLoading(true)
@@ -102,7 +135,7 @@ const AccountSettingsPage = () => {
         color='#212529'
         mb={3}
         textAlign={isMobile ? "center" : "left"}>
-        Thiết lập tài khoản
+     {t("account_settings_title")}
       </Typography>
 
       {/* Card chính */}
@@ -125,13 +158,12 @@ const AccountSettingsPage = () => {
               <ListItemText
                 primary={
                   <Typography fontWeight={600} color='#212529'>
-                    Đổi mã PIN
+                    {t("change_pin_title")}
                   </Typography>
                 }
                 secondary={
                   <Typography variant='body2' color='#adb5bd' mt={0.5}>
-                    Đổi mã PIN thường xuyên để nâng cấp tính bảo mật của tài
-                    khoản
+                       {t("change_pin_description")}
                   </Typography>
                 }
               />
@@ -143,28 +175,28 @@ const AccountSettingsPage = () => {
             </ListItemButton>
           </ListItem>
 
-          {/* <Divider sx={{ mx: 3 }} /> */}
+          <Divider sx={{ mx: 3 }} />
 
           {/* Liên kết tài khoản */}
-          {/* <ListItem disablePadding>
-            <ListItemButton sx={{ py: 3, px: 3 }}>
+          <ListItem disablePadding>
+            <ListItemButton  onClick={() => setOpenLanguage(true)} sx={{ py: 3, px: 3 }}>
               <ListItemIcon sx={{ minWidth: 40 }}>
-                <LinkOutlined sx={{ color: "#6c757d" }} />
+                <LanguageIcon sx={{ color: "#6c757d" }} />
               </ListItemIcon>
               <ListItemText
                 primary={
                   <Typography fontWeight={600} color='#212529'>
-                    Liên kết tài khoản
+                 {t("language")}
                   </Typography>
                 }
               />
               <Box sx={{ ml: 2 }}>
-                <Typography color='#6c757d' fontSize='1.5rem'>
-                  ›
+                <Typography color='#6c757d' fontSize='1.5rem' display={"flex"} alignItems={"center"} gap={2}>
+                  <Typography fontSize='1rem'>{LANGUAGES.find((item)=>item.code==selectedLang)?.label}</Typography> ›
                 </Typography>
               </Box>
             </ListItemButton>
-          </ListItem> */}
+          </ListItem>
 
           {/* Google */}
           {/* <ListItem disablePadding>
@@ -236,7 +268,7 @@ const AccountSettingsPage = () => {
             alignItems='center'
             mb={3}>
             <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            Nhập mã PIN của bạn
+            {t("verify_pin_modal_title")}
             </Typography>
             <IconButton onClick={() => {setState("verify");
           setPin("");
@@ -246,7 +278,7 @@ const AccountSettingsPage = () => {
             </IconButton>
           </Stack>
           <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          Bạn cần xác thực mã PIN của mình trước khi đổi mã PIN mới
+          {t("verify_pin_modal_description")}
           </Typography>
           <Box
             sx={{
@@ -329,10 +361,10 @@ const AccountSettingsPage = () => {
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang xác thực...
+                   {  t("verifying_button")}
                   </>
                 ) : (
-                  "Xác thực"
+                  t("verify_button")
                 )}
               </Button>
         </Box>}
@@ -357,7 +389,7 @@ const AccountSettingsPage = () => {
             alignItems='center'
             mb={3}>
             <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            Tạo mã PIN của bạn
+            {  t("create_pin_modal_title")}
             </Typography>
             <IconButton onClick={() => {
         setState("verify");
@@ -368,7 +400,7 @@ const AccountSettingsPage = () => {
             </IconButton>
           </Stack>
           <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          Bạn cần xác thực mã PIN của mình trước khi đổi mã PIN mới
+          {  t("confirm_pin_modal_title")}
           </Typography>
           <Box
             sx={{
@@ -449,7 +481,7 @@ const AccountSettingsPage = () => {
                 }}
               >
               
-                  Tiếp tục
+              {  t("continue_button")}
                 
               </Button>
         </Box>}
@@ -474,7 +506,7 @@ const AccountSettingsPage = () => {
             alignItems='center'
             mb={3}>
             <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-            Xác thực mã PIN mới của bạn
+            {  t("confirm_pin_modal_title")}
             </Typography>
             <IconButton onClick={() => {
         setState("verify");
@@ -485,7 +517,7 @@ const AccountSettingsPage = () => {
             </IconButton>
           </Stack>
           <Typography fontSize={"14px"} color='rgba(93, 102, 121, 1)'>
-          Bạn cần xác thực mã PIN của mình trước khi đổi mã PIN mới
+          {  t("verify_pin_modal_description")}
           </Typography>
           <Box
             sx={{
@@ -549,7 +581,7 @@ const AccountSettingsPage = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Mã PIN không khớp. Vui lòng nhập lại.
+               {  t("pin_mismatch_error")}
                 </Typography>
               )}
 
@@ -581,10 +613,10 @@ const AccountSettingsPage = () => {
               {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang thay đổi...
+                   {   t("changing_button")}
                   </>
                 ) : (
-                  "Thay đổi"
+                    t("change_button")
                 )}
                   
                 
@@ -593,8 +625,119 @@ const AccountSettingsPage = () => {
         
         </>
       </Modal>
+      <LanguageModal open={openLanguage} onClose={()=>{setOpenLanguage(false)
+      setActiveMenu(t("account_settings_menu"))
+      }} />
     </Box>
   );
 };
 
 export default AccountSettingsPage;
+
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+ 
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useEffect } from "react";
+
+
+ function LanguageModal({ open, onClose }) {
+  const { i18n, t } = useTranslation();
+
+  // Chuẩn hóa ngôn ngữ ban đầu (vi-VN -> vi)
+  const getNormalizedLang = (lng) => {
+    if (!lng) return "en";
+    if (lng.startsWith("vi")) return "vi";
+    if (lng.startsWith("en")) return "en";
+    if (lng.startsWith("ko")) return "ko";
+    if (lng.startsWith("ja")) return "ja";
+    return lng;
+  };
+
+  const [selectedLang, setSelectedLang] = useState(
+    getNormalizedLang(i18n.language)
+  );
+
+  // Khi mở modal → sync lại state
+  useEffect(() => {
+    if (open) {
+      setSelectedLang(getNormalizedLang(i18n.language));
+    }
+  }, [open, i18n.language]);
+
+  const handleUpdate = () => {
+    // i18next-browser-languagedetector sẽ tự cache localStorage
+    i18n.changeLanguage(selectedLang);
+    localStorage.setItem("i18nextLng", selectedLang);
+    onClose();
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          minHeight: 500,
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: 600 }}>
+        {t("language", "Ngôn ngữ")}
+      </DialogTitle>
+
+      <DialogContent sx={{ px: 1 }}>
+        <List>
+          {LANGUAGES.map((lang) => (
+            <ListItemButton
+              key={lang.code}
+              onClick={() => setSelectedLang(lang.code)}
+              sx={{
+                borderRadius: 2,
+                mx: 1,
+                mb: 0.5,
+              }}
+            >
+              <ListItemIcon sx={{ fontSize: 22 }}>
+                {lang.flag}
+              </ListItemIcon>
+
+              <ListItemText primary={lang.label} />
+
+              {selectedLang === lang.code && (
+                <CheckCircleIcon sx={{ color: "#9ACD32" }} />
+              )}
+            </ListItemButton>
+          ))}
+        </List>
+      </DialogContent>
+
+      <DialogActions sx={{ p: 2 }}>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleUpdate}
+          sx={{
+            borderRadius: 999,
+            backgroundColor: "#9ACD32",
+            textTransform: "none",
+            fontWeight: 600,
+            height: 44,
+            "&:hover": {
+              backgroundColor: "#8DBA2E",
+            },
+          }}
+        >
+          Cập nhật
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

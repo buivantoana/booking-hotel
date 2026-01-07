@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const destinations = [
   { name: "Hà Nội", hotels: "100 khách sạn" },
@@ -37,6 +38,7 @@ const DestinationItem = ({
   hotels: string;
 }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation();
   return (
     <Box>
       <Typography
@@ -55,7 +57,7 @@ const DestinationItem = ({
         variant='body2'
         color='#999'
         sx={{ fontSize: { xs: "0.8rem", md: "0.85rem" } }}>
-       {total_hotels} khách sạn
+       {total_hotels} {t('hotels')}
       </Typography>
     </Box>
   )
@@ -65,7 +67,7 @@ const PopularDestinations = ({location}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-
+  const { t } = useTranslation();
   // Tính số cột
   const columns = isMobile ? 2 : isTablet ? 3 : 4;
 
@@ -81,7 +83,7 @@ const PopularDestinations = ({location}) => {
             sx={{
               fontSize: { xs: "1.2rem", md: "1.875rem" },
             }}>
-          Các địa điểm thu hút nhất Việt Nam
+         {t('top_attractions_vietnam')}
           </Typography>
 
         {/* Grid địa điểm */}

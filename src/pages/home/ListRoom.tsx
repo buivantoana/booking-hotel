@@ -96,7 +96,7 @@ const HotelCard = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   return (
     <Card
       elevation={3}
@@ -216,7 +216,7 @@ const HotelCard = ({
             spacing={0.5}
             sx={{ mt: 1.5 }}>
             <Typography variant='caption' color='#999' sx={{ fontWeight: 500 }}>
-              Chỉ từ
+            {t('from_only')}
             </Typography>
             <Typography
               variant='h6'
@@ -229,7 +229,7 @@ const HotelCard = ({
               {price ? `${price.toLocaleString("vi-VN")}đ` : "160.000đ"}
             </Typography>
             <Typography variant='body2' color='#666'>
-              / 2 giờ
+            {t('per_2_hours')}
             </Typography>
           </Stack>
         </Stack>
@@ -252,6 +252,7 @@ const ListRoom = ({
   data: any[];
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const settings = {
     dots: false,
     infinite: true,
@@ -315,7 +316,7 @@ const ListRoom = ({
                 sx={{ cursor: "pointer" }}
                 color='rgba(152, 159, 173, 1)'
                 fontSize={"15px"}>
-                Xem tất cả <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
+               {t('view_all')} <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
               </Typography>
             )}
           </Box>
@@ -360,6 +361,7 @@ const ListRoom = ({
 export default ListRoom;
 
 import { Skeleton } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const HotelCardSkeleton = () => {
   return (

@@ -1,139 +1,42 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
   Box,
-  Stack,
-  Typography,
+  Button,
   Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Drawer,
   Grid,
   Paper,
   Skeleton,
-  useTheme,
-  useMediaQuery,
   Slider,
-  Button,
-  Divider,
-  CircularProgress,
-  Container,
-  Pagination,
-  Drawer,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
 import {
   GoogleMap,
-  LoadScript,
-  Marker,
   InfoWindow,
-  MarkerClusterer,
+  LoadScript,
+  Marker
 } from "@react-google-maps/api";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 // === ICONS (giữ nguyên) ===
-import iconBaggage from "../../images/double shopping bag 1.png";
-import iconBaggageActive from "../../images/double shopping bag.png";
-import iconElevator from "../../images/Frame.png";
-import iconElevatorActive from "../../images/Frame (1).png";
-import iconLock from "../../images/Frame 1321317930.png";
-import iconLockActive from "../../images/Frame 1321317930 (1).png";
-import iconParking from "../../images/Frame 1321317935.png";
-import iconParkingActive from "../../images/Frame 1321317935 (1).png";
-import iconPool from "../../images/Frame 1321317932.png";
-import iconPoolActive from "../../images/Frame 1321317932 (1).png";
-import iconAc from "../../images/Frame 1321317934.png";
-import iconAcActive from "../../images/hotel-air-conditioner--heating-ac-air-hvac-cool-cooling-cold-hot-conditioning-hotel.png";
-import iconTv from "../../images/Display1.png";
-import iconTvActive from "../../images/Display.png";
-import iconHeart from "../../images/Armchair.png";
-import iconHeartActive from "../../images/Armchair 2.png";
-import iconBathtub from "../../images/Bath1.png";
-import iconBathtubActive from "../../images/Bath.png";
-import iconKitchen from "../../images/pot-01.png";
-import iconKitchenActive from "../../images/pot-01 (1).png";
-import iconFridge from "../../images/Fridge1.png";
-import iconFridgeActive from "../../images/Fridge.png";
-import iconWifi from "../../images/wifi--wireless-wifi-internet-server-network-connection.png";
-import iconWifiActive from "../../images/Frame 1321317936.png";
-import iconHairdryer from "../../images/Frame 1321317937.png";
-import iconHairdryerActive from "../../images/Frame 1321317937 (1).png";
-import swap from "../../images/Swap.png";
-import map from "../../images/maps.png";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import starActive from "../../images/star.svg";
-import starInactive from "../../images/star.svg";
-import image_room from "../../images/Rectangle 29975.png";
-import no_room from "../../images/No Navigation.svg";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import no_room from "../../images/No Navigation.svg";
+import map from "../../images/maps.png";
+import { default as starActive, default as starInactive } from "../../images/star.svg";
 interface Amenity {
   label: string;
   icon: string;
   iconActive: string;
   active: boolean;
 }
-
-const amenities: Amenity[] = [
-  {
-    label: "Bảo quản hành lý",
-    icon: iconBaggage,
-    iconActive: iconBaggageActive,
-    active: false,
-  },
-  {
-    label: "Thang máy",
-    icon: iconElevator,
-    iconActive: iconElevatorActive,
-    active: false,
-  },
-  {
-    label: "Két sắt",
-    icon: iconLock,
-    iconActive: iconLockActive,
-    active: false,
-  },
-  {
-    label: "Bãi đỗ xe",
-    icon: iconParking,
-    iconActive: iconParkingActive,
-    active: false,
-  },
-  {
-    label: "Bể bơi",
-    icon: iconPool,
-    iconActive: iconPoolActive,
-    active: false,
-  },
-  { label: "Điều hòa", icon: iconAc, iconActive: iconAcActive, active: false },
-  { label: "Smart TV", icon: iconTv, iconActive: iconTvActive, active: false },
-  {
-    label: "Ghế tình yêu",
-    icon: iconHeart,
-    iconActive: iconHeartActive,
-    active: false,
-  },
-  {
-    label: "Bồn tắm",
-    icon: iconBathtub,
-    iconActive: iconBathtubActive,
-    active: false,
-  },
-  {
-    label: "Đồ bếp",
-    icon: iconKitchen,
-    iconActive: iconKitchenActive,
-    active: false,
-  },
-  {
-    label: "Tủ lạnh",
-    icon: iconFridge,
-    iconActive: iconFridgeActive,
-    active: false,
-  },
-  { label: "Wifi", icon: iconWifi, iconActive: iconWifiActive, active: false },
-  {
-    label: "Máy sấy tóc",
-    icon: iconHairdryer,
-    iconActive: iconHairdryerActive,
-    active: false,
-  },
-];
 
 const ratings = [
   { label: "≥ 3.5", active: false, value: 3.5 },
@@ -169,6 +72,7 @@ const RoomsView = ({
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
   const context = useBookingContext();
+  const {t} = useTranslation()
   const [center, setCenter] = useState({
     lat: 21.0285,
     lng: 105.8542,
@@ -355,17 +259,17 @@ const RoomsView = ({
                           cursor: "pointer",
                         }}>
                         <LocationOnIcon sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }} />
-                        Xem trên bản đồ
+                       {t("view_on_map")}
                       </Box>
                     </Box>
 
                     {/* KHOẢNG GIÁ */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={2}>
-                        Khoảng giá
+                      {t("price_range")}
                       </Typography>
                       <Typography fontSize='0.8rem' color='#666' mb={2}>
-                        Giá phòng đã bao gồm mọi khoản phí
+                      {t("price_includes_all")}
                       </Typography>
 
                       <Box display={"flex"} justifyContent={"center"}>
@@ -398,11 +302,11 @@ const RoomsView = ({
 
                       <Stack direction='row' alignItems='center' justifyContent='space-evenly' mt={2} spacing={1}>
                         <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                          Giá tối thiểu
+                        {t("min_price")}
                         </Typography>
                         <Box sx={{ width: "100px", height: 1, bgcolor: "#e0e0e0", mx: 1 }} />
                         <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                          Giá tối đa
+                        {t("max_price")}
                         </Typography>
                       </Stack>
 
@@ -449,7 +353,7 @@ const RoomsView = ({
                     {/* ĐIỂM ĐÁNH GIÁ */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                        Điểm đánh giá
+                      {t("rating_title")}
                       </Typography>
                       <Stack direction='row' flexWrap='wrap' gap={1}>
                         {ratingList.map((rating, i) => (
@@ -481,7 +385,7 @@ const RoomsView = ({
                     {/* TIỆN ÍCH */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                        Tiện ích khách sạn
+                      {t("amenities_title")}
                       </Typography>
                       <Grid container spacing={1}>
                         {amenityList.map((item, i) => (
@@ -546,7 +450,7 @@ const RoomsView = ({
 
                   {/* Tiêu đề */}
                   <Typography fontWeight={700} fontSize="1.3rem" textAlign="center" mb={3}>
-                    Bộ lọc tìm kiếm
+                  {t("filter_title")}
                   </Typography>
 
                   {/* Copy nguyên phần filter ở trên vào đây */}
@@ -584,17 +488,17 @@ const RoomsView = ({
                           cursor: "pointer",
                         }}>
                         <LocationOnIcon sx={{ fontSize: 16, color: "rgba(152, 183, 32, 1)" }} />
-                        Xem trên bản đồ
+                        {t("view_on_map")}
                       </Box>
                     </Box>
 
                     {/* KHOẢNG GIÁ */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={2}>
-                        Khoảng giá
+                      {t("price_range")}
                       </Typography>
                       <Typography fontSize='0.8rem' color='#666' mb={2}>
-                        Giá phòng đã bao gồm mọi khoản phí
+                      {t("price_includes_all")}
                       </Typography>
 
                       <Box display={"flex"} justifyContent={"center"}>
@@ -627,11 +531,11 @@ const RoomsView = ({
 
                       <Stack direction='row' alignItems='center' justifyContent='space-evenly' mt={2} spacing={1}>
                         <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                          Giá tối thiểu
+                        {t("min_price")}
                         </Typography>
                         <Box sx={{ width: "100px", height: 1, bgcolor: "#e0e0e0", mx: 1 }} />
                         <Typography fontSize='0.75rem' color='#666' whiteSpace='nowrap'>
-                          Giá tối đa
+                        {t("max_price")}
                         </Typography>
                       </Stack>
 
@@ -678,7 +582,7 @@ const RoomsView = ({
                     {/* ĐIỂM ĐÁNH GIÁ */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                        Điểm đánh giá
+                      {t("rating_title")}
                       </Typography>
                       <Stack direction='row' flexWrap='wrap' gap={1}>
                         {ratingList.map((rating, i) => (
@@ -710,7 +614,7 @@ const RoomsView = ({
                     {/* TIỆN ÍCH */}
                     <Stack>
                       <Typography fontWeight={600} fontSize='1rem' color='#333' mb={1.5}>
-                        Tiện ích khách sạn
+                      {t("amenities_title")}
                       </Typography>
                       <Grid container spacing={1}>
                         {amenityList.map((item, i) => (
@@ -766,7 +670,7 @@ const RoomsView = ({
                     mt:1
                   }}
                 >
-                  Áp dụng 
+                  {t("apply_filter")}
                 </Button>
               </Drawer>
             </Grid>
@@ -792,7 +696,7 @@ const RoomsView = ({
                 }}
               >
                 <Typography fontWeight={600} fontSize="1.1rem">
-                  Bộ lọc
+                {t("filter_title")}
                 </Typography>
                 <Button
                   variant="contained"
@@ -809,7 +713,7 @@ const RoomsView = ({
                     "&:hover": { bgcolor: "#43a047" },
                   }}
                 >
-                  Lọc
+                   {t("apply_filter")}
                 </Button>
               </Box>
               <Box
@@ -834,7 +738,7 @@ const RoomsView = ({
                     ) : (
                       <>{totalAll}</>
                     )}{" "}
-                    kết quả tìm kiếm
+                   {t("search_results")}
                   </Typography>
                 </Stack>
 
@@ -891,7 +795,7 @@ const FilterMap = ({
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
-
+  const {t} = useTranslation()
   // Khi map dừng di chuyển (drag, zoom…)
   const onIdle = () => {
     if (!mapRef.current) return;
@@ -932,7 +836,7 @@ const FilterMap = ({
             alignItems={"center"}
             gap={1}>
             <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
-            Xem danh sách khách sạn{" "}
+              {t("view_list")}
           </Typography>}
       <Grid justifyContent={"space-between"} flexDirection={isMobile?"column-reverse":"row"} container>
         <Grid item xs={12} md={5}>
@@ -949,7 +853,7 @@ const FilterMap = ({
             alignItems={"center"}
             gap={1}>
             <ArrowBackIosNewIcon sx={{ fontSize: "19px" }} />
-            Xem danh sách khách sạn{" "}
+              {t("view_list")}
           </Typography>}
           <Box
             height={"50vh"}
@@ -1127,6 +1031,7 @@ const ItemHotel = ({
   const navigate = useNavigate();
   const loadMoreRef = useRef(null);
   const isRequesting = useRef(false);
+  const {t} = useTranslation()
   useEffect(() => {
     if (!activeHotel) return;
 
@@ -1376,7 +1281,7 @@ const ItemHotel = ({
                           alignItems='flex-end'>
                           <Stack alignItems={"end"}>
                             <Typography fontSize='14px' color='#999'>
-                              Giá cho 2 giờ
+                            {t("price_for_short_stay")}
                             </Typography>
                             <Typography
                               fontWeight={700}
@@ -1391,7 +1296,7 @@ const ItemHotel = ({
                                 fontSize='14px'
                                 lineHeight={2}
                                 color='#999'>
-                                Chỉ từ
+                                  {t("from_price")}
                               </Typography>{" "}
                               {hotel?.price_min?.[searchParams.get("type")]?.toLocaleString("vi-VN")}đ
                             </Typography>
@@ -1520,8 +1425,7 @@ const ItemHotel = ({
                 alignItems={"center"}>
                 <img src={no_room} alt='' />
                 <Typography mt={3}>
-                  Tệ thật, mình không thấy khách sạn vào phù hợp với tìm kiếm
-                  của bạn.
+                {t("no_results")}
                 </Typography>
               </Box>
             </Box>
@@ -1532,11 +1436,11 @@ const ItemHotel = ({
   );
 };
 
-import { Menu, MenuItem, ListItemText, ListItemIcon } from "@mui/material";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import CheckIcon from "@mui/icons-material/Check";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
+import { ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 const sortOptions = [
   { label: "Phù hợp nhất", value: "all" },
@@ -1657,14 +1561,15 @@ const SortButton = ({ queryHotel, setQueryHotel }) => {
   );
 };
 
-import gift from "../../images/image 8.png";
 import { useBookingContext } from "../../App";
-import { borderRadius } from "@mui/system";
 import SearchBarWithDropdown from "../../components/SearchBarWithDropdownHeader";
+import gift from "../../images/image 8.png";
 import { getLocation } from "../../service/hotel";
 import { parseName } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 
 function PromotionBanner() {
+  const {t} = useTranslation()
   const navigate = useNavigate();
   return (
     <Box
@@ -1713,11 +1618,10 @@ function PromotionBanner() {
                 color='#2B2F38'
                 gutterBottom
                 sx={{ lineHeight: 1.3, fontSize: "17px" }}>
-                Nhận ưu đãi đặc biệt - khi đăng ký tài khoản ngay !
+                 {t("promotion_title")}
               </Typography>
               <Typography fontSize={"12px"} color='#5D6679'>
-                Hãy đăng ký ngay tài khoản để nhận ưu đãi đặc biệt và trải
-                nghiệm tốt nhất từ chúng tôi
+              {t("promotion_desc")}
               </Typography>
             </Box>
           </Stack>
@@ -1736,7 +1640,7 @@ function PromotionBanner() {
               py: 1.2,
               textTransform: "none",
             }}>
-            Đăng ký ngay
+              {t("register_now")}
           </Button>
         </Stack>
       </Container>

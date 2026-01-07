@@ -62,19 +62,20 @@ const ProfileView = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const {t} = useTranslation()
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("Hồ sơ của tôi");
+  const [activeMenu, setActiveMenu] = useState(`${t("profile_menu")}`);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [detailBooking, setDetailBooking] = useState(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-
+ 
   const menuItems = [
-    { text: "Hồ sơ của tôi", icon: <PersonIcon />, active: false },
-    { text: "Thiết lập tài khoản", icon: <SettingsIcon />, active: false },
-    { text: "Đặt phòng của tôi", icon: <RoomIcon />, active: true },
-    { text: "Đăng xuất", icon: <LogoutIcon />, active: false },
+    { text: t("profile_menu"), icon: <PersonIcon />, active: false },
+    { text: t("account_settings_menu"), icon: <SettingsIcon />, active: false },
+    { text: t("my_bookings_menu"), icon: <RoomIcon />, active: true },
+    { text: t("logout_menu"), icon: <LogoutIcon />, active: false },
   ];
   const context = useBookingContext();
   useEffect(() => {
@@ -90,12 +91,12 @@ const ProfileView = ({
     const type = searchParams.get("type");
     if (type) {
       if (type == "booking") {
-        setActiveMenu("Đặt phòng của tôi");
+        setActiveMenu(t("my_bookings_menu"));
         searchParams.delete("type");
         setSearchParams(searchParams, { replace: true });
       }
       if (type == "profile") {
-        setActiveMenu("Hồ sơ của tôi");
+        setActiveMenu(t("profile_menu"));
         searchParams.delete("type");
         setSearchParams(searchParams, { replace: true });
       }
@@ -175,10 +176,10 @@ const ProfileView = ({
           <List disablePadding sx={{ cursor: "pointer" }}>
             {menuItems.map((item) => (
               <React.Fragment key={item.text}>
-                {item.text === "Đăng xuất" && <Divider sx={{ my: 2 }} />}
+                {item.text === t("logout_menu") && <Divider sx={{ my: 2 }} />}
                 <ListItem
                   onClick={() => {
-                    if (item.text === "Đăng xuất") {
+                    if (item.text === t("logout_menu")) {
                       setDeleteDialogOpen(true);
                     } else {
                       handleClickItemMenu(item.text);
@@ -342,13 +343,13 @@ const ProfileView = ({
     const getRentTypeLabel = () => {
       switch (detailBooking.rent_type) {
         case "hourly":
-          return "Theo giờ";
+          return t("rent_type_hourly");
         case "overnight":
-          return "Qua đêm";
+          return t("rent_type_overnight");
         case "daily":
-          return "Qua ngày";
+          return t("rent_type_daily");
         default:
-          return "Theo giờ";
+          return t("rent_type_hourly");
       }
     };
     const getBestPayment = (payments = []) => {
@@ -364,7 +365,7 @@ const ProfileView = ({
     };
     const getPaymentTextStatus = (payments = []) => {
       if (!payments || payments.length === 0) {
-        return "Trả tại khách sạn"; // không có thông tin thanh toán
+        return t("payment_status_at_hotel"); // không có thông tin thanh toán
       }
 
       // Thứ tự ưu tiên
@@ -383,17 +384,17 @@ const ProfileView = ({
       // Map sang text tiếng Việt
       switch (status) {
         case "paid":
-          return "Đã thanh toán";
+          return t("payment_status_paid");
         case "pending":
-          return "Đang chờ thanh toán";
+          return  t("payment_status_pending");
         case "failed":
-          return "Thanh toán thất bại";
+          return t("payment_status_failed");
         case "cancelled":
-          return "Thanh toán bị hủy";
+          return t("payment_status_cancelled");
         case "refunded":
-          return "Đã hoàn tiền";
+          return  t("payment_status_refunded");
         default:
-          return "Chưa thanh toán";
+          return   t("payment_status_refunded");
       }
     };
     // Trạng thái thanh toán
@@ -411,8 +412,8 @@ const ProfileView = ({
         ? "Ví MoMo"
         : bestPayment.method === "vnpay"
         ? "VNPay"
-        : "Trả tại khách sạn"
-      : "Trả tại khách sạn";
+        :t("payment_status_at_hotel")
+      :t("payment_status_at_hotel");
     const totalPrice = Number(detailBooking.total_price || 0).toLocaleString(
       "vi-VN"
     );
@@ -444,12 +445,12 @@ const ProfileView = ({
 
       // booking đã hoàn thành hoặc bị hủy -> nút "Đặt lại"
       if (bookingStatus === "checked_out" || bookingStatus === "cancelled" ||detailBooking.status === "no_show" ) {
-        return "Đặt lại";
+        return t("button_rebook");
       }
 
       // đã xác nhận và đã thanh toán → có thể hủy
       if (bookingStatus === "confirmed" && paymentStatus === "paid") {
-        return "Hủy đặt phòng";
+        return  t("button_cancel_booking");
       }
 
       // chưa thanh toán đủ hoặc payment lỗi
@@ -458,16 +459,16 @@ const ProfileView = ({
         paymentStatus === "pending" ||
         bookingStatus === "pending"
       ) {
-        return "Tiếp tục thanh toán";
+        return  t("button_continue_payment");
       }
 
       // fallback – mặc định vẫn hiển thị tiếp tục thanh toán
-      return "Tiếp tục thanh toán";
+      return  t("button_continue_payment");
     };
     const handleSubmit = async () => {
       setLoadingSubmit(true);
       try {
-        if (getBookingNameStatus(detailBooking) == "Hủy đặt phòng") {
+        if (getBookingNameStatus(detailBooking) ==  t("button_cancel_booking")) {
           setOpenReason(true);
           // let result = await cancelBooking(detailBooking.booking_id);
           // if (result?.code == "OK") {
@@ -475,7 +476,7 @@ const ProfileView = ({
           //   getHistoryBooking();
           // }
         } else if (
-          getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán"
+          getBookingNameStatus(detailBooking) ==  t("button_continue_payment")
         ) {
           handleRetryPayment({
             booking_id: detailBooking?.booking_id,
@@ -485,7 +486,7 @@ const ProfileView = ({
       } catch (error) {
         console.log(error);
       }
-      if (!(getBookingNameStatus(detailBooking) == "Tiếp tục thanh toán")) {
+      if (!(getBookingNameStatus(detailBooking) == t("button_continue_payment"))) {
         setLoadingSubmit(false);
       }
     };
@@ -598,7 +599,7 @@ const ProfileView = ({
            
           </IconButton>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Đặt phòng của tôi
+        {t("booking_detail_title")}
           </Typography>
         </Stack>
         <ReasonModal
@@ -620,10 +621,10 @@ const ProfileView = ({
                 <img src={success} alt='Thành công' width={48} />
                 <Stack>
                   <Typography fontWeight={700} fontSize='1rem' color='#98b720'>
-                    Hoàn thành
+                  {t("status_completed")}
                   </Typography>
                   <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                    Cảm ơn bạn đã đặt phòng! đừng quên đánh giá khách sạn nhé.
+                  {t("completed_message")}
                   </Typography>
                 </Stack>
               </Stack>
@@ -641,7 +642,7 @@ const ProfileView = ({
                   minWidth: 120,
                   "&:hover": { bgcolor: "#7a9a1a" },
                 }}>
-                Đặt lại
+                {t("button_rebook")}
               </Button>
             </Stack>
           </Paper>
@@ -662,10 +663,10 @@ const ProfileView = ({
                       fontWeight={700}
                       fontSize='1rem'
                       color='#98b720'>
-                      Chờ nhận phòng
+                        {t("status_waiting_checkin")}
                     </Typography>
                     <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                      Hoàn tất đặt phòng! đừng quên đến nhận phòng đúng giờ nhé
+                    {t("waiting_checkin_message")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -690,10 +691,10 @@ const ProfileView = ({
                       fontWeight={700}
                       fontSize='1rem'
                       color='#98b720'>
-                      Chờ thanh toán
+                          {t("status_waiting_payment")}
                     </Typography>
                     <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                      Phòng đang được giữ trong 00:14:59
+                    {t("waiting_payment_message")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -724,10 +725,10 @@ const ProfileView = ({
                         size={20}
                         sx={{ color: "#fff", mr: 1 }}
                       />
-                      Tiếp tục thanh toán...
+                        {t("button_loading_continue")}
                     </>
                   ) : (
-                    <> Tiếp tục thanh toán</>
+                    <>    {t("button_continue_payment")}</>
                   )}
                 </Button>
               </Stack>
@@ -745,10 +746,10 @@ const ProfileView = ({
                 <img src={cancel} alt='Thành công' width={48} />
                 <Stack>
                   <Typography fontWeight={700} fontSize='1rem' color='red'>
-                    Không nhận phòng
+                  {t("status_no_show")}
                   </Typography>
                   <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                    Bạn đã không nhận phòng đặt vào 10:00, 04/11/2025
+                  {t("no_show_message")}
                   </Typography>
                 </Stack>
               </Stack>
@@ -766,7 +767,7 @@ const ProfileView = ({
                   minWidth: 120,
                   "&:hover": { bgcolor: "#7a9a1a" },
                 }}>
-                Đặt lại
+                  {t("button_rebook")}
               </Button>
             </Stack>
           </Paper>
@@ -777,7 +778,7 @@ const ProfileView = ({
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-            Lựa chọn của bạn
+          {t("your_choice_title")}
           </Typography>
           <Stack direction={'row'} flexWrap={"wrap"} gap={2}  spacing={2} alignItems='flex-start'>
             {/* HÌNH ẢNH PHÒNG */}
@@ -804,7 +805,7 @@ const ProfileView = ({
                 {hotelName}
               </Typography>
               <Typography fontSize='0.9rem' fontWeight={500} color='#333'>
-                Phòng tiêu chuẩn
+              {t("standard_room")}
               </Typography>
               <Typography fontSize='0.8rem' color='#666'>
                 {hotelAddress}
@@ -837,7 +838,7 @@ const ProfileView = ({
               <Grid container spacing={0.5} mt={1} fontSize='0.7rem'>
                 <Grid item xs={4}>
                   <Typography color='#888' fontSize='0.75rem'>
-                    Nhận phòng
+                  {t("checkin_label")}
                   </Typography>
                   <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                     {checkInTime}
@@ -848,7 +849,7 @@ const ProfileView = ({
                   xs={4}
                   sx={{ borderLeft: "1px solid #ddd", textAlign: "center" }}>
                   <Typography color='#888' fontSize='0.75rem'>
-                    Trả phòng
+                  {t("checkout_label")}
                   </Typography>
                   <Typography fontWeight={600} color='#333' fontSize='0.8rem'>
                     {checkOutTime}
@@ -875,7 +876,7 @@ const ProfileView = ({
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-            Thông tin nhận phòng
+          {t("checkin_info_title")}
           </Typography>
           <Stack spacing={2}>
             <Stack
@@ -883,7 +884,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-                Mã đặt phòng
+              {t("booking_code_label")}
               </Typography>
               <Stack direction='row' spacing={0.5} alignItems='center'>
                 <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
@@ -902,7 +903,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-                Số điện thoại
+              {t("phone_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 +84 {context.state?.user?.phone?.slice(3)}
@@ -913,7 +914,7 @@ const ProfileView = ({
               justifyContent='space-between'
               alignItems='center'>
               <Typography fontSize='0.9rem' color='#666'>
-                Họ tên
+              {t("full_name_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {context.state?.user?.name}
@@ -927,12 +928,12 @@ const ProfileView = ({
           elevation={0}
           sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
           <Typography fontWeight={600} mb={2} fontSize='1rem' color='#333'>
-            Chi tiết thanh toán
+          {t("payment_details_title")}
           </Typography>
           <Stack spacing={2}>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-                Trạng thái
+              {t("payment_status_label")}
               </Typography>
               <Typography
                 fontWeight={600}
@@ -943,7 +944,7 @@ const ProfileView = ({
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-                Phương thức thanh toán
+              {t("payment_method_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {paymentMethodLabel}
@@ -951,7 +952,7 @@ const ProfileView = ({
             </Stack>
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='0.9rem' color='#666'>
-                Tiền phòng
+              {t("room_price_label")}
               </Typography>
               <Typography fontWeight={600} color='#333' fontSize='0.95rem'>
                 {totalPrice}đ
@@ -960,7 +961,7 @@ const ProfileView = ({
             <Divider sx={{ bgcolor: "#eee" }} />
             <Stack direction='row' justifyContent='space-between'>
               <Typography fontSize='1rem' fontWeight={700} color='#333'>
-                Tổng tiền thanh toán
+              {t("total_payment_label")}
               </Typography>
               <Typography fontSize='1.1rem' fontWeight={700} color='#333'>
                 {totalPrice}đ
@@ -981,7 +982,7 @@ const ProfileView = ({
             fontSize='16px'
             color='rgba(43, 47, 56, 1)'
             sx={{ textDecoration: "underline", cursor: "pointer" }}>
-            Chính sách hủy phòng
+               {t("cancellation_policy")}
           </Typography>
           <Button
             fullWidth={isMobile}
@@ -1052,10 +1053,10 @@ const ProfileView = ({
 
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-            Đăng xuất tài khoản?
+          {t("logout_dialog_title")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Bạn có chắc muốn đăng xuất không?
+          {t("logout_dialog_message")}
           </Typography>
         </DialogContent>
 
@@ -1090,7 +1091,7 @@ const ProfileView = ({
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Đồng ý
+           {t("logout_confirm_button")}
           </Button>
           <Button
             onClick={() => setDeleteDialogOpen(false)}
@@ -1103,7 +1104,7 @@ const ProfileView = ({
               width: "100%",
               ml: "0px !important",
             }}>
-            Hủy bỏ
+            {t("logout_cancel_button")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1117,9 +1118,9 @@ const ProfileView = ({
               {detailBooking && (
                 <MainContent setDetailBooking={setDetailBooking} />
               )}
-              {activeMenu == "Hồ sơ của tôi" && <Account context={context} />}
-              {activeMenu == "Thiết lập tài khoản" && <AccountSettingsPage />}
-              {activeMenu == "Đặt phòng của tôi" && !detailBooking && (
+              {activeMenu ==   t("profile_menu") && <Account context={context} />}
+              {activeMenu == t("account_settings_menu") && <AccountSettingsPage setActiveMenu={setActiveMenu} />}
+              {activeMenu ==  t("my_bookings_menu") && !detailBooking && (
                 <MyBookingsPage
                   historyBooking={historyBooking}
                   setDetailBooking={setDetailBooking}
@@ -1143,10 +1144,11 @@ export default ProfileView;
 import { TextField } from "@mui/material";
 import { getStatusPayment, retryPayment } from "../../service/payment";
 import { getErrorMessage } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 
 const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
   const [reason, setReason] = React.useState("");
-
+  const {t} = useTranslation()
   const handleSubmit = () => {
     onSubmit(reason); // trả lý do về parent
     setReason(""); // clear input
@@ -1159,13 +1161,13 @@ const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xs' fullWidth>
-      <DialogTitle>Lý do</DialogTitle>
+      <DialogTitle>{t("reason_modal_title")}</DialogTitle>
 
       <DialogContent>
         <TextField
           multiline
           rows={3}
-          placeholder='Viết suy nghĩ cảm nhận của bạn'
+          placeholder={t("reason_placeholder")}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           fullWidth
@@ -1190,7 +1192,7 @@ const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
           variant='outlined'
           sx={{ borderColor: "#98b720", color: "#98b720" }}
           onClick={handleClose}>
-          Hủy
+        {t("reason_cancel_button")}
         </Button>
         <Button
           variant='contained'
@@ -1200,7 +1202,7 @@ const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {
           {loadingSubmit ? (
             <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
           ) : (
-            "Đồng ý"
+            t("reason_submit_button")
           )}
         </Button>
       </DialogActions>

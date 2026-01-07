@@ -33,6 +33,7 @@ import { getLocation } from "../../service/hotel";
 import { useLocation } from "react-router-dom";
 import { Phone } from "@mui/icons-material";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -67,6 +68,7 @@ const DetailRoomView = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const {t} = useTranslation()
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [tabValue, setTabValue] = useState(0);
@@ -107,12 +109,12 @@ const DetailRoomView = ({
   };
 
   const tabs = [
-    "Danh sách phòng",
-    "Giới thiệu khách sạn",
-    "Tiện ích khách sạn",
-    "Đánh giá",
-    "Chính sách nhận - trả phòng",
-    "Chính sách khách sạn",
+    t("tab_room_list"),
+    t("tab_hotel_intro"),
+    t("tab_amenities"),
+    t("tab_reviews"),
+    t("tab_checkin_policy"),
+    t("tab_hotel_policy"),
   ];
   const handleScroll = (ref) => {
     if (!ref.current) return;
@@ -152,9 +154,9 @@ const DetailRoomView = ({
   
       await navigator.clipboard.writeText(url);
   
-      toast.success("Đã sao chép đường dẫn chia sẻ");
+      toast.success(t("share_copied_success"));
     } catch (err) {
-      toast.error("Không thể sao chép đường dẫn");
+      toast.error(t("share_copied_error"));
     }
   };
   return (
@@ -198,7 +200,7 @@ const DetailRoomView = ({
                   fontSize='0.85rem'
                   color='#98b720'
                   sx={{ cursor: "pointer", textDecoration: "underline" }}>
-                  Xem bản đồ
+                {t("view_map")}
                 </Typography>
               </Stack>
               <Stack direction='row' alignItems='center' spacing={1} mt={1}>
@@ -211,7 +213,7 @@ const DetailRoomView = ({
                     {detailHotel?.hotel?.rating}
                   </Typography>
                   <Typography fontSize='0.85rem' color='#666'>
-                    ({detailHotel?.hotel?.review_count || 0} reviews)
+                    ({detailHotel?.hotel?.review_count || 0} {t("reviews_count")})
                   </Typography>
                 </Stack>
                 <Box sx={{ flex: 1 }} />
@@ -434,7 +436,7 @@ const DetailRoomView = ({
           />
           <ListRoom
             loading={loading}
-            title={"Ưu đãi độc quyền"}
+            title={t("exclusive_offers")}
             data={recommend}
             isDetail={true}
           />

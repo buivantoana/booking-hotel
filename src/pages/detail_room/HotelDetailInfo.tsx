@@ -44,6 +44,7 @@ import { editReviewBooking, reviewDelete } from "../../service/booking";
 import { toast } from "react-toastify";
 import { useBookingContext } from "../../App";
 import { facilities, getErrorMessage } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 interface Review {
   id: number;
   author: string;
@@ -65,6 +66,7 @@ const HotelDetailInfo = ({
   amenities,
 }) => {
   const theme = useTheme();
+  const {t} = useTranslation()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewDetail, setReviewDetail] = useState(null);
@@ -119,7 +121,7 @@ const HotelDetailInfo = ({
         {/* === 1. GIỚI THIỆU KHÁCH SẠN === */}
         <Stack ref={section2Ref} spacing={2}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Giới thiệu khách sạn
+            {t("hotel_intro_title")}
           </Typography>
           <Typography fontSize='0.95rem' color='#666' lineHeight={1.7}>
             {info?.description?.vi}
@@ -127,7 +129,7 @@ const HotelDetailInfo = ({
               component='span'
               color='#98b720'
               sx={{ cursor: "pointer", textDecoration: "underline" }}>
-              Xem thêm
+              {t("view_more")}
             </Typography>
           </Typography>
         </Stack>
@@ -135,7 +137,7 @@ const HotelDetailInfo = ({
         {/* === 2. TIỆN ÍCH KHÁCH SẠN === */}
         <Stack ref={section3Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Tiện ích khách sạn
+          {t("hotel_amenities_title")}
           </Typography>
           <Grid container spacing={2}>
           {(() => {
@@ -164,7 +166,7 @@ const HotelDetailInfo = ({
                 if (selectedFacilities.length === 0) {
                   return (
                     <Typography color='#999' fontStyle='italic'>
-                      Chưa có tiện ích nào được thiết lập
+                         {t("no_amenities")}
                     </Typography>
                   );
                 }
@@ -206,7 +208,7 @@ const HotelDetailInfo = ({
         {/* === 3. ĐÁNH GIÁ === */}
         <Stack ref={section4Ref} spacing={4}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Đánh giá
+          {t("reviews")}
           </Typography>
 
           {/* TỔNG ĐIỂM */}
@@ -242,14 +244,14 @@ const HotelDetailInfo = ({
                       fontWeight={600}
                       fontSize='1.4rem'
                       color='rgba(152, 183, 32, 1)'>
-                      Xuất sắc
+                    {t("excellent")}
                     </Typography>
                     <Typography fontSize='0.85rem' color='rgba(43, 47, 56, 1)'>
-                      Từ {reviews.length} đánh giá
+                    {t("from_reviews", { count: reviews.length })}
                     </Typography>
-                    <Typography fontSize='0.8rem' color='#999'>
-                      Bởi người dùng trong Booking Hotel
-                    </Typography>
+                    {/* <Typography fontSize='0.8rem' color='#999'>
+                    {t("from_reviews")}
+                    </Typography> */}
                   </Box>
                 </Box>
               </Grid>
@@ -411,7 +413,7 @@ const HotelDetailInfo = ({
                 "&:hover": { borderColor: "#7a9a1a", bgcolor: "#f0f8f0" },
               }}
               onClick={() => setOpenModal(true)}>
-             Toàn bộ đánh giá
+             {t("show_all_reviews")}
             </Button>
           )}
         </Stack>
@@ -419,20 +421,20 @@ const HotelDetailInfo = ({
         {/* === 4. CHÍNH SÁCH NHẬN - TRẢ PHÒNG === */}
         <Stack ref={section5Ref} spacing={3}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Chính sách nhận - trả phòng
+          {t("checkin_policy_title")}
           </Typography>
           <Grid container>
             {[
               info?.rent_types?.hourly && {
-                label: "Theo giờ",
+                label:    t("rent_type_hourly"),
                 time: `${info?.rent_types?.hourly.from} - ${info?.rent_types?.hourly.to}`,
               },
               info?.rent_types?.overnight && {
-                label: "Qua đêm",
+                label: t("rent_type_overnight"),
                 time: `${info?.rent_types?.overnight.from} - ${info?.rent_types?.overnight.to}`,
               },
               info?.rent_types?.daily && {
-                label: "Theo ngày",
+                label: t("rent_type_daily"),
                 time: `${info?.rent_types?.daily.from} - ${info?.rent_types?.daily.to}`,
               },
             ]
@@ -451,22 +453,24 @@ const HotelDetailInfo = ({
               ))}
           </Grid>
           <Typography fontSize='0.85rem' color='#999'>
-            Lưu ý: việc hủy phòng sẽ tuân theo quy định riêng của từng loại
-            phòng
+           {t("cancellation_note")}
           </Typography>
         </Stack>
 
         {/* === 5. CHÍNH SÁCH KHÁCH SẠN === */}
         <Stack ref={section6Ref} spacing={2}>
           <Typography fontWeight={600} fontSize='1.1rem' color='#333'>
-            Chính sách khách sạn
+          {t("hotel_policy_title")}
           </Typography>
           <Typography fontSize='0.9rem' color='#666' lineHeight={1.7}>
-            <strong>Check-in/out :</strong> Check-in: từ 14:00 - Check-out:
-            12:00 - Nhận phòng sớm: tùy thuộc vào tình trạng phòng. <br />
-            <strong>Chính sách trả phòng muộn:</strong> Trả phòng trễ tùy thuộc
-            vào tình trạng phòng - Quý khách vui lòng liên hệ lễ tân khi có nhu
-            cầu trả phòng trễ - Sau 17:00 trả phòng: Phụ phí giá phòng 100%
+          <strong>{t("policy_checkin_out_label")}</strong>{" "}
+    {t("policy_checkin_time")} - {t("policy_checkout_time")} - {t("policy_early_checkin")}
+    <br />
+   
+
+    {/* Phần trả phòng muộn */}
+    <strong>{t("policy_late_checkout_label")}</strong>{" "}
+    {t("policy_late_checkout_desc")} - {t("policy_after_17")}
           </Typography>
         </Stack>
 
@@ -494,7 +498,7 @@ const HotelDetailInfo = ({
               alignItems='center'
               mb={3}>
               <Typography fontWeight={700} fontSize='1.25rem' color='#333'>
-                Đánh giá
+              {t("reviews_title")}
               </Typography>
               <IconButton onClick={() => setOpenModal(false)}>
                 <CloseIcon />
@@ -532,15 +536,15 @@ const HotelDetailInfo = ({
                           fontWeight={600}
                           fontSize='1.4rem'
                           color='rgba(152, 183, 32, 1)'>
-                          Xuất sắc
+                              {t("excellent")}
                         </Typography>
                         <Typography
                           fontSize='0.85rem'
                           color='rgba(43, 47, 56, 1)'>
-                          Từ {reviews.length} đánh giá
+                         {t("from_reviews", { count: reviews.length })}
                         </Typography>
                         <Typography fontSize='0.8rem' color='#999'>
-                          Bởi người dùng trong Booking Hotel
+                        {t("by_users")}
                         </Typography>
                       </Box>
                     </Box>
@@ -701,10 +705,10 @@ const HotelDetailInfo = ({
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-            Xóa review
+          {t("delete_review_title")}
           </Typography>
           <Typography fontSize='14px' color='#666'>
-            Theo tác này không thể hoàn tác. Bạn có thực sự muốn xóa review?
+          {t("delete_confirm")}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -728,10 +732,10 @@ const HotelDetailInfo = ({
             {loadingReview ? (
               <>
                 <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                Đang xóa...
+                {t("deleting")}
               </>
             ) : (
-              "Đồng ý"
+              t("agree")
             )}{" "}
           </Button>
           <Button
@@ -744,7 +748,7 @@ const HotelDetailInfo = ({
               color: "#666",
               width: "100%",
             }}>
-            Hủy bỏ
+         { t("cancel")}
           </Button>
         </DialogActions>
       </Dialog>
@@ -784,7 +788,7 @@ function ReviewModal({
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+  const {t} = useTranslation()
   const [rating, setRating] = useState<number | null>(0);
   const [reviewText, setReviewText] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -913,7 +917,7 @@ function ReviewModal({
       fullScreen={isMobile}>
       <DialogTitle sx={{ pb: 1, position: "relative" }}>
         <Typography variant='h6' fontWeight={700}>
-          {reviewDetail ? "Chỉnh sửa đánh giá" : "Đánh giá khách sạn"}
+          {reviewDetail ?t("edit_title") : t("create_title") }
         </Typography>
 
         <IconButton
@@ -960,12 +964,12 @@ function ReviewModal({
         </Stack>
 
         <Typography fontWeight={600} mb={1}>
-          Viết đánh giá
+         {t("write_review") }
         </Typography>
         <TextField
           multiline
           rows={4}
-          placeholder='Chia sẻ trải nghiệm của bạn...'
+          placeholder={t("placeholder") }
           value={reviewText}
           onChange={(e) => setReviewText(e.target.value)}
           fullWidth
@@ -976,7 +980,7 @@ function ReviewModal({
         />
 
         <Typography fontWeight={600} mb={2}>
-          Hình ảnh / Video
+        {t("images_videos") }
         </Typography>
         <Stack direction='row' gap={2} flexWrap='wrap'>
           <label htmlFor='upload-review-images'>
@@ -1049,10 +1053,10 @@ function ReviewModal({
           {loading ? (
             <>
               <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-              Cập nhật đánh giá...
+              {t("updating") }
             </>
           ) : (
-            "Cập nhật đánh giá"
+            t("submit_button")
           )}
         </Button>
       </Box>

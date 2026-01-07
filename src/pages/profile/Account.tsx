@@ -16,6 +16,7 @@ import Flag from "react-country-flag";
 import { userUpdate } from "../../service/admin";
 import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 
 const Account = ({ context }) => {
   const theme = useTheme();
@@ -23,6 +24,7 @@ const Account = ({ context }) => {
   const [loading,setLoading] = useState(false)
   const [touchedDate, setTouchedDate] = useState(false);
   const [touchedName, setTouchedName] = useState(false);
+  const {t} = useTranslation()
   // Lấy dữ liệu ban đầu từ context
   const initialData = {
     name: context?.state?.user?.name || "",
@@ -108,7 +110,7 @@ const Account = ({ context }) => {
         color='#212529'
         mb={3}
         textAlign={isMobile ? "center" : "left"}>
-        Hồ sơ của tôi
+       {t("my_profile_title")}
       </Typography>
 
       <Box
@@ -122,7 +124,7 @@ const Account = ({ context }) => {
           {/* Số điện thoại - KHÔNG CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
-              Số điện thoại
+            {t("phone_label")}
             </Typography>
             <TextField
               fullWidth
@@ -164,7 +166,7 @@ const Account = ({ context }) => {
           {/* Ngày sinh - CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
-              Ngày sinh của bạn
+            {t("birthday_label")}
             </Typography>
             <TextField
                 fullWidth
@@ -176,7 +178,7 @@ const Account = ({ context }) => {
                 error={touchedDate && !isValidBirthDate(formData.birthday)}
                 helperText={
                   touchedDate && !isValidBirthDate(formData.birthday)
-                    ? "Bạn phải từ 18 tuổi trở lên."
+                    ?    t("birthday_error_required_or_under_18")
                     : ""
                 }
                 InputLabelProps={{ shrink: true }}
@@ -200,19 +202,19 @@ const Account = ({ context }) => {
           {/* Tên - CHO SỬA */}
           <Grid item xs={12} sm={6}>
             <Typography variant='body2' color='#6c757d' mb={1}>
-              Tên của bạn
+              {  t("name_label")}
             </Typography>
             <TextField
             name='name'
                 fullWidth
-                placeholder="Nhập tên của bạn"
+                placeholder= {  t("name_placeholder")}
                 value={formData.name}
                 onChange={handleChange}
                 onBlur={() => setTouchedName(true)}
                 error={touchedName && !isValidName(formData.name)}
                 helperText={
                   touchedName && !isValidName(formData.name)
-                    ? "Tên không hợp lệ. Chỉ chữ cái và khoảng trắng giữa các từ, không dấu cách đầu/cuối."
+                    ? t("name_error_invalid")
                     : ""
                 }
                 sx={{
@@ -289,10 +291,10 @@ const Account = ({ context }) => {
                    {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Cập nhật
+                   { t("update_button")}
                   </>
                 ) : (
-                  "Cập nhật"
+                  t("update_button")
                 )}
                 
               </Button>

@@ -30,6 +30,7 @@ import PopularDestinations from "./PopularDestinations";
 import FirstTimeExplore from "./FirstTimeExplore";
 import SearchBarWithDropdown from "./SearchBarWithDropdown";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const HomeView = ({
   location,
@@ -44,7 +45,7 @@ const HomeView = ({
   const [address, setAddress] = useState(null);
   const [bookingType, setBookingType] = useState("hourly");
   const navigate = useNavigate();
-
+  const { t } = useTranslation();
   useEffect(()=>{
     if(localStorage.getItem("location")){
       setAddress(location.find((item)=>item.id == localStorage.getItem("location")))
@@ -91,13 +92,13 @@ const HomeView = ({
             gutterBottom
             align='center'
             sx={{ mb: 1 }}>
-            Nền tảng đặt phòng hàng đầu
+           {t('leading_booking_platform')}
           </Typography>
           <Typography
             variant={isMobile ? "body1" : "h6"}
             align='center'
             sx={{ mb: 4, opacity: 0.9 }}>
-            Tìm khách sạn lý tưởng – Chạm một lần, ở thoải mái mãi
+           {t('find_ideal_hotel')}
           </Typography>
         </Container>
         <SearchBarWithDropdown address={address} location={location} />
@@ -111,7 +112,7 @@ const HomeView = ({
           display={isMobile?"none":"block"}
           align='center'
           gutterBottom>
-          Booking Hotel có gì
+         {t('what_does_booking_hotel_have')}
         </Typography>
 
         <Box
@@ -174,13 +175,13 @@ const HomeView = ({
           data={recommend}
           location={address?.id || "hanoi"}
           category={"recommend"}
-          title={"Gợi ý cho bạn"}
+          title={t('suggestions_for_you')}
         />
         <ListRoom
           loading={loading}
           data={toprated}
           category={"toprated"}
-          title={"Top được bình chọn"}
+          title={t('top_voted')}
           location={address?.id || "hanoi"}
         />
         <ListRoom
@@ -188,7 +189,7 @@ const HomeView = ({
           category={"new"}
           location={address?.id || "hanoi"}
           data={newHotel}
-          title={"Khách sạn mới"}
+          title={t('new_hotels')}
         />
         <PopularDestinations location={location} />
       </Container>

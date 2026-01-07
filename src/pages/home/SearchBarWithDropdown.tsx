@@ -45,6 +45,7 @@ import out_time from "../../images/logout.png";
 import query from "../../images/location-load.gif";
 import { useNavigate } from "react-router-dom";
 import { getLocation } from "../../service/hotel";
+import { useTranslation } from "react-i18next";
 // === POPUP CHUNG ===
 interface DateRangePickerProps {
   open: boolean;
@@ -78,6 +79,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
   const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
+  const { t } = useTranslation();
   const now = dayjs();
   const hours = Array.from(
     { length: 24 },
@@ -252,7 +254,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      Giờ nhận phòng
+                      {t('check_in_time')}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -320,7 +322,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      Số giờ sử dụng
+                     {t('hours_of_use')}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -393,7 +395,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       color='#666'
                       fontSize='0.9rem'
                       mb={0.5}>
-                      Trả phòng
+                       {t('check_out_time')}
                     </Typography>
                     <Typography fontWeight={600} color='#333'>
                       {endTime
@@ -529,7 +531,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   textTransform: "none",
                   fontSize: "0.9rem",
                 }}>
-                {bookingType === "hourly" ? "Ngày giờ bất kỳ" : "Ngày bất kỳ"}
+                {bookingType === "hourly" ?     t('any_date_time') :   t('any_date')}
               </Button>
               <Button
                 variant='contained'
@@ -543,7 +545,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   fontSize: "0.9rem",
                   "&:hover": { bgcolor: "#43a047" },
                 }}>
-                Áp dụng
+               {t('apply')}
               </Button>
             </Stack>
           </Stack>
@@ -576,6 +578,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
   const [selectedLocation, setSelectedLocation] = useState<string>("");
 const selectingRef = useRef(false);
+const { t } = useTranslation();
   const geoResolveRef = useRef(null);
   const filteredLocations = location.filter((loc) =>
     loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
@@ -645,7 +648,7 @@ const selectingRef = useRef(false);
   };
 
   const formatCheckIn = () => {
-    if (!checkIn) return "Nhận phòng";
+    if (!checkIn) return t('check_in');
     if (bookingType === "hourly" && checkInTime)
       return `${checkInTime}, ${checkIn.format("DD/MM")}`;
     return checkIn.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
@@ -653,12 +656,12 @@ const selectingRef = useRef(false);
 
   const formatCheckOut = () => {
     if (bookingType === "hourly") {
-      if (!checkOut) return "Trả phòng";
+      if (!checkOut) return t('check_out');
 
       return checkOut.format("HH:mm, DD/MM");
     }
 
-    if (!checkOut) return "Trả phòng";
+    if (!checkOut) return t('check_out');
     return checkOut.format("DD/MM/YYYY");
   };
   // Hàm convert "Hà Nội" -> "hanoi"
@@ -801,9 +804,9 @@ const selectingRef = useRef(false);
                   width: isMobile?"80%":"unset"
                 }}>
                 {[
-                  { v: "hourly", i: <AccessTime sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: "Theo giờ" },
-                  { v: "overnight", i: <Nightlight sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: "Qua đêm" },
-                  { v: "daily", i: <CalendarToday sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: "Theo ngày" },
+                  { v: "hourly", i: <AccessTime sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l:  t('by_hour') },
+                  { v: "overnight", i: <Nightlight sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: t('overnight') },
+                  { v: "daily", i: <CalendarToday sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: t('by_day') },
                 ].map((x) => (
                   <ToggleButton
                     key={x.v}
@@ -863,7 +866,7 @@ const selectingRef = useRef(false);
                 <Box sx={{ flex: { md: 1 }, position: "relative" }}>
                   <TextField
                     fullWidth
-                    placeholder='Bạn muốn đi đâu?'
+                    placeholder={t('where_do_you_want_to_go')}
                     variant='outlined'
                     value={searchValue}
                     onChange={(e) => {
@@ -940,7 +943,7 @@ const selectingRef = useRef(false);
                           overflowY: "auto",
                         }}>
                         <Typography color='rgba(152, 159, 173, 1)'>
-                          Không tìm thấy dữ liệu
+                        {t('no_data_found')}
                         </Typography>
                       </Paper>
                     ) : (
@@ -959,7 +962,7 @@ const selectingRef = useRef(false);
                             variant='subtitle2'
                             color='#666'
                             fontWeight={600}>
-                            Địa chỉ
+                             {t('address')}
                           </Typography>
                         </Box>
                         <List disablePadding>
@@ -1143,7 +1146,7 @@ const selectingRef = useRef(false);
                     height: { xs: 48, md: 45 },
                     "&:hover": { bgcolor: "#43a047" },
                   }}>
-                  Tìm kiếm
+                  {t('search')}
                 </Button>
               </Stack>
             </Paper>
@@ -1169,7 +1172,7 @@ const selectingRef = useRef(false);
           {/* HEADER */}
           <Stack direction='row' justifyContent='space-between' mb={2}>
             <Typography fontSize='1.2rem' fontWeight={700}>
-              Đang truy cập vị trí...
+            {t('accessing_location')}
             </Typography>
 
             <IconButton onClick={() => cancelGeo()}>

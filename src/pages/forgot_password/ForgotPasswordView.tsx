@@ -27,6 +27,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
 import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
 
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
@@ -49,6 +50,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 }) => {
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {t} = useTranslation()
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
     e.preventDefault();
@@ -134,17 +136,17 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 fontWeight: 700,
                 mb: 1,
               }}>
-              Quên mật khẩu
+              {t("forgot_password_title")}
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>
               {/* Phone */}
               <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                Số điện thoại
+              {t("phone_label")}
               </Typography>
               <TextField
                 fullWidth
-                placeholder='Nhập số điện thoại'
+                placeholder=   {t("phone_placeholder")}
                 variant='outlined'
                 value={phoneNumber}
                 onChange={(e) => {
@@ -158,7 +160,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
                   touched && !isValidVietnamPhone(phoneNumber)
-                    ? "Số điện thoại không hợp lệ, vui lòng nhập lại."
+                    ?  t("phone_invalid_error")
                     : ""
                 }
                 sx={{
@@ -224,7 +226,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               <Typography
                 sx={{ fontSize: "14px", mb: 3 }}
                 color='text.secondary'>
-                Bằng việc đăng kí tài khoản, tôi đồng ý với{" "}
+               { t("terms_text")}
                 <Link
                   href='#'
                   sx={{
@@ -232,9 +234,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     fontWeight: 500,
                     textDecoration: "underline",
                   }}>
-                  điều khoản và chính sách bảo mật
+                  { t("terms_link")}
                 </Link>{" "}
-                của Hotel Booking
+                { t("terms_of")}
               </Typography>
 
               <Button
@@ -259,10 +261,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang gửi mã...
+                    { t("sending_otp")}
                   </>
                 ) : (
-                  "Tiếp tục"
+                  t("continue_button")
                 )}
               </Button>
 
@@ -304,6 +306,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   birthDate,
 }) => {
   const [loading, setLoading] = useState(false);
+  const {t} = useTranslation()
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -377,12 +380,12 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 onClick={onBack}
                 sx={{ cursor: "pointer" }}
               />
-              Nhập mã xác nhận
+            {   t("enter_otp_title")}
             </Typography>
 
             <Typography
               sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              Mã xác nhận đã được gửi đến số <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
+                 {   t("otp_sent_to")}<b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>
@@ -421,10 +424,10 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 }}>
                 {isResendEnabled ? (
                   <Link onClick={onResend} sx={{ cursor: "pointer" }}>
-                    Gửi lại mã
+                   {   t("resend_otp_link")}
                   </Link>
                 ) : (
-                  `Gửi lại mã trong (${formatTime(timer)})`
+                  `${ t("resend_otp_timer")} (${formatTime(timer)})`
                 )}
               </Typography>
 
@@ -451,10 +454,10 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang xác nhận...
+                    { t("verifying_otp")}
                   </>
                 ) : (
-                  "Xác nhận OTP"
+                  t("verify_otp_button")
                 )}
               </Button>
             </Box>
@@ -471,7 +474,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 
 const PinCreation = ({ onNext, onBack, pin, setPin }) => {
   const [showPin, setShowPin] = useState(false);
-
+const {t} = useTranslation()
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length === 6) {
@@ -517,18 +520,18 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
                   sx={{ cursor: "pointer" }}
                 />
               )}
-              Tạo mã PIN của bạn
+             {  t("create_pin_title")}
             </Typography>
 
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
               <Typography fontSize={14} color='#5D6679' fontWeight={500}>
-                Mã PIN sẽ được dùng để đăng nhập
+              {  t("confirm_pin_title")}
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
                 sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
-                {showPin ? "Ẩn" : "Hiện"}
+                {showPin ? t("hide_pin") : t("show_pin") }
               </Typography>
             </Box>
 
@@ -575,7 +578,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }) => {
                     backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
                 }}>
-                Tiếp tục
+              { t("continue_button")}
               </Button>
             </Box>
           </Box>
@@ -590,6 +593,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const {t} = useTranslation()
   const context = useBookingContext();
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
@@ -662,18 +666,18 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                   sx={{ cursor: "pointer" }}
                 />
               )}
-              Xác nhận lại mã PIN
+                { t("confirm_pin_title")}
             </Typography>
 
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
               <Typography fontSize={14} color='#5D6679' fontWeight={500}>
-                Mã PIN sẽ được dùng để đăng nhập
+              { t("pin_usage_note")}
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
                 sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
-                {showPin ? "Ẩn" : "Hiện"}
+                {showPin ? t("hide_pin") : t("show_pin")}
               </Typography>
             </Box>
 
@@ -711,7 +715,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                     mb: 2,
                     fontWeight: 500,
                   }}>
-                  Mã PIN không khớp. Vui lòng nhập lại.
+                 { t("pin_mismatch_error")}
                 </Typography>
               )}
 
@@ -738,10 +742,10 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    Đang hoàn tất...
+                   { t("completing")}
                   </>
                 ) : (
-                  "Hoàn tất đăng ký"
+                   t("complete_button")
                 )}
               </Button>
             </Box>

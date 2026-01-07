@@ -5,6 +5,7 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconBut
 import { Close, Tune } from "@mui/icons-material";
 import success from "../../images/Capa_1.png"
 import { useLocation, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 type Props = {};
 
 const HomeController = (props: Props) => {
@@ -17,6 +18,7 @@ const HomeController = (props: Props) => {
   const [registerSuccessOpen, setRegisterSuccessOpen] = useState(false);
   const [forgotSuccessOpen, setForgotSuccessOpen] = useState(false); 
   const [searchParams,setSearchParams] = useSearchParams();
+  const { t } = useTranslation();
   useEffect(() => {
     if (searchParams.get("msg") === "success"&& searchParams.get("from") == "register") {
 
@@ -114,10 +116,10 @@ const HomeController = (props: Props) => {
         </DialogTitle>
         <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
           <Typography fontWeight={600} fontSize='18px' mb={1}>
-          {forgotSuccessOpen ? "Đổi mã PIN thành công":"Tạo tài khoản thành công"} 
+          {forgotSuccessOpen ? t('pin_change_success'):t('account_creation_success')} 
           </Typography>
           <Typography fontSize='14px' color='#666'>
-          Bạn có thể đùng mã PIN mới để đăng nhập tài khoản
+          {t('pin_new_login_prompt')}
           </Typography>
         </DialogContent>
         <DialogActions
@@ -139,7 +141,7 @@ const HomeController = (props: Props) => {
               "&:hover": { bgcolor: "#8ab020" },
               width: "100%",
             }}>
-            Đồng ý
+           {t('pin_new_login_agree')}
           </Button>
          
         </DialogActions>
