@@ -41,8 +41,8 @@ import en from "../../images/en.png";
 const LANGUAGES = [
   { code: "vi", label: "Tiếng Việt", flag: vn },
   { code: "en", label: "English", flag: en },
-  { code: "ko", label: "Hàn Quốc", flag: ko },
-  { code: "ja", label: "Nhật Bản", flag: ja },
+  { code: "ko", label: " 한국인", flag: ko },
+  { code: "ja", label: "日本語", flag: ja },
 ];
 
 const AccountSettingsPage = ({ setActiveMenu }) => {
