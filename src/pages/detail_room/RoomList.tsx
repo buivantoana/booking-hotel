@@ -277,7 +277,7 @@ const RoomCard = ({
             };
             console.log("AAA facilityIds", facilityIds());
             // Map id → object đầy đủ (label + icon)
-            const selectedFacilities = facilities.filter((fac) =>
+            const selectedFacilities = amenities.filter((fac) =>
               facilityIds().includes(fac.id)
             );
 
@@ -1008,7 +1008,7 @@ const RoomDetailModal = ({
                 };
 
                 // Map id → object đầy đủ (label + icon)
-                const selectedFacilities = facilities.filter((fac) =>
+                const selectedFacilities = amenities.filter((fac) =>
                   facilityIds().includes(fac.id)
                 );
 

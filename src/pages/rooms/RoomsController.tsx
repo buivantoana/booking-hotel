@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import RoomsView from "./RoomsView";
 import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { getAmenities, searchHotel } from "../../service/hotel";
+import { getAmenities, getAttribute, searchHotel } from "../../service/hotel";
 import { facilities } from "../../utils/utils";
 
 type Props = {};
@@ -10,9 +10,7 @@ type Props = {};
 const RoomsController = (props: Props) => {
   const [queryHotel, setQueryHotel] = useState({});
   const [dataHotel, setDataHotel] = useState([]);
-  const [amenities, setAmenities] = useState(facilities.map((item)=>{
-    return {...item,active:false}
-  }));
+  const [amenities, setAmenities] = useState([]);
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [page, setPage] = useState(1);
@@ -22,11 +20,11 @@ const RoomsController = (props: Props) => {
   const [loadingScroll, setLoadingScroll] = useState(false);
   const limit = 5;
   useEffect(() => {
-    console.log("AAAAAA toan tesst")
+    console.log("AAAAAA toan tesst");
     const locationParam = searchParams.get("location") || "";
     const typeParam = searchParams.get("type") || "hourly";
-    const category = searchParams.get("category") ;
-    
+    const category = searchParams.get("category");
+
     setQueryHotel({
       ...queryHotel,
       city: locationParam,
@@ -35,60 +33,60 @@ const RoomsController = (props: Props) => {
       limit,
       page,
     });
-  }, [location.pathname, searchParams.get("search") , page]);
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       let result = await getAmenities();
+  }, [location.pathname, searchParams.get("search"), page]);
+  useEffect(() => {
+    (async () => {
+      try {
+        let result = await getAttribute();
 
-  //       if (result?.amenities?.length > 0) {
-  //         setAmenities(
-  //           result?.amenities.map((item) => {
-  //             return {
-  //               ...item,
-  //               active: false,
-  //             };
-  //           })
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   })();
-  // }, []);
+        if (result?.amenities?.length > 0) {
+          setAmenities(
+            result?.amenities.map((item) => {
+              return {
+                ...item,
+                active: false,
+              };
+            })
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
   const prevQueryRef = useRef(queryHotel);
   useEffect(() => {
     if (Object.keys(queryHotel).length === 0) return;
-  
+
     const prevQuery = prevQueryRef.current;
-    
+
     // Kiểm tra xem chỉ page thay đổi
     const onlyPageChanged =
       queryHotel.page !== prevQuery.page &&
       Object.keys(queryHotel).every(
-        key => key === 'page' || queryHotel[key] === prevQuery[key]
+        (key) => key === "page" || queryHotel[key] === prevQuery[key]
       );
-  
+
     if (onlyPageChanged) {
       // chỉ load thêm, không reset dataHotel
       getHotel(queryHotel);
     } else {
       // reset dataHotel nếu có field khác thay đổi
       setDataHotel([]);
-      setPage(1)
+      setPage(1);
       getHotel();
     }
-  
+
     // lưu lại queryHotel hiện tại cho lần sau
     prevQueryRef.current = queryHotel;
   }, [queryHotel]);
   const getHotel = async (query) => {
-    if(dataHotel.length == 0){
+    if (dataHotel.length == 0) {
       setLoading(true);
-    }else{
-      setLoadingScroll(true)
+    } else {
+      setLoadingScroll(true);
     }
-     
+
     try {
       let result = await searchHotel(query || queryHotel);
       if (result?.hotels) {
@@ -106,12 +104,11 @@ const RoomsController = (props: Props) => {
     } catch (error) {
       console.log(error);
     }
-    if(dataHotel.length == 0){
+    if (dataHotel.length == 0) {
       setLoading(false);
-    }else{
-      setLoadingScroll(false)
+    } else {
+      setLoadingScroll(false);
     }
-    
   };
   const getHotelLatLon = async (query) => {
     setLoading(true);

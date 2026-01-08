@@ -3,6 +3,7 @@ import DetailRoomView from "./DetailRoomView";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   getAmenities,
+  getAttribute,
   getAvailableRooms,
   getDetailHotelApi,
   getReviewHotel,
@@ -23,9 +24,7 @@ const DetailRoomController = (props: Props) => {
   const [hastag, setHastag] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
-  const [amenities, setAmenities] = useState(facilities.map((item)=>{
-    return {...item,active:false}
-  }));
+  const [amenities, setAmenities] = useState([]);
   useEffect(() => {
     const checkIn = searchParams.get("checkIn"); // 2026-01-05
     const checkOut = searchParams.get("checkOut");
@@ -33,29 +32,29 @@ const DetailRoomController = (props: Props) => {
     const checkInTime = searchParams.get("checkInTime"); // 18:00
     const durationStr = searchParams.get("duration");
     const duration = durationStr ? Number(durationStr) : null;
-  
+
     let finalCheckIn = checkIn;
     let finalCheckOut = checkOut;
     let rentType = type;
-  
+
     if (type === "hourly") {
       if (!checkIn || !checkInTime || !duration || isNaN(duration)) {
         console.error("Missing params for hourly");
         return;
       }
-  
+
       // Không dùng new Date() + toISOString() để tránh convert UTC
       // Thay vào đó: trực tiếp ghép chuỗi theo định dạng backend mong muốn
       finalCheckIn = `${checkIn} ${checkInTime}:00`; // "2026-01-05 18:00:00"
-  
+
       // Tính check out
       const [hourStr, minuteStr] = checkInTime.split(":");
       let hour = parseInt(hourStr);
       const minute = parseInt(minuteStr);
-  
+
       let outHour = hour + duration;
       let outDay = checkIn;
-  
+
       // Nếu vượt 24h thì sang ngày hôm sau (hiếm, nhưng xử lý cho chắc)
       if (outHour >= 24) {
         outHour -= 24;
@@ -63,11 +62,11 @@ const DetailRoomController = (props: Props) => {
         nextDay.setDate(nextDay.getDate() + 1);
         outDay = nextDay.toISOString().slice(0, 10);
       }
-  
+
       const outTime = `${outHour.toString().padStart(2, "0")}:${minuteStr}`;
       finalCheckOut = `${outDay} ${outTime}:00`; // ví dụ: "2026-01-05 20:00:00"
     }
-  
+
     if (idPrams && finalCheckIn && finalCheckOut) {
       getAvaibleRoom(idPrams, {
         check_in: finalCheckIn,
@@ -79,7 +78,7 @@ const DetailRoomController = (props: Props) => {
   useEffect(() => {
     (async () => {
       try {
-        let result = await getAmenities();
+        let result = await getAttribute();
 
         if (result?.amenities?.length > 0) {
           setAmenities(

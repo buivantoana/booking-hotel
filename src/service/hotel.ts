@@ -71,6 +71,23 @@ export async function getAvailableRooms(id, query) {
   }
 }
 
+export async function getAttribute() {
+  try {
+    const response = await api.get(`/hotel/room-attributes?type=all`);
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      console.error("Error response data:", error.response.data);
+      console.error("Error response status:", error.response.status);
+      return error.response.data;
+    } else if (error.request) {
+      console.error("No response received:", error.request);
+    } else {
+      console.error("Error setting up request:", error.message);
+    }
+  }
+}
+
 export async function getDetailHotelApi(id) {
   let token = localStorage.getItem("access_token");
   let headers = {};
@@ -82,7 +99,7 @@ export async function getDetailHotelApi(id) {
     };
   }
   try {
-    const response = await api.get(`/hotel/detail/${id}`,headers);
+    const response = await api.get(`/hotel/detail/${id}`, headers);
     return response.data;
   } catch (error: any) {
     if (error.response) {
