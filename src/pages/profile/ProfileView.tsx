@@ -62,7 +62,8 @@ const ProfileView = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
+  const currentLang = i18n.language;
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(`${t("profile_menu")}`);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -308,10 +309,8 @@ const ProfileView = ({
       JSON.parse(detailBooking.hotel_name)?.vi ||
       JSON.parse(detailBooking.hotel_name)?.en ||
       "Khách sạn";
-    const roomName =
-      detailBooking.rooms[0]?.room_name ||
-      detailBooking.rooms[0]?.room_name ||
-      "Khách sạn";
+    const roomName = parseName(detailBooking.rooms[0]?.room_name)
+      
     const hotelAddress =
       JSON.parse(detailBooking.hotel_address)?.vi ||
       JSON.parse(detailBooking.hotel_address)?.en ||
@@ -1176,7 +1175,7 @@ export default ProfileView;
 
 import { TextField } from "@mui/material";
 import { getStatusPayment, retryPayment } from "../../service/payment";
-import { getErrorMessage } from "../../utils/utils";
+import { getErrorMessage, parseName } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 
 const ReasonModal = ({ open, onClose, onSubmit, loadingSubmit }) => {

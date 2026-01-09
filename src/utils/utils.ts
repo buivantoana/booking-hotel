@@ -181,14 +181,15 @@ export const normalizePhoneForAPI = (phone) => {
 };
 
 export const parseName = (name?: string) => {
+  let currentLanguage = localStorage.getItem("i18nextLng")
   if (!name) return "Không có tên";
 
   try {
     if (typeof name == "object") {
-      return name?.vi || name?.en || "Không có tên";
+      return name?.[currentLanguage] || "Không có tên";
     }
     const parsed = JSON.parse(name);
-    return parsed?.vi || parsed?.en || "Không có tên";
+    return parsed?.[currentLanguage]  || "Không có tên";
   } catch {
     console.log("AAAAA test");
     // name là plain text (ví dụ: "Suite")
