@@ -30,7 +30,7 @@ import { MuiOtpInput } from "mui-one-time-password-input";
 import { Login, userUpdate } from "../../service/admin";
 import { useBookingContext } from "../../App";
 import { toast } from "react-toastify";
-import { getErrorMessage } from "../../utils/utils";
+import { getErrorMessage, validateChar } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 import LanguageIcon from "@mui/icons-material/Language";
 import vn from "../../images/vn.png";
@@ -310,6 +310,7 @@ const AccountSettingsPage = ({ setActiveMenu }) => {
                   value={pin}
                   onChange={setPin}
                   length={6}
+                  validateChar={validateChar}
                   TextFieldsProps={{
                     type: "password",
                     inputProps: { maxLength: 1 },
@@ -428,6 +429,7 @@ const AccountSettingsPage = ({ setActiveMenu }) => {
                   value={pin}
                   onChange={setPin}
                   length={6}
+                  validateChar={validateChar}
                   TextFieldsProps={{
                     type: "password",
                     inputProps: { maxLength: 1 },
@@ -539,6 +541,7 @@ const AccountSettingsPage = ({ setActiveMenu }) => {
                   value={pinConfirm}
                   onChange={setPinConfirm}
                   length={6}
+                  validateChar={validateChar}
                   TextFieldsProps={{
                     type: "password",
                     inputProps: { maxLength: 1 },

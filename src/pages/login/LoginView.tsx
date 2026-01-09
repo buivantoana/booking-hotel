@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -10,6 +10,7 @@ import {
   Link,
   useTheme,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import image_left from "../../images/Frame 1321317999.png";
@@ -33,7 +34,8 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import AppleLogin from "react-apple-login";
 import { useTranslation } from "react-i18next";
 import { useGoogleLogin } from "@react-oauth/google";
-import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI, validateChar } from "../../utils/utils";
+import { ErrorOutline } from "@mui/icons-material";
 
 const GOOGLE_CLIENT_ID =
   "285312507829-8puo8pp5kikc3ahdivtr9ehq1fm3kkks.apps.googleusercontent.com";
@@ -182,6 +184,7 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,
@@ -302,6 +305,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumb
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,
@@ -435,6 +439,7 @@ const OtpVerification = ({
             <Box component="form" onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={otp}
+                validateChar={validateChar}
                 onChange={setOtp}
                 length={4}
                 sx={{
@@ -810,37 +815,67 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [attemptsLeft, setAttemptsLeft] = useState(5);
   const navigate = useNavigate();
   const context = useBookingContext();
+  const MAX_ATTEMPTS = 5;
+  const handleSubmit = async () => {
+    if (loading || pin.length !== 6) return;
+    if (attemptsLeft <= 0) return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
     setLoading(true);
-    if (pin.length === 6) {
-      try {
-        const result = await Login({
-          platform: "ios",
-          type: "phone",
-          value: "+84" + normalizePhoneForAPI(phoneNumber),
-          password: pin,
+    setErrorMessage(""); // Xóa lỗi cũ
+
+    try {
+      const result = await Login({
+        platform: "ios",
+        type: "phone",
+        value: "+84" + normalizePhoneForAPI(phoneNumber),
+        password: pin,
+      });
+
+      if (result.access_token) {
+        // Đăng nhập thành công
+        localStorage.setItem("access_token", result.access_token);
+        localStorage.setItem("refresh_token", result.refresh_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        context.dispatch({ type: "LOGIN", payload: { ...context.state, user: result.user } });
+        toast.success("Đăng nhập thành công");
+        setTimeout(() => navigate("/"), 300);
+      } else {
+        // Đăng nhập thất bại
+        const errorMsg = getErrorMessage(result.code) || result.message || "Mã PIN không đúng";
+        setErrorMessage(errorMsg);
+        
+        // Giảm số lần thử
+        setAttemptsLeft((prev) => {
+          const newAttempts = prev - 1;
+          if (newAttempts <= 0) {
+            toast.error("Bạn đã hết số lần thử. Vui lòng thử lại sau hoặc khôi phục PIN.");
+            // Có thể thêm logic khóa tạm thời ở đây (ví dụ: disable input 30s)
+          }
+          return newAttempts;
         });
-        if (result.access_token) {
-          localStorage.setItem("access_token", result.access_token);
-          localStorage.setItem("refresh_token", result.refresh_token);
-          localStorage.setItem("user", JSON.stringify(result.user));
-          context.dispatch({ type: "LOGIN", payload: { ...context.state, user: result.user } });
-          toast.success("Login success");
-          setTimeout(() => navigate("/"), 300);
-        } else {
-          toast.error(getErrorMessage(result.code) || result.message);
-        }
-      } catch (error) {
-        console.error(error);
       }
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Có lỗi xảy ra. Vui lòng thử lại.");
+      setAttemptsLeft((prev) => Math.max(0, prev - 1));
+    } finally {
+      setLoading(false);
+      // Xóa PIN sau khi submit (tăng bảo mật)
+      setPin("");
     }
-    setLoading(false);
   };
 
+  // Tự động submit khi đủ 6 ký tự
+  useEffect(() => {
+    if (pin.length === 6 && !loading && attemptsLeft > 0) {
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin]);
   return (
     <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
@@ -878,6 +913,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,
@@ -892,7 +928,38 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                   "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
                 }}
               />
+{errorMessage && (
+                <Alert 
+                  severity="error" 
+                  sx={{ mb: 2 }}
+                  icon={<ErrorOutline />}
+                >
+                  {errorMessage}
+                  {attemptsLeft > 0 && (
+                    <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+                      Còn <strong>{attemptsLeft}</strong> lần thử
+                    </Typography>
+                  )}
+                </Alert>
+              )}
 
+              {attemptsLeft <= 0 && (
+                <Alert 
+                  severity="warning" 
+                  sx={{ mb: 3 }}
+                  action={
+                    <Button 
+                      color="inherit" 
+                      size="small"
+                      onClick={() => navigate("/forgot-password")}
+                    >
+                      {t("forgot_pin")}
+                    </Button>
+                  }
+                >
+                  Bạn đã hết số lần thử. Vui lòng khôi phục mã PIN.
+                </Alert>
+              )}
               <Typography sx={{ mb: 4, color: "#FF7A00", fontSize: "14px", fontWeight: 500 }}>
                 <Link href="/forgot-password" sx={{ color: "#FF7A00", textDecoration: "underline" }}>
                   {t("forgot_pin")}
@@ -900,7 +967,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
               </Typography>
 
               <Button
-                type="submit"
+             
                 fullWidth
                 disabled={pin.length !== 6 || loading}
                 sx={{

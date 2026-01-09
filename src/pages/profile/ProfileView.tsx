@@ -644,6 +644,9 @@ const ProfileView = ({
               </Stack>
               <Button
                 variant='contained'
+                onClick={()=>{
+                  navigateToRoom(detailBooking)
+                }}
                 sx={{
                   bgcolor: "#98b720",
                   color: "white",
@@ -770,6 +773,9 @@ const ProfileView = ({
                 </Stack>
                 <Button
                   variant='contained'
+                  onClick={()=>{
+                    navigateToRoom(detailBooking)
+                  }}
                   sx={{
                     bgcolor: "#98b720",
                     color: "white",
@@ -1000,7 +1006,12 @@ const ProfileView = ({
           spacing={2}>
           <Typography
             onClick={() => {
-              setOpenCancelBooking(true);
+              if(detailBooking.status =="confirmed" || detailBooking.status=="pending"){
+                setOpenCancelBooking(true);
+
+              }else{
+                toast.warning("Đặt phòng đã quá thời gian huỷ")
+              }
             }}
             fontSize='16px'
             color='rgba(43, 47, 56, 1)'

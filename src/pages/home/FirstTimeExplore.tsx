@@ -45,6 +45,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
   const [openLocation, setOpenLocation] = useState(
     localStorage.getItem("location") ? false : true
   );
+  const context = useBookingContext()
   const navigate = useNavigate();
   return (
     <Box sx={{ py: { xs: 6, md: 8 } }}>
@@ -72,7 +73,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
             sx={{
               fontSize: { xs: "1.2rem", md: "1.875rem" },
             }}>
-           {t('first_time_explore')}
+           {!context?.state?.user?.id? t('first_time_explore'):""}
           </Typography>
 
           <Chip
@@ -110,7 +111,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
           />
         </Stack>
 
-        {/* 2 Card */}
+        {!context?.state?.user?.id&&
         <Grid container spacing={{ xs: 3, md: 4 }} alignItems='stretch'>
           {/* Card 1: Thành viên mới */}
           <Grid item xs={12} md={6}>
@@ -222,7 +223,7 @@ const FirstTimeExplore = ({ location, setAddress, address }) => {
               </Grid>
             </Card>
           </Grid>
-        </Grid>
+        </Grid>}
       </Box>
     </Box>
   );
@@ -251,6 +252,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CheckIcon from "@mui/icons-material/Check";
 import { useTranslation } from "react-i18next";
+import { useBookingContext } from "../../App";
 
 function LocationModal({ open, onClose, onSelect, location, address }: any) {
   const { t } = useTranslation();

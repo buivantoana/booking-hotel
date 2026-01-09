@@ -11,6 +11,7 @@ import {
   IconButton,
   useTheme,
   CircularProgress,
+  Popper,
 } from "@mui/material";
 import { MuiOtpInput } from "mui-one-time-password-input";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -22,9 +23,14 @@ import { checkUser, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
-import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI, validateChar } from "../../utils/utils";
 import { useTranslation } from "react-i18next"; // ← Thêm import
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "dayjs/locale/vi";
 
+dayjs.locale("vi");
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
 // ──────────────────────────────────────────────────────────────
@@ -88,12 +94,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
     return /^0[35789]\d{8,9}$/.test("0" + normalized) || /^[35789]\d{8,9}$/.test(normalized);
   };
 
-  const isValidName = (name: string) => {
+  const isValidName = (name: string): boolean => {
     if (!name) return false;
     if (name.length > 100) return false;
-    return /^[A-Za-zÀ-ỹ]+(?: [A-Za-zÀ-ỹ]+)*$/.test(name.trim());
+  
+    // Regex:
+    // ^[A-Za-zÀ-ỹ]+       : bắt đầu bằng chữ cái (không cho khoảng trắng đầu)
+    // (?:\s[A-Za-zÀ-ỹ]+)* : tiếp theo là (1 khoảng trắng + ít nhất 1 chữ cái), lặp lại
+    // $                   : kết thúc (không cho khoảng trắng cuối)
+    const vietnameseNameRegex = /^[A-Za-zÀ-ỹ]+(?:\s[A-Za-zÀ-ỹ]+)*$/;
+  
+    return vietnameseNameRegex.test(name);
   };
-
   const isValidBirthDate = (dateStr: string) => {
     if (!dateStr) return false;
     const today = new Date();
@@ -223,31 +235,80 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               <Typography fontSize={14} fontWeight={500} mb={0.5}>
                 {t("birthdate_label")}
               </Typography>
-              <TextField
-                fullWidth
-                type="date"
-                value={birthDate}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const valid = /^\d{4}-\d{2}-\d{2}$/.test(val);
-                  if (valid || val === "") setBirthDate(val);
-                }}
-                onBlur={() => setTouchedDate(true)}
-                error={touchedDate && !isValidBirthDate(birthDate)}
-                helperText={touchedDate && !isValidBirthDate(birthDate) ? t("invalid_birthdate_error") : ""}
-                InputLabelProps={{ shrink: true }}
-                inputProps={{ max: maxDate }}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px",
-                    height: "60px",
-                    backgroundColor: "#fff",
-                    "&.Mui-focused fieldset": { borderColor: "#98b720", borderWidth: 1.5 },
-                  },
-                }}
-              />
+              <LocalizationProvider adapterLocale="vi" dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  value={birthDate ? dayjs(birthDate) : null}
+                  dayOfWeekFormatter={(day) => {
+                    const map = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+                    return map[day.day()];
+                  }}
+                  onChange={(newValue) => {
+                    setBirthDate(newValue ? newValue.format("YYYY-MM-DD") : "");
+                  }}
+                  maxDate={dayjs(maxDate)}
 
+                  /* 🔥 CUSTOM POPPER */
+                  slots={{
+                    popper: (props) => (
+                      <Popper
+                        {...props}
+                        placement="bottom-start"
+                        style={{
+                          width: props.anchorEl
+                            ? props.anchorEl.clientWidth
+                            : undefined,
+                        }}
+                      />
+                    ),
+                  }}
+
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                      error: touchedDate && !isValidBirthDate(birthDate),
+                      helperText:
+                        touchedDate && !isValidBirthDate(birthDate)
+                          ? t("invalid_birthdate_error")
+                          : "",
+                      onBlur: () => setTouchedDate(true),
+
+                      InputProps: {
+                        sx: {
+                          height: "60px",
+                          borderRadius: "16px",
+                          backgroundColor: "#fff",
+
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            borderRadius: "16px",
+                            borderColor: "#cddc39",
+                          },
+
+                          "&:focus-within .MuiOutlinedInput-notchedOutline": {
+                            borderColor: "#98b720",
+                            borderWidth: 2,
+                          },
+
+                          "& input": {
+                            padding: "18px 14px",
+                            fontSize: "16px",
+                          },
+                        },
+                      },
+
+                      sx: { mb: 3 },
+                    },
+
+                    /* OPTIONAL: style calendar box */
+                    popper: {
+                      sx: {
+                        "& .MuiPaper-root": {
+                          borderRadius: "16px",
+                        },
+                      },
+                    },
+                  }}
+                />
+              </LocalizationProvider>
               <Typography sx={{ fontSize: "14px", mb: 3 }} color="text.secondary">
                 {t("agreement_text")}{" "}
                 <Link
@@ -324,7 +385,8 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-
+  const [countSpam, setCountSpam] = useState(1);
+  
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -333,6 +395,13 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("AAAAA countSpam",countSpam)
+    if(countSpam == 5){
+      toast.warning("Quá số lần nhập OTP");
+      onBack()
+      return 
+    }
+   
     setLoading(true);
     if (otp.length === 4) {
       try {
@@ -348,7 +417,9 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         if (result.access_token) {
           onSuccess(result);
         } else {
-          toast.error(getErrorMessage(result.code) || result.detail);
+          setCountSpam(countSpam+1)
+          setOtp("")
+          toast.error(getErrorMessage(result.code) || result.message);
         }
       } catch (error) {
         console.log(error);
@@ -390,6 +461,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                   value={otp}
                   onChange={setOtp}
                   length={4}
+                  validateChar={validateChar}
                   sx={{
                     gap: 2,
                     "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
@@ -499,6 +571,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }: any) => {
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,
@@ -548,9 +621,14 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }: any) =>
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const context = useBookingContext();
-
+  const [count,setCount] = useState(1)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(count == 5){
+      toast.warning("Nhập mã pin sai quá 5 lần ")
+      onBack(true)
+      return 
+    }
     setLoading(true);
     if (pin.length === 6 && pin === pinConfirm) {
       try {
@@ -570,6 +648,8 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }: any) =>
       }
     } else {
       setShowConfirm(true);
+      setCount(count+1)
+     
     }
     setLoading(false);
   };
@@ -611,6 +691,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }: any) =>
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,
@@ -751,7 +832,13 @@ const RegisterView = () => {
       {currentStep === "confirm_pin" && (
         <PinCreationConfirm
           onSuccess={() => navigate("/?from=register&msg=success")}
-          onBack={() => setCurrentStep("pin")}
+          onBack={(isOtp) => {
+            if(isOtp){
+              setCurrentStep("otp")
+            }else{
+              setCurrentStep("pin")
+            }
+          }}
           pinConfirm={pin}
           dataUser={dataUser}
         />

@@ -26,7 +26,7 @@ import { sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
-import { getErrorMessage, normalizePhoneForAPI } from "../../utils/utils";
+import { getErrorMessage, normalizePhoneForAPI, validateChar } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 
 // ──────────────────────────────────────────────────────────────
@@ -394,6 +394,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                   value={otp}
                   onChange={setOtp}
                   length={4}
+                  validateChar={validateChar}
                   sx={{
                     gap: 2,
                     "& .MuiOtpInput-TextField .MuiOutlinedInput-root": {
@@ -539,6 +540,7 @@ const {t} = useTranslation()
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
+                validateChar={validateChar}
                 length={6}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
@@ -686,6 +688,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                 value={pin}
                 onChange={setPin}
                 length={6}
+                validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
                 sx={{
                   gap: 1.5,

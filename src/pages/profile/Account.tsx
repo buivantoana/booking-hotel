@@ -95,12 +95,17 @@ const Account = ({ context }) => {
     const age = Math.abs(ageDate.getUTCFullYear() - 1970);
     return age >= 18;
   };
-  const isValidName = (name) => {
-    if (!name) return false; // bắt buộc nhập
-    if (name.length > 100) return false; // tối đa 100 ký tự
-    // regex: chỉ chữ cái (có dấu) và khoảng trắng, không khoảng trắng đầu/cuối
-    if (!/^[A-Za-zÀ-ỹ]+(?: [A-Za-zÀ-ỹ]+)*$/.test(name.trim())) return false;
-    return true;
+  const isValidName = (name: string): boolean => {
+    if (!name) return false;
+    if (name.length > 100) return false;
+  
+    // Regex:
+    // ^[A-Za-zÀ-ỹ]+       : bắt đầu bằng chữ cái (không cho khoảng trắng đầu)
+    // (?:\s[A-Za-zÀ-ỹ]+)* : tiếp theo là (1 khoảng trắng + ít nhất 1 chữ cái), lặp lại
+    // $                   : kết thúc (không cho khoảng trắng cuối)
+    const vietnameseNameRegex = /^[A-Za-zÀ-ỹ]+(?:\s[A-Za-zÀ-ỹ]+)*$/;
+  
+    return vietnameseNameRegex.test(name);
   };
   return (
     <Box sx={{ backgroundColor: "#f8f9fa" }}>

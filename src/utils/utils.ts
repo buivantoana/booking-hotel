@@ -197,6 +197,9 @@ export const parseName = (name?: string) => {
   }
 };
 
+export const validateChar = (value) => {
+    return /^\d*$/.test(value); // Hoặc dùng !isNaN(Number(value)) && value !== ''
+  };
 export const facilities = [
   {
     id: "luggage_storage",

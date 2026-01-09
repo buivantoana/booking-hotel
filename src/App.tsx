@@ -17,6 +17,7 @@ export const coursesContext = createContext({});
 const reducer = (state: any, action: any) => {
   switch (action.type) {
     case "LOGIN":
+      localStorage.setItem("first_time_logged_in",JSON.stringify(true))
       return {
         ...state,
         user: action.payload.user,

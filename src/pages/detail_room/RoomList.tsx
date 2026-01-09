@@ -42,6 +42,7 @@ import {
   getErrorMessage,
   normalizePhoneForAPI,
   parseName,
+  validateChar,
 } from "../../utils/utils";
 import { useTranslation } from "react-i18next";
 interface Room {
@@ -1200,6 +1201,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
             value={pin}
             onChange={setPin}
             length={6}
+            validateChar={validateChar}
             TextFieldsProps={{
               type: showPin ? "text" : "password",
               inputProps: { maxLength: 1 },
