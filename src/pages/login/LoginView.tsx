@@ -28,13 +28,17 @@ import {
   verifyOtp,
 } from "../../service/admin";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useBookingContext } from "../../App";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import AppleLogin from "react-apple-login";
 import { useTranslation } from "react-i18next";
 import { useGoogleLogin } from "@react-oauth/google";
-import { getErrorMessage, normalizePhoneForAPI, validateChar } from "../../utils/utils";
+import {
+  getErrorMessage,
+  normalizePhoneForAPI,
+  validateChar,
+} from "../../utils/utils";
 import { ErrorOutline } from "@mui/icons-material";
 
 const GOOGLE_CLIENT_ID =
@@ -96,7 +100,10 @@ const LoginView = () => {
       )}
 
       {currentStep === "pin" && (
-        <PinCreation setCurrentStep={setCurrentStep} phoneNumber={phoneNumber} />
+        <PinCreation
+          setCurrentStep={setCurrentStep}
+          phoneNumber={phoneNumber}
+        />
       )}
 
       {currentStep === "otp" && (
@@ -148,13 +155,27 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
-        <Grid item xs={12} md={6} display="flex" justifyContent="end">
+        <Grid item xs={12} md={6} display='flex' justifyContent='end'>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
             <Typography
               sx={{
@@ -164,22 +185,29 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              {onBack && <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />}
+              }}>
+              {onBack && (
+                <ArrowBackIosNewIcon
+                  onClick={onBack}
+                  sx={{ cursor: "pointer" }}
+                />
+              )}
               {t("create_pin_title")}
             </Typography>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Typography fontSize={14} color="#5D6679" fontWeight={500}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Typography fontSize={14} color='#5D6679' fontWeight={500}>
                 {t("pin_usage_description")}
               </Typography>
-              <Typography onClick={() => setShowPin(!showPin)} sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
+              <Typography
+                onClick={() => setShowPin(!showPin)}
+                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
                 {showPin ? t("hide_pin") : t("show_pin")}
               </Typography>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
@@ -197,12 +225,17 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={pin.length !== 6}
                 sx={{
@@ -214,9 +247,10 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0" },
-                }}
-              >
+                  "&:hover": {
+                    backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
+                  },
+                }}>
                 {t("continue")}
               </Button>
             </Box>
@@ -228,7 +262,13 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
 };
 
 // ==================== PIN CONFIRM (Google flow) ====================
-const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumber }: any) => {
+const PinCreationConfirm = ({
+  onSuccess,
+  onBack,
+  pinConfirm,
+  dataUser,
+  phoneNumber,
+}: any) => {
   const { t } = useTranslation();
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
@@ -255,7 +295,10 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumb
           );
           context.dispatch({
             type: "LOGIN",
-            payload: { ...context.state, user: { ...dataUser.user, phone: "+84" + phoneNumber } },
+            payload: {
+              ...context.state,
+              user: { ...dataUser.user, phone: "+84" + phoneNumber },
+            },
           });
           onSuccess();
         }
@@ -269,13 +312,27 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumb
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
-        <Grid item xs={12} md={6} display="flex" justifyContent="end">
+        <Grid item xs={12} md={6} display='flex' justifyContent='end'>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
             <Typography
               sx={{
@@ -285,22 +342,29 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumb
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              {onBack && <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />}
+              }}>
+              {onBack && (
+                <ArrowBackIosNewIcon
+                  onClick={onBack}
+                  sx={{ cursor: "pointer" }}
+                />
+              )}
               {t("confirm_pin_title")}
             </Typography>
 
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-              <Typography fontSize={14} color="#5D6679" fontWeight={500}>
+            <Box
+              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+              <Typography fontSize={14} color='#5D6679' fontWeight={500}>
                 {t("pin_usage_description")}
               </Typography>
-              <Typography onClick={() => setShowPin(!showPin)} sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
+              <Typography
+                onClick={() => setShowPin(!showPin)}
+                sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
                 {showPin ? t("hide_pin") : t("show_pin")}
               </Typography>
             </Box>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
@@ -318,33 +382,47 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser, phoneNumb
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
 
               {showConfirm && pin !== pinConfirm && (
-                <Typography sx={{ color: "#f44336", fontSize: "14px", mb: 2, fontWeight: 500 }}>
+                <Typography
+                  sx={{
+                    color: "#f44336",
+                    fontSize: "14px",
+                    mb: 2,
+                    fontWeight: 500,
+                  }}>
                   {t("pin_not_match")}
                 </Typography>
               )}
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: pin.length !== 6 || loading ? "#e0e0e0" : "#9AC700",
+                  backgroundColor:
+                    pin.length !== 6 || loading ? "#e0e0e0" : "#9AC700",
                   color: pin.length !== 6 || loading ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: pin.length !== 6 || loading ? "#e0e0e0" : "#7cb400" },
+                  "&:hover": {
+                    backgroundColor:
+                      pin.length !== 6 || loading ? "#e0e0e0" : "#7cb400",
+                  },
                   position: "relative",
-                }}
-              >
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -410,13 +488,27 @@ const OtpVerification = ({
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
-        <Grid item xs={12} md={6} display="flex" justifyContent="end">
+        <Grid item xs={12} md={6} display='flex' justifyContent='end'>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
             <Typography
               sx={{
@@ -426,17 +518,20 @@ const OtpVerification = ({
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              <ArrowBackIosNewIcon onClick={onBack} sx={{ cursor: "pointer" }} />
+              }}>
+              <ArrowBackIosNewIcon
+                onClick={onBack}
+                sx={{ cursor: "pointer" }}
+              />
               {t("enter_otp_title")}
             </Typography>
 
-            <Typography sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
+            <Typography
+              sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
               {t("otp_sent_to")} <b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
+            <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={otp}
                 validateChar={validateChar}
@@ -454,11 +549,22 @@ const OtpVerification = ({
                     "&:hover fieldset": { borderColor: "#7cb400" },
                     "&.Mui-focused fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
 
-              <Typography sx={{ mb: 4, color: "#FF7A00", fontSize: "14px", fontWeight: 500 }}>
+              <Typography
+                sx={{
+                  mb: 4,
+                  color: "#FF7A00",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}>
                 {isResendEnabled ? (
                   <Link onClick={onResend} sx={{ cursor: "pointer" }}>
                     {t("resend_otp")}
@@ -469,22 +575,25 @@ const OtpVerification = ({
               </Typography>
 
               <Button
-                type="submit"
+                type='submit'
                 fullWidth
                 disabled={otp.length !== 4 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: otp.length !== 4 || loading ? "#e0e0e0" : "#9AC700",
+                  backgroundColor:
+                    otp.length !== 4 || loading ? "#e0e0e0" : "#9AC700",
                   color: otp.length !== 4 || loading ? "#888" : "#fff",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: otp.length !== 4 || loading ? "#e0e0e0" : "#7cb400" },
+                  "&:hover": {
+                    backgroundColor:
+                      otp.length !== 4 || loading ? "#e0e0e0" : "#7cb400",
+                  },
                   position: "relative",
-                }}
-              >
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -522,7 +631,10 @@ const RegistrationForm = ({
   const isValidVietnamPhone = (phone: string) => {
     if (!phone) return false;
     const normalized = phone.replace(/\D/g, "");
-    return /^0[35789]\d{8,9}$/.test("0" + normalized) || /^[35789]\d{8,9}$/.test(normalized);
+    return (
+      /^0[35789]\d{8,9}$/.test("0" + normalized) ||
+      /^[35789]\d{8,9}$/.test(normalized)
+    );
   };
 
   const handleRegister = async () => {
@@ -547,7 +659,8 @@ const RegistrationForm = ({
     try {
       const result = await LoginGoogle({
         platform: "ios",
-        id_token: credentialResponse?.access_token || credentialResponse?.credential,
+        id_token:
+          credentialResponse?.access_token || credentialResponse?.credential,
         location: "hanoi",
       });
 
@@ -561,7 +674,10 @@ const RegistrationForm = ({
         localStorage.setItem("access_token", result.access_token);
         localStorage.setItem("refresh_token", result.refresh_token);
         localStorage.setItem("user", JSON.stringify(result.user));
-        context.dispatch({ type: "LOGIN", payload: { ...context.state, user: result.user } });
+        context.dispatch({
+          type: "LOGIN",
+          payload: { ...context.state, user: result.user },
+        });
         toast.success("Login success");
         setTimeout(() => navigate("/"), 300);
       }
@@ -615,7 +731,10 @@ const RegistrationForm = ({
           localStorage.setItem("access_token", result.access_token);
           localStorage.setItem("refresh_token", result.refresh_token);
           localStorage.setItem("user", JSON.stringify(result.user));
-          context.dispatch({ type: "LOGIN", payload: { ...context.state, user: result.user } });
+          context.dispatch({
+            type: "LOGIN",
+            payload: { ...context.state, user: result.user },
+          });
           toast.success("Login success");
           setTimeout(() => navigate("/"), 300);
         }
@@ -626,26 +745,56 @@ const RegistrationForm = ({
   };
 
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 5 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 5 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="Hotel illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='Hotel illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
-        <Grid item xs={12} md={6} display="flex" justifyContent="end">
-          <Box sx={{ px: { xs: 3, sm: 4, md: 0 }, width: { xs: "100%", sm: "400px", md: "486px" } }}>
-            <Typography sx={{ fontSize: { xs: "28px", md: "32px" }, fontWeight: 700, mb: 1 }}>
+        <Grid item xs={12} md={6} display='flex' justifyContent='end'>
+          <Box
+            sx={{
+              px: { xs: 3, sm: 4, md: 0 },
+              width: { xs: "100%", sm: "400px", md: "486px" },
+            }}>
+            <Typography
+              sx={{
+                fontSize: { xs: "28px", md: "32px" },
+                fontWeight: 700,
+                mb: 1,
+              }}>
               {isLoginGoogle ? (
                 <>
-                  <ArrowBackIosNewIcon sx={{ cursor: "pointer" }} onClick={() => setIsLoginGoogle(false)} /> {t("your_phone_title")}
+                  <ArrowBackIosNewIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => setIsLoginGoogle(false)}
+                  />{" "}
+                  {t("your_phone_title")}
                 </>
               ) : (
                 t("login_welcome")
               )}
             </Typography>
 
-            <Typography sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-              {isLoginGoogle ? t("enter_phone_to_continue") : t("login_exclusive_offers")}
+            <Typography
+              sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
+              {isLoginGoogle
+                ? t("enter_phone_to_continue")
+                : t("login_exclusive_offers")}
             </Typography>
 
             <Box>
@@ -656,12 +805,18 @@ const RegistrationForm = ({
               <TextField
                 fullWidth
                 placeholder={t("phone_placeholder")}
-                variant="outlined"
+                variant='outlined'
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) =>
+                  setPhoneNumber(e.target.value.replace(/\D/g, ""))
+                }
                 onBlur={() => setTouched(true)}
                 error={touched && !isValidVietnamPhone(phoneNumber)}
-                helperText={touched && !isValidVietnamPhone(phoneNumber) ? t("invalid_phone_error") : ""}
+                helperText={
+                  touched && !isValidVietnamPhone(phoneNumber)
+                    ? t("invalid_phone_error")
+                    : ""
+                }
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "16px",
@@ -669,20 +824,33 @@ const RegistrationForm = ({
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#e0e0e0" },
                     "&:hover fieldset": { borderColor: "#98b720" },
-                    "&.Mui-focused fieldset": { borderColor: "#98b720", borderWidth: 1.5 },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#98b720",
+                      borderWidth: 1.5,
+                    },
                   },
                 }}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <img src={vn} alt="VN" style={{ width: 28, height: 20, borderRadius: 4, objectFit: "cover", marginRight: 8 }} />
+                    <InputAdornment position='start'>
+                      <img
+                        src={vn}
+                        alt='VN'
+                        style={{
+                          width: 28,
+                          height: 20,
+                          borderRadius: 4,
+                          objectFit: "cover",
+                          marginRight: 8,
+                        }}
+                      />
                       <Typography sx={{ fontSize: 14, mr: 1 }}>+84</Typography>
                     </InputAdornment>
                   ),
                 }}
               />
 
-              <Typography sx={{ mb: 3, mt: 0.5 }} fontSize="12px" color="red">
+              <Typography sx={{ mb: 3, mt: 0.5 }} fontSize='12px' color='red'>
                 {errorExits && t("phone_already_registered")}
               </Typography>
 
@@ -695,18 +863,31 @@ const RegistrationForm = ({
                     mb: 3,
                     py: 1.5,
                     borderRadius: "16px",
-                    backgroundColor: loading || !isValidVietnamPhone(phoneNumber) ? "#e0e0e0" : "#98b720",
-                    color: loading || !isValidVietnamPhone(phoneNumber) ? "#888" : "#fff",
+                    backgroundColor:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#e0e0e0"
+                        : "#98b720",
+                    color:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#888"
+                        : "#fff",
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: "18px",
                     height: "56px",
-                    "&:hover": { backgroundColor: loading || !isValidVietnamPhone(phoneNumber) ? "#e0e0e0" : "#98b720" },
-                  }}
-                >
+                    "&:hover": {
+                      backgroundColor:
+                        loading || !isValidVietnamPhone(phoneNumber)
+                          ? "#e0e0e0"
+                          : "#98b720",
+                    },
+                  }}>
                   {loading ? (
                     <>
-                      <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                      <CircularProgress
+                        size={20}
+                        sx={{ color: "#fff", mr: 1 }}
+                      />
                       {t("continue")}...
                     </>
                   ) : (
@@ -722,18 +903,31 @@ const RegistrationForm = ({
                     mb: 3,
                     py: 1.5,
                     borderRadius: "16px",
-                    backgroundColor: loading || !isValidVietnamPhone(phoneNumber) ? "#e0e0e0" : "#98b720",
-                    color: loading || !isValidVietnamPhone(phoneNumber) ? "#888" : "#fff",
+                    backgroundColor:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#e0e0e0"
+                        : "#98b720",
+                    color:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#888"
+                        : "#fff",
                     textTransform: "none",
                     fontWeight: 600,
                     fontSize: "18px",
                     height: "56px",
-                    "&:hover": { backgroundColor: loading || !isValidVietnamPhone(phoneNumber) ? "#e0e0e0" : "#98b720" },
-                  }}
-                >
+                    "&:hover": {
+                      backgroundColor:
+                        loading || !isValidVietnamPhone(phoneNumber)
+                          ? "#e0e0e0"
+                          : "#98b720",
+                    },
+                  }}>
                   {loading ? (
                     <>
-                      <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
+                      <CircularProgress
+                        size={20}
+                        sx={{ color: "#fff", mr: 1 }}
+                      />
                       {t("login_button")}...
                     </>
                   ) : (
@@ -744,23 +938,27 @@ const RegistrationForm = ({
 
               {!isLoginGoogle && (
                 <>
-                  <Typography variant="body2" align="center" mb={2} color="text.secondary">
+                  <Typography
+                    variant='body2'
+                    align='center'
+                    mb={2}
+                    color='text.secondary'>
                     {t("or")}
                   </Typography>
 
                   <Grid container spacing={2} mb={3}>
                     <Grid item xs={12} sm={6}>
                       <AppleLogin
-                        clientId="com.zeezoo.hotelbooking.login"
-                        redirectURI="https://booking-hotel-liard.vercel.app"
-                        responseType="code"
-                        responseMode="query"
+                        clientId='com.zeezoo.hotelbooking.login'
+                        redirectURI='https://booking-hotel-liard.vercel.app'
+                        responseType='code'
+                        responseMode='query'
                         usePopup={true}
-                        scope="name email"
+                        scope='name email'
                         callback={handleAppleResponse}
                         render={(renderProps: any) => (
                           <Button
-                            variant="outlined"
+                            variant='outlined'
                             onClick={renderProps.onClick}
                             fullWidth
                             sx={{
@@ -774,9 +972,13 @@ const RegistrationForm = ({
                               justifyContent: "center",
                               gap: 1,
                               "&:hover": { borderColor: "#bdbdbd" },
-                            }}
-                          >
-                            <Box component="img" src={apple} alt="Apple" sx={{ width: 20, mt: -0.7 }} />
+                            }}>
+                            <Box
+                              component='img'
+                              src={apple}
+                              alt='Apple'
+                              sx={{ width: 20, mt: -0.7 }}
+                            />
                             {t("sign_up_with_apple")}
                           </Button>
                         )}
@@ -785,17 +987,25 @@ const RegistrationForm = ({
 
                     <Grid item xs={12} sm={6}>
                       <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                        <GoogleCustomButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+                        <GoogleCustomButton
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleError}
+                        />
                       </GoogleOAuthProvider>
                     </Grid>
                   </Grid>
 
-                  <Typography sx={{ fontSize: "14px" }} color="text.secondary">
+                  <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
                     {t("no_account_yet")}
                     <Link
                       onClick={() => navigate("/register")}
-                      sx={{ color: "#ff7a00", fontWeight: 500, textDecoration: "underline", cursor: "pointer", ml: 0.5 }}
-                    >
+                      sx={{
+                        color: "#ff7a00",
+                        fontWeight: 500,
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        ml: 0.5,
+                      }}>
                       {t("register_now_link")}
                     </Link>
                   </Typography>
@@ -840,19 +1050,25 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
         localStorage.setItem("access_token", result.access_token);
         localStorage.setItem("refresh_token", result.refresh_token);
         localStorage.setItem("user", JSON.stringify(result.user));
-        context.dispatch({ type: "LOGIN", payload: { ...context.state, user: result.user } });
+        context.dispatch({
+          type: "LOGIN",
+          payload: { ...context.state, user: result.user },
+        });
         toast.success("Đăng nhập thành công");
         setTimeout(() => navigate("/"), 300);
       } else {
         // Đăng nhập thất bại
-        const errorMsg = getErrorMessage(result.code) || result.message || "Mã PIN không đúng";
+        const errorMsg =
+          getErrorMessage(result.code) || result.message || "Mã PIN không đúng";
         setErrorMessage(errorMsg);
-        
+
         // Giảm số lần thử
         setAttemptsLeft((prev) => {
           const newAttempts = prev - 1;
           if (newAttempts <= 0) {
-            toast.error("Bạn đã hết số lần thử. Vui lòng thử lại sau hoặc khôi phục PIN.");
+            toast.error(
+              "Bạn đã hết số lần thử. Vui lòng thử lại sau hoặc khôi phục PIN."
+            );
             // Có thể thêm logic khóa tạm thời ở đây (ví dụ: disable input 30s)
           }
           return newAttempts;
@@ -877,13 +1093,27 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pin]);
   return (
-    <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", py: 8 }}>
+    <Container
+      maxWidth='lg'
+      sx={{ display: "flex", alignItems: "center", py: 8 }}>
       <Grid container sx={{ alignItems: "center", minHeight: "60vh" }}>
-        <Grid item xs={12} md={6} sx={{ display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-          <Box component="img" src={image_left} alt="Hotel illustration" sx={{ width: "592px", height: "557px", maxWidth: "100%" }} />
+        <Grid
+          item
+          xs={12}
+          md={6}
+          sx={{
+            display: { xs: "none", md: "flex" },
+            justifyContent: "center",
+          }}>
+          <Box
+            component='img'
+            src={image_left}
+            alt='Hotel illustration'
+            sx={{ width: "592px", height: "557px", maxWidth: "100%" }}
+          />
         </Grid>
 
-        <Grid item xs={12} md={6} display="flex" justifyContent="end">
+        <Grid item xs={12} md={6} display='flex' justifyContent='end'>
           <Box sx={{ width: { xs: "100%", sm: "400px", md: "486px" } }}>
             <Typography
               sx={{
@@ -893,18 +1123,27 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-              }}
-            >
-              <ArrowBackIosNewIcon onClick={() => setCurrentStep("register")} sx={{ cursor: "pointer" }} />
+              }}>
+              <ArrowBackIosNewIcon
+                onClick={() => setCurrentStep("register")}
+                sx={{ cursor: "pointer" }}
+              />
               {t("welcome_back_pin")}+84{normalizePhoneForAPI(phoneNumber)}
             </Typography>
 
-            <Box component="form" onSubmit={handleSubmit}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-                <Typography fontSize={14} color="#5D6679" fontWeight={500}>
+            <Box component='form' onSubmit={handleSubmit}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  mb: 2,
+                }}>
+                <Typography fontSize={14} color='#5D6679' fontWeight={500}>
                   {t("pin_login_description")}
                 </Typography>
-                <Typography onClick={() => setShowPin(!showPin)} sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
+                <Typography
+                  onClick={() => setShowPin(!showPin)}
+                  sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
                   {showPin ? t("hide_pin") : t("show_pin")}
                 </Typography>
               </Box>
@@ -925,18 +1164,19 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                     backgroundColor: "#fff",
                     "& fieldset": { borderColor: "#9AC700" },
                   },
-                  "& input": { textAlign: "center", fontSize: "24px", fontWeight: 700, color: "#9AC700" },
+                  "& input": {
+                    textAlign: "center",
+                    fontSize: "24px",
+                    fontWeight: 700,
+                    color: "#9AC700",
+                  },
                 }}
               />
-{errorMessage && (
-                <Alert 
-                  severity="error" 
-                  sx={{ mb: 2 }}
-                  icon={<ErrorOutline />}
-                >
+              {errorMessage && (
+                <Alert severity='error' sx={{ mb: 2 }} icon={<ErrorOutline />}>
                   {errorMessage}
                   {attemptsLeft > 0 && (
-                    <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+                    <Typography variant='body2' component='span' sx={{ ml: 1 }}>
                       Còn <strong>{attemptsLeft}</strong> lần thử
                     </Typography>
                   )}
@@ -944,44 +1184,52 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
               )}
 
               {attemptsLeft <= 0 && (
-                <Alert 
-                  severity="warning" 
+                <Alert
+                  severity='warning'
                   sx={{ mb: 3 }}
                   action={
-                    <Button 
-                      color="inherit" 
-                      size="small"
-                      onClick={() => navigate("/forgot-password")}
-                    >
+                    <Button
+                      color='inherit'
+                      size='small'
+                      onClick={() => navigate("/forgot-password")}>
                       {t("forgot_pin")}
                     </Button>
-                  }
-                >
+                  }>
                   Bạn đã hết số lần thử. Vui lòng khôi phục mã PIN.
                 </Alert>
               )}
-              <Typography sx={{ mb: 4, color: "#FF7A00", fontSize: "14px", fontWeight: 500 }}>
-                <Link href="/forgot-password" sx={{ color: "#FF7A00", textDecoration: "underline" }}>
+              <Typography
+                sx={{
+                  mb: 4,
+                  color: "#FF7A00",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}>
+                <Link
+                  href='/forgot-password'
+                  sx={{ color: "#FF7A00", textDecoration: "underline" }}>
                   {t("forgot_pin")}
                 </Link>
               </Typography>
 
               <Button
-             
                 fullWidth
                 disabled={pin.length !== 6 || loading}
                 sx={{
                   py: 1.6,
                   borderRadius: "30px",
-                  backgroundColor: pin.length === 6 && !loading ? "#9AC700" : "#e0e0e0",
+                  backgroundColor:
+                    pin.length === 6 && !loading ? "#9AC700" : "#e0e0e0",
                   color: pin.length === 6 && !loading ? "#fff" : "#888",
                   textTransform: "none",
                   fontWeight: 600,
                   fontSize: "18px",
                   height: "56px",
-                  "&:hover": { backgroundColor: pin.length === 6 && !loading ? "#7cb400" : "#e0e0e0" },
-                }}
-              >
+                  "&:hover": {
+                    backgroundColor:
+                      pin.length === 6 && !loading ? "#7cb400" : "#e0e0e0",
+                  },
+                }}>
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
@@ -1002,15 +1250,28 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
 // ==================== GOOGLE CUSTOM BUTTON ====================
 const GoogleCustomButton = ({ onSuccess, onError }: any) => {
   const { t } = useTranslation();
-  const login = useGoogleLogin({
-    onSuccess,
-    onError,
-  });
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const login = useGoogleLogin({ onSuccess, onError });
+
+  // ✅ Auto login nếu URL có ?type=google
+  useEffect(() => {
+    if (searchParams.get("type") === "google") {
+      // defer để popup login chạy đúng
+      setTimeout(() => {
+        login();
+        // Xóa param
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete("type");
+        setSearchParams(newParams, { replace: true });
+      }, 0);
+    }
+  }, [searchParams, setSearchParams, login]);
 
   return (
     <Button
-      variant="outlined"
-      onClick={() => login()}
+      variant='outlined'
+      onClick={() => login()} // click vẫn hoạt động
       fullWidth
       sx={{
         py: 1.2,
@@ -1023,9 +1284,8 @@ const GoogleCustomButton = ({ onSuccess, onError }: any) => {
         justifyContent: "center",
         gap: 1,
         "&:hover": { borderColor: "#bdbdbd" },
-      }}
-    >
-      <Box component="img" src={google} alt="Google" sx={{ width: 23 }} />
+      }}>
+      <Box component='img' src={google} alt='Google' sx={{ width: 23 }} />
       {t("sign_up_with_google")}
     </Button>
   );

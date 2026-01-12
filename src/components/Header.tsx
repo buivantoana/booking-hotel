@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -26,7 +26,7 @@ import {
 import SearchBarWithDropdownHeader from "./SearchBarWithDropdownHeader";
 import { useLocation, useNavigate } from "react-router-dom";
 import DehazeIcon from "@mui/icons-material/Dehaze";
-import logo from "../../src/images/Frame 1321318033.png"
+import logo from "../../src/images/Frame 1321318033.png";
 const Header = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -35,15 +35,32 @@ const Header = () => {
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [locationAddress, setLocationAddress] = useState([]);
   const context: any = useBookingContext();
   const navigate = useNavigate();
+
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY >= window.innerHeight * 1) {
+        setVisible(true);
+      } else {
+        setVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
-        if (location.pathname == "/rooms") {
+        if (location.pathname == "/rooms" || location.pathname == "/") {
           let result = await getLocation();
           console.log("AAA location", result);
           if (result?.locations) {
@@ -60,7 +77,10 @@ const Header = () => {
   };
 
   return (
-    <Box bgcolor={"white"} sx={{ position: "sticky", top: 0, left: 0, zIndex: 1000 }} p={0}>
+    <Box
+      bgcolor={"white"}
+      sx={{ position: "sticky", top: 0, left: 0, zIndex: 1000 }}
+      p={0}>
       <Container maxWidth='lg'>
         <AppBar
           position='static'
@@ -81,37 +101,58 @@ const Header = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: 2,
-                width:isMobile? "max-content": "400px",
+                width: isMobile ? "max-content" : "400px",
               }}>
-             
-                <>
-                  <Typography
-                    onClick={() => {
-                      navigate("/");
-                    }}
-                    variant='h5'
-                    fontWeight={700}
-                    color='#333'
-                    sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
-                    <img src={logo} width={isMobile?150: 200} alt="" />
-                  </Typography>
+              <>
+                <Typography
+                  onClick={() => {
+                    navigate("/");
+                  }}
+                  variant='h5'
+                  fontWeight={700}
+                  color='#333'
+                  sx={{ fontSize: "1.5rem", cursor: "pointer" }}>
+                  <img src={logo} width={isMobile ? 150 : 200} alt='' />
+                </Typography>
 
-                  <Typography
-                    variant='body2'
-                    color='#666'
-                    sx={{
-                      fontSize:isMobile?"0.775rem" : "0.875rem",
-                      letterSpacing: "0.5px",
-                      display:isMobile?"none":"block"
-                    }}>
-                    {t("header_for_partners")}
-                  </Typography>
-                </>
-             
+                <Typography
+                  variant='body2'
+                  color='#666'
+                  sx={{
+                    fontSize: isMobile ? "0.775rem" : "0.875rem",
+                    letterSpacing: "0.5px",
+                    display: isMobile ? "none" : "block",
+                  }}>
+                  {t("header_for_partners")}
+                </Typography>
+              </>
             </Box>
-            {(location.pathname == "/rooms" || location.pathname.includes("room")) &&!isMobile &&  (
-              <SearchBarWithDropdownHeader locationAddress={locationAddress} />
-            )}
+            {(location.pathname == "/" ||
+              location.pathname == "/rooms" ||
+              location.pathname.includes("room")) &&
+              !isMobile && (
+                <Box
+                  width={isMobile ? "100%" : "70%"}
+                  ref={ref}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 20,
+                    borderRadius: 2,
+
+                    opacity: visible || location.pathname != "/" ? 1 : 0,
+                    transform:
+                      visible || location.pathname != "/"
+                        ? "scale(1)"
+                        : "scale(0.8)",
+                    transition: "all 0.6s ease-out",
+                  }}>
+                  <SearchBarWithDropdownHeader
+                    locationAddress={locationAddress}
+                  />
+                </Box>
+              )}
             {/* RIGHT: AVATAR */}
             <Box>
               {Object.keys(context.state.user).length > 0 ? (
@@ -119,9 +160,9 @@ const Header = () => {
               ) : (
                 <>
                   {location.pathname == "/" ||
-                    location.pathname == "/login" ||
-                    location.pathname == "/register" ? (
-                    <Box sx={{display:"flex"}}>
+                  location.pathname == "/login" ||
+                  location.pathname == "/register" ? (
+                    <Box sx={{ display: "flex" }}>
                       <Button
                         onClick={() => {
                           window.location.href = "/login";
@@ -131,11 +172,10 @@ const Header = () => {
                           border: "none",
                           color: "#5D6679",
                           borderRadius: "16px",
-                          px:isMobile?1: 3,
-                          py:isMobile?1: 1.2,
+                          px: isMobile ? 1 : 3,
+                          py: isMobile ? 1 : 1.2,
                           textTransform: "none",
-                        }}
-                      >
+                        }}>
                         {t("header_login")}
                       </Button>
 
@@ -148,12 +188,11 @@ const Header = () => {
                           bgcolor: "#98b720",
                           color: "white",
                           borderRadius: "16px",
-                          px:isMobile?1: 3,
-                          py:isMobile?1: 1.2,
+                          px: isMobile ? 1 : 3,
+                          py: isMobile ? 1 : 1.2,
                           textTransform: "none",
-                        }}
-                      >
-                          {t("header_register")}
+                        }}>
+                        {t("header_register")}
                       </Button>
                     </Box>
                   ) : (
@@ -193,7 +232,7 @@ const Header = () => {
                             <Typography
                               fontSize='14px'
                               color='rgba(93, 102, 121, 1)'>
-                             {t("header_login")}
+                              {t("header_login")}
                             </Typography>
                           </ListItemText>
                         </MenuItem>
@@ -206,7 +245,7 @@ const Header = () => {
                             <Typography
                               fontSize='14px'
                               color='rgba(93, 102, 121, 1)'>
-                                {t("header_register")}
+                              {t("header_register")}
                             </Typography>
                           </ListItemText>
                         </MenuItem>
@@ -267,7 +306,7 @@ import { useTranslation } from "react-i18next";
 function UserDropdownMenuV2({ context }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -377,7 +416,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-              {t("header_profile")}
+                {t("header_profile")}
               </Typography>
             </ListItemText>
           </MenuItem>
@@ -394,7 +433,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-              {t("header_my_bookings")}
+                {t("header_my_bookings")}
               </Typography>
             </ListItemText>
           </MenuItem>
@@ -414,7 +453,7 @@ function UserDropdownMenuV2({ context }) {
             </ListItemIcon>
             <ListItemText>
               <Typography fontWeight={500} fontSize='15px'>
-              {t("header_logout")}
+                {t("header_logout")}
               </Typography>
             </ListItemText>
           </MenuItem>

@@ -130,15 +130,16 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
 }) => {
   const [checkIn, setCheckIn] = useState<Dayjs | null>(initialCheckIn);
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
-  const [time, setTime] = useState<string>(initialTime );
+  const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const now = dayjs();
-  const hours = Array.from({ length: 24 }, (_, i) =>
-  String(i).padStart(2, "0") + ":00"
-);
+  const hours = Array.from(
+    { length: 24 },
+    (_, i) => String(i).padStart(2, "0") + ":00"
+  );
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
 
   const hourIndex = hours.indexOf(time);
@@ -161,22 +162,21 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
     setCheckIn(dayjs());
     setCheckOut(null);
     const now = dayjs();
-      const nextHour = now.add(1, "hour").startOf("hour"); // làm tròn lên giờ tiếp theo
-      const formatted = nextHour.format("HH:00");
-  
-      setTime(formatted); 
+    const nextHour = now.add(1, "hour").startOf("hour"); // làm tròn lên giờ tiếp theo
+    const formatted = nextHour.format("HH:00");
+
+    setTime(formatted);
     setDuration(2);
   };
 
-  const isToday =
-  checkIn && checkIn.isSame(now, "day");
+  const isToday = checkIn && checkIn.isSame(now, "day");
 
-const disabledHours = isToday
-  ? hours.filter((h) => {
-      const hourNum = parseInt(h.split(":")[0]);
-      return hourNum <= now.hour();   // disable những giờ đã qua
-    })
-  : [];
+  const disabledHours = isToday
+    ? hours.filter((h) => {
+        const hourNum = parseInt(h.split(":")[0]);
+        return hourNum <= now.hour(); // disable những giờ đã qua
+      })
+    : [];
   const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
     if (bookingType === "overnight") {
       setCheckIn(date);
@@ -193,31 +193,28 @@ const disabledHours = isToday
       }
     } else if (bookingType === "hourly") {
       setCheckIn(date);
-      
-      
+
       const selectedIsToday = date.isSame(now, "day");
-      
-      
+
       if (selectedIsToday) {
-      const nextHour = now.hour() + 1;
-      const nextHourStr = hours[nextHour] || hours[hours.length - 1];
-      setTime(nextHourStr);
+        const nextHour = now.hour() + 1;
+        const nextHourStr = hours[nextHour] || hours[hours.length - 1];
+        setTime(nextHourStr);
       } else {
-      setTime("00:00"); // ngày khác → active 00:00
+        setTime("00:00"); // ngày khác → active 00:00
       }
-      
-      
+
       setDuration(2); // mặc định luôn chọn 2h
-      }
+    }
   };
 
   if (!open || !anchorEl) return null;
 
   const endTime = checkIn
     ? checkIn
-      .hour(parseInt(time.split(":")[0]))
-      .minute(0)
-      .add(duration, "hour")
+        .hour(parseInt(time.split(":")[0]))
+        .minute(0)
+        .add(duration, "hour")
     : null;
 
   return (
@@ -238,8 +235,8 @@ const disabledHours = isToday
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                  ? 680
-                  : 380,
+                ? 680
+                : 380,
           },
           bgcolor: "white",
         }}>
@@ -248,7 +245,7 @@ const disabledHours = isToday
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
               <Typography fontWeight={600} color='#333'>
-              {  dayjs().format("[Tháng] MM, YYYY") }
+                {dayjs().format("[Tháng] MM, YYYY")}
               </Typography>
             </Box>
 
@@ -259,7 +256,7 @@ const disabledHours = isToday
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -305,7 +302,7 @@ const disabledHours = isToday
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                     {t("search_bar_checkin_time_label")}
+                      {t("search_bar_checkin_time_label")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -334,10 +331,12 @@ const disabledHours = isToday
                               size='small'
                               onClick={() => {
                                 const hourNum = parseInt(h.split(":")[0]);
-                              
+
                                 if (isToday) {
                                   if (hourNum <= now.hour()) {
-                                    const next = hours[now.hour() + 1] || hours[hours.length - 1];
+                                    const next =
+                                      hours[now.hour() + 1] ||
+                                      hours[hours.length - 1];
                                     setTime(next);
                                   } else {
                                     setTime(h);
@@ -346,7 +345,6 @@ const disabledHours = isToday
                                   setTime(h);
                                 }
                               }}
-                              
                               sx={{
                                 minWidth: 60,
                                 borderRadius: "12px",
@@ -387,7 +385,7 @@ const disabledHours = isToday
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                        {t("search_bar_duration_label")}
+                      {t("search_bar_duration_label")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -430,7 +428,7 @@ const disabledHours = isToday
                                       : "#e0e0e0",
                                 },
                               }}>
-                              {d}      {t("search_bar_hour_suffix")}
+                              {d} {t("search_bar_hour_suffix")}
                             </Button>
                           ))}
                       </Stack>
@@ -439,7 +437,7 @@ const disabledHours = isToday
                         onClick={() =>
                           setDuration(
                             durations[
-                            Math.min(durations.length - 1, durationIndex + 1)
+                              Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -460,24 +458,27 @@ const disabledHours = isToday
                       color='#666'
                       fontSize='0.9rem'
                       mb={0.5}>
-                     {t("search_bar_checkout_label")}
+                      {t("search_bar_checkout_label")}
                     </Typography>
                     <Typography fontWeight={600} color='#333'>
                       {endTime
                         ? `${endTime.format("HH:mm, DD/MM/YYYY")}`
-                        :    t("search_bar_not_selected")}
+                        : t("search_bar_not_selected")}
                     </Typography>
                   </Box>
                 </Box>
               </Stack>
             ) : (
               /* === QUA ĐÊM / THEO NGÀY === */
-              <Stack direction='row' flexDirection={isMobile?"column":"row"} spacing={0}>
+              <Stack
+                direction='row'
+                flexDirection={isMobile ? "column" : "row"}
+                spacing={0}>
                 {/* Tháng 1 */}
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -511,8 +512,8 @@ const disabledHours = isToday
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                  ? "#f0f8f0"
+                                  : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
                               "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
@@ -529,7 +530,7 @@ const disabledHours = isToday
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
                       value={checkIn}
-                      onChange={() => { }}
+                      onChange={() => {}}
                       disablePast
                       sx={{
                         width: "100%",
@@ -563,8 +564,8 @@ const disabledHours = isToday
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                      ? "#f0f8f0"
-                                      : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
                                 "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
@@ -610,7 +611,7 @@ const disabledHours = isToday
                   fontSize: "0.9rem",
                   "&:hover": { bgcolor: "#43a047" },
                 }}>
-               { t("search_bar_apply_button")}
+                {t("search_bar_apply_button")}
               </Button>
             </Stack>
           </Stack>
@@ -647,24 +648,24 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const [name, setName] = useState<string>("");
   const [searchParams] = useSearchParams();
   const addressOldRef = useRef("");
-  const isMobile = useMediaQuery('(max-width:900px)'); // Thêm breakpoint cho mobile
+  const isMobile = useMediaQuery("(max-width:900px)"); // Thêm breakpoint cho mobile
   const selectingRef = useRef(false);
   const [data, setData] = useState([]);
   const [dataLoading, setDataLoading] = useState(false);
-  const {t} = useTranslation()
+  const { t } = useTranslation();
+
   useEffect(() => {
     // nếu chưa nhập gì thì không call
     if (!searchValue.trim()) return;
 
-    const timer = setTimeout(async() => {
-      setDataLoading(true)
+    const timer = setTimeout(async () => {
+      setDataLoading(true);
       console.log("CALL API:", searchValue);
-      let result = await getSuggest(searchValue)
-      if(result?.hotels){
-        setData(result?.hotels)
+      let result = await getSuggest(searchValue);
+      if (result?.hotels) {
+        setData(result?.hotels);
       }
-      setDataLoading(false)
-      
+      setDataLoading(false);
     }, 500);
 
     // nếu người dùng nhập tiếp -> huỷ timeout cũ
@@ -679,13 +680,27 @@ export default function SearchBarWithDropdown({ locationAddress }) {
     const checkInParam = searchParams.get("checkIn");
     const checkOutParam = searchParams.get("checkOut");
     const name = searchParams.get("name");
-    setName(name)
+    setName(name);
 
     setBookingType(typeParam);
-    setSearchValue(
-      name||locationAddress?.find((item) => item.id == locationParam)?.name?.vi || ""
-    );
-    addressOldRef.current = locationAddress?.find((item) => item.id == locationParam)?.name?.vi
+    if (localStorage.getItem("location") && location.pathname == "/") {
+      setSearchValue(
+        name ||
+          locationAddress?.find(
+            (item) => item.id == localStorage.getItem("location")
+          )?.name?.vi ||
+          ""
+      );
+    } else {
+      setSearchValue(
+        name ||
+          locationAddress?.find((item) => item.id == locationParam)?.name?.vi ||
+          ""
+      );
+    }
+    addressOldRef.current = locationAddress?.find(
+      (item) => item.id == locationParam
+    )?.name?.vi;
     setCheckInTime(checkInTimeParam);
     setCheckInDuration(Number(durationParam));
 
@@ -700,22 +715,24 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       setCheckOut(checkIn.add(1, "day"));
       setCheckInTime(null);
       setCheckInDuration(null);
-    } 
-    else if (bookingType === "daily") {
-      if (!checkOut || checkOut.isSame(checkIn, "day") || checkOut.isBefore(checkIn)) {
+    } else if (bookingType === "daily") {
+      if (
+        !checkOut ||
+        checkOut.isSame(checkIn, "day") ||
+        checkOut.isBefore(checkIn)
+      ) {
         setCheckOut(checkIn.add(1, "day"));
       }
       setCheckInTime(null);
       setCheckInDuration(null);
-    } 
-    else if (bookingType === "hourly") {
+    } else if (bookingType === "hourly") {
       const today = dayjs();
       if (checkIn.isSame(today, "day")) {
         const nextHour = today.hour() + 1;
         setCheckInTime(String(nextHour).padStart(2, "0") + ":00");
       }
     }
-  }, [bookingType, checkIn])
+  }, [bookingType, checkIn]);
 
   const updateParams = (newParams: Record<string, any>) => {
     const current = Object.fromEntries([...searchParams]);
@@ -723,18 +740,22 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       ...current,
       ...newParams,
     };
-    navigate(`?${new URLSearchParams(updated).toString()}`, { replace: true });
+    if (location.pathname != "/") {
+      navigate(`?${new URLSearchParams(updated).toString()}`, {
+        replace: true,
+      });
+    }
   };
-  
+
   useEffect(() => {
     updateParams({ type: bookingType });
   }, [bookingType]);
 
   useEffect(() => {
     const locId = locationAddress.find(
-      i => i.name.vi === selectedAddress
+      (i) => i.name.vi === selectedAddress
     )?.id;
-  
+
     updateParams({ location: locId || "" });
   }, [selectedAddress]);
   useEffect(() => {
@@ -742,9 +763,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
       checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
       checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
       checkInTime,
-      duration: checkInDuration||2
+      duration: checkInDuration || 2,
     });
-  }, [checkIn,checkOut,checkInTime,checkInDuration]);
+  }, [checkIn, checkOut, checkInTime, checkInDuration]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const typeRef = useRef<HTMLDivElement>(null);
@@ -752,43 +773,45 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const navigate = useNavigate();
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  
-const normalize = (str = "") =>
-  str
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
 
-const keyword = normalize(searchValue?.trim());
+  const normalize = (str = "") =>
+    str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
 
-const filteredLocations = !keyword
-  ? locationAddress
-  : locationAddress.filter((loc) => {
-      const words = normalize(loc?.name?.vi).split(/\s+/);
+  const keyword = normalize(searchValue?.trim());
 
-      return words.some(word =>
-        word.startsWith(keyword) // ho -> hồ, ha -> hà
-      );
-    });
+  const filteredLocations = !keyword
+    ? locationAddress
+    : locationAddress.filter((loc) => {
+        const words = normalize(loc?.name?.vi).split(/\s+/);
+
+        return words.some(
+          (word) => word.startsWith(keyword) // ho -> hồ, ha -> hà
+        );
+      });
   const formatDateDisplay = () => {
     if (!checkIn) return t("search_bar_select_date");
-  
+
     if (bookingType === "hourly") {
       if (!checkInTime || !checkInDuration) {
         return `${checkIn.format("D/M")}`;
       }
-  
+
       const startHour = parseInt(checkInTime.split(":")[0], 10);
       const endHour = (startHour + checkInDuration) % 24;
-  
-      return `${checkInTime} - ${endHour.toString().padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
+
+      return `${checkInTime} - ${endHour
+        .toString()
+        .padStart(2, "0")}:00, ${checkIn.format("D/M")}`;
     }
-  
+
     const checkInStr = checkIn.format("D/M");
     if (!checkOut) return checkInStr;
-    
+
     const checkOutStr = checkOut.format("D/M");
-    
+
     return checkIn.isSame(checkOut, "month")
       ? `${checkInStr} - ${checkOut.format("D/M")}`
       : `${checkInStr} - ${checkOutStr}`;
@@ -797,37 +820,48 @@ const filteredLocations = !keyword
   const getTypeLabel = () => {
     if (bookingType === "hourly") return t("search_bar_hourly_label");
     if (bookingType === "overnight") return t("search_bar_overnight_label");
-    return  t("search_bar_daily_label");
+    return t("search_bar_daily_label");
   };
-  
+
   const handleSearch = () => {
-    if (!checkIn) return toast.warning("Vui lòng chọn ngày giờ!")
-    let params
-    if(name){
+    if (location.pathname != "/") {
+      if (!checkIn) return toast.warning("Vui lòng chọn ngày giờ!");
+    }
+    let params;
+    if (name) {
       const current = Object.fromEntries([...searchParams]);
       params = {
         ...current,
-        search :searchParams.get("search")?Number(searchParams.get("search"))+1 :1
+        search: searchParams.get("search")
+          ? Number(searchParams.get("search")) + 1
+          : 1,
       };
-    }else{
+    } else {
       params = {
-        location: locationAddress.find((item) => item.name.vi == searchValue)?.id|| "",
+        location:
+          locationAddress.find((item) => item.name.vi == searchValue)?.id || "",
         type: bookingType,
         checkIn: checkIn ? checkIn.format("YYYY-MM-DD") : "",
         checkOut: checkOut ? checkOut.format("YYYY-MM-DD") : "",
         checkInTime: checkInTime || "",
         duration: checkInDuration || "",
-        search :searchParams.get("search")?Number(searchParams.get("search"))+1 :1
+        search: searchParams.get("search")
+          ? Number(searchParams.get("search")) + 1
+          : 1,
       };
     }
-    
+
     const queryString = new URLSearchParams(params).toString();
     setTimeout(() => {
-      navigate(`?${queryString}`);
+      if (location.pathname == "/") {
+        navigate(`/rooms?${queryString}`);
+      } else {
+        navigate(`?${queryString}`);
+      }
     }, 300);
   };
 
-  console.log("AAA addressOldRef",addressOldRef)
+  console.log("AAA addressOldRef", addressOldRef);
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <ClickAwayListener
@@ -839,21 +873,20 @@ const filteredLocations = !keyword
           if (dateRef.current && !dateRef.current.contains(e.target))
             setPickerOpen(false);
 
-            if (inputRef.current && !inputRef.current.contains(e.target)) {
-              const isValid = locationAddress.some(
-                (loc) => loc.name.vi === searchValue
-              );
-          
-              if (!isValid) {
-              
-                setSearchValue(addressOldRef.current || "");
-              }
-          
-              setDropdownOpen(false);
+          if (inputRef.current && !inputRef.current.contains(e.target)) {
+            const isValid = locationAddress.some(
+              (loc) => loc.name.vi === searchValue
+            );
+
+            if (!isValid) {
+              setSearchValue(addressOldRef.current || "");
             }
+
+            setDropdownOpen(false);
+          }
         }}>
-        <Box width={isMobile ? '100%' : '70%'}>
-          <Container sx={{px:0}} maxWidth={isMobile ? 'sm' : 'md'}>
+        <Box>
+          <Container sx={{ px: 0 }} maxWidth={isMobile ? "sm" : "md"}>
             {/* === THANH TÌM KIẾM === */}
             <Paper
               elevation={0}
@@ -861,7 +894,7 @@ const filteredLocations = !keyword
                 borderRadius: isMobile ? "24px" : "50px",
                 overflow: "hidden",
                 bgcolor: "white",
-                border: isMobile?"none": "1px solid #ddd",
+                border: isMobile ? "none" : "1px solid #ddd",
                 p: isMobile ? 1.5 : 0.5,
               }}>
               {isMobile ? (
@@ -872,25 +905,26 @@ const filteredLocations = !keyword
                     <TextField
                       fullWidth
                       disabled={name}
-                      placeholder={ t("search_bar_location_placeholder")}
+                      placeholder={t("search_bar_location_placeholder")}
                       variant='outlined'
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
                       onFocus={() => {
                         addressOldRef.current = selectedAddress;
-                        setDropdownOpen(true)}}
+                        setDropdownOpen(true);
+                      }}
                       inputRef={inputRef}
                       onBlur={() => {
                         if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
-                    
+
                         const isValid = locationAddress.some(
                           (loc) => loc.name.vi === searchValue
                         );
-                    
+
                         if (!isValid) {
                           setSearchValue(selectedAddress || "");
                         }
-                    
+
                         setDropdownOpen(false);
                       }}
                       InputProps={{
@@ -904,7 +938,13 @@ const filteredLocations = !keyword
                         "& .MuiOutlinedInput-root": {
                           height: 48,
                           borderRadius: "12px",
-                          "& fieldset": { border: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" :isMobile?"1px solid rgba(152, 183, 32, 1) !important": "none !important" },
+                          "& fieldset": {
+                            border: dropdownOpen
+                              ? "1px solid rgba(152, 183, 32, 1) !important"
+                              : isMobile
+                              ? "1px solid rgba(152, 183, 32, 1) !important"
+                              : "none !important",
+                          },
                         },
                       }}
                     />
@@ -926,16 +966,17 @@ const filteredLocations = !keyword
                                 selectingRef.current = true; // ✅ báo đang chọn
                               }}
                               onClick={() => {
-                                setSearchValue(loc.name.vi)
+                                setSearchValue(loc.name.vi);
                                 setSelectedAddress(loc.name.vi);
-                                setDropdownOpen(false)
+                                setDropdownOpen(false);
                                 selectingRef.current = false;
                               }}
                               sx={{
                                 py: 1.5,
-                                borderBottom: i < filteredLocations.length - 1
-                                  ? "1px solid #eee"
-                                  : "none",
+                                borderBottom:
+                                  i < filteredLocations.length - 1
+                                    ? "1px solid #eee"
+                                    : "none",
                               }}>
                               <ListItemIcon sx={{ minWidth: 36 }}>
                                 <LocationOn
@@ -973,15 +1014,28 @@ const filteredLocations = !keyword
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            bgcolor: typeDropdownOpen ? "rgba(152, 183, 32, 0.05)" : "white",
+                            bgcolor: typeDropdownOpen
+                              ? "rgba(152, 183, 32, 0.05)"
+                              : "white",
                           }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}>
                             {bookingType === "hourly" ? (
-                              <AccessTime sx={{ color: "#98b720", fontSize: 18 }} />
+                              <AccessTime
+                                sx={{ color: "#98b720", fontSize: 18 }}
+                              />
                             ) : bookingType === "overnight" ? (
-                              <Nightlight sx={{ color: "#98b720", fontSize: 18 }} />
+                              <Nightlight
+                                sx={{ color: "#98b720", fontSize: 18 }}
+                              />
                             ) : (
-                              <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                              <CalendarToday
+                                sx={{ color: "#98b720", fontSize: 18 }}
+                              />
                             )}
                             <Typography
                               sx={{
@@ -996,13 +1050,15 @@ const filteredLocations = !keyword
                             sx={{
                               fontSize: 16,
                               color: "#666",
-                              transform: typeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+                              transform: typeDropdownOpen
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
                             }}
                           />
                         </Box>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12}>
                       <Box
                         ref={dateRef}
@@ -1017,10 +1073,19 @@ const filteredLocations = !keyword
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
-                            bgcolor: pickerOpen ? "rgba(152, 183, 32, 0.05)" : "white",
+                            bgcolor: pickerOpen
+                              ? "rgba(152, 183, 32, 0.05)"
+                              : "white",
                           }}>
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}>
+                            <CalendarToday
+                              sx={{ color: "#98b720", fontSize: 18 }}
+                            />
                             <Typography
                               sx={{
                                 fontWeight: 500,
@@ -1037,7 +1102,9 @@ const filteredLocations = !keyword
                             sx={{
                               fontSize: 16,
                               color: "#666",
-                              transform: pickerOpen ? "rotate(180deg)" : "rotate(0deg)",
+                              transform: pickerOpen
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
                             }}
                           />
                         </Box>
@@ -1059,7 +1126,9 @@ const filteredLocations = !keyword
                       fontWeight: 600,
                       "&:hover": { bgcolor: "#7a8f1a" },
                     }}>
-                    {name ?  t("search_bar_update_search_button") : t("search_bar_search_button") }
+                    {name
+                      ? t("search_bar_update_search_button")
+                      : t("search_bar_search_button")}
                   </Button>
                 </Box>
               ) : (
@@ -1069,7 +1138,6 @@ const filteredLocations = !keyword
                   <Box sx={{ flex: "250px 0 0", position: "relative" }}>
                     <TextField
                       fullWidth
-                      
                       disabled={name}
                       placeholder='Bạn muốn đi đâu?'
                       variant='outlined'
@@ -1077,22 +1145,22 @@ const filteredLocations = !keyword
                       onChange={(e) => setSearchValue(e.target.value)}
                       onFocus={() => {
                         // addressOldRef.current = selectedAddress;
-                        setDropdownOpen(true)}}
+                        setDropdownOpen(true);
+                      }}
                       inputRef={inputRef}
                       onBlur={() => {
-                        if(!name){
+                        if (!name) {
                           if (selectingRef.current) return; // ✅ đang click item → bỏ qua blur
-                      
+
                           const isValid = locationAddress.some(
                             (loc) => loc.name.vi === searchValue
                           );
-                      
+
                           if (!isValid) {
                             setSearchValue(selectedAddress || "");
                           }
-                      
-                          setDropdownOpen(false);
 
+                          setDropdownOpen(false);
                         }
                       }}
                       InputProps={{
@@ -1106,10 +1174,20 @@ const filteredLocations = !keyword
                         "& .MuiOutlinedInput-root": {
                           height: 40,
                           borderRadius: "50px 15px 15px 50px",
-                          "& fieldset": { border: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important" },
-                          "&:hover": { borderColor: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important" },
+                          "& fieldset": {
+                            border: dropdownOpen
+                              ? "1px solid rgba(152, 183, 32, 1) !important"
+                              : "none !important",
+                          },
+                          "&:hover": {
+                            borderColor: dropdownOpen
+                              ? "1px solid rgba(152, 183, 32, 1) !important"
+                              : "none !important",
+                          },
                           "&.Mui-focused": {
-                            borderColor: dropdownOpen ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important",
+                            borderColor: dropdownOpen
+                              ? "1px solid rgba(152, 183, 32, 1) !important"
+                              : "none !important",
                             borderWidth: 2,
                           },
                         },
@@ -1120,7 +1198,7 @@ const filteredLocations = !keyword
                       anchorEl={inputRef.current}
                       placement='bottom-start'
                       sx={{ zIndex: 20, padding: "0px !important" }}>
-                      {filteredLocations.length == 0 && data?.length == 0  ? (
+                      {filteredLocations.length == 0 && data?.length == 0 ? (
                         <Paper
                           elevation={3}
                           className='hidden-add-voice'
@@ -1132,7 +1210,7 @@ const filteredLocations = !keyword
                             overflowY: "auto",
                           }}>
                           <Typography color='rgba(152, 159, 173, 1)'>
-                           {t("search_bar_no_data_found")}
+                            {t("search_bar_no_data_found")}
                           </Typography>
                         </Paper>
                       ) : (
@@ -1143,16 +1221,16 @@ const filteredLocations = !keyword
                             borderRadius: "16px",
                             maxHeight: 300,
                             overflow: "auto",
-                            padding: .5
+                            padding: 0.5,
                           }}>
-                             <Box p={2} bgcolor='#f9f9f9'>
-                          <Typography
-                            variant='subtitle2'
-                            color='#666'
-                            fontWeight={600}>
-                             {t('address')}
-                          </Typography>
-                        </Box>
+                          <Box p={2} bgcolor='#f9f9f9'>
+                            <Typography
+                              variant='subtitle2'
+                              color='#666'
+                              fontWeight={600}>
+                              {t("address")}
+                            </Typography>
+                          </Box>
                           <List disablePadding>
                             {filteredLocations.map((loc, i) => (
                               <ListItemButton
@@ -1161,9 +1239,9 @@ const filteredLocations = !keyword
                                   selectingRef.current = true; // ✅ báo đang chọn
                                 }}
                                 onClick={() => {
-                                  setSearchValue(loc.name.vi)
+                                  setSearchValue(loc.name.vi);
                                   setSelectedAddress(loc.name.vi);
-                                  setDropdownOpen(false)
+                                  setDropdownOpen(false);
                                   selectingRef.current = false;
                                 }}
                                 sx={{
@@ -1189,96 +1267,108 @@ const filteredLocations = !keyword
                               </ListItemButton>
                             ))}
                           </List>
-                          
-                          <Box p={2} bgcolor='#f9f9f9'>
-                          <Typography
-                            variant='subtitle2'
-                            color='#666'
-                            fontWeight={600}>
-                             {t('hotels')}
-                          </Typography>
-                        </Box>
-                        {dataLoading?
-                        <Box display={"flex"} justifyContent={"center"}>
-                          <CircularProgress sx={{fontSize:"15px" ,color:"rgba(152, 183, 32, 1)"}}/>
-                        </Box>
-                        :
-                        <List disablePadding>
-                          {data.map((loc, i) => (
-                            <ListItemButton
-                              key={i}
-                              onMouseDown={() => {
-                                selectingRef.current = true; // 🔥 chặn blur
-                              }}
-                              onClick={() => {
-                                const current = Object.fromEntries([]);
-                        
-                                // ---- xử lý mặc định ---- //
-                                const now = new Date();
-                        
-                                // format yyyy-MM-dd
-                                const formatDate = (d) => d.toISOString().split("T")[0];
-                        
-                                // format lên giờ chẵn
-                                const formatHour = (d) => {
-                                  let hour = d.getHours();
-                                  let minute = d.getMinutes();
-                        
-                                  // round up: nếu phút > 0 thì cộng 1 giờ
-                                  if (minute > 0) hour++;
-                        
-                                  // format HH:00 (VD: 09:00, 20:00)
-                                  return `${String(hour).padStart(2, "0")}:00`;
-                                };
-                        
-                                // Set mặc định nếu param không có
-                                current.checkIn = current.checkIn || formatDate(now);
-                                current.checkOut = current.checkOut || formatDate(now);
-                                current.checkInTime = current.checkInTime || formatHour(now);
-                                current.duration = current.duration || 2;
-                                current.type = "hourly";
-                        
-                                // ---- build URL ---- //
-                                navigate(
-                                  `/room/${loc.id}?${new URLSearchParams(
-                                    current
-                                  ).toString()}&name=${parseName(loc.name)}`
-                                );
-                              }}
-                              sx={{
-                                px: 2,
-                                py: 1.5,
-                                borderBottom:
-                                  i < data.length - 1
-                                    ? "1px solid #eee"
-                                    : "none",
-                                "&:hover": { bgcolor: "#f0f8f0" },
-                              }}>
-                              <ListItemIcon sx={{ minWidth: 36 }}>
-                                <img src={building} alt="" />
-                              </ListItemIcon>
-                              <Box>
 
-                              <ListItemText
-                                primary={parseName(loc?.name)}
-                                primaryTypographyProps={{
-                                  fontSize: "0.95rem",
-                                  color: "#333",
-                                  fontWeight: 500,
+                          <Box p={2} bgcolor='#f9f9f9'>
+                            <Typography
+                              variant='subtitle2'
+                              color='#666'
+                              fontWeight={600}>
+                              {t("hotels")}
+                            </Typography>
+                          </Box>
+                          {dataLoading ? (
+                            <Box display={"flex"} justifyContent={"center"}>
+                              <CircularProgress
+                                sx={{
+                                  fontSize: "15px",
+                                  color: "rgba(152, 183, 32, 1)",
                                 }}
                               />
-                               <ListItemText
-                                primary={parseName(loc?.address)}
-                                primaryTypographyProps={{
-                                  fontSize: "0.95rem",
-                                  color: "#333",
-                                  fontWeight: 500,
-                                }}
-                              />
-                              </Box>
-                            </ListItemButton>
-                          ))}
-                        </List>}
+                            </Box>
+                          ) : (
+                            <List disablePadding>
+                              {data.map((loc, i) => (
+                                <ListItemButton
+                                  key={i}
+                                  onMouseDown={() => {
+                                    selectingRef.current = true; // 🔥 chặn blur
+                                  }}
+                                  onClick={() => {
+                                    const current = Object.fromEntries([]);
+
+                                    // ---- xử lý mặc định ---- //
+                                    const now = new Date();
+
+                                    // format yyyy-MM-dd
+                                    const formatDate = (d) =>
+                                      d.toISOString().split("T")[0];
+
+                                    // format lên giờ chẵn
+                                    const formatHour = (d) => {
+                                      let hour = d.getHours();
+                                      let minute = d.getMinutes();
+
+                                      // round up: nếu phút > 0 thì cộng 1 giờ
+                                      if (minute > 0) hour++;
+
+                                      // format HH:00 (VD: 09:00, 20:00)
+                                      return `${String(hour).padStart(
+                                        2,
+                                        "0"
+                                      )}:00`;
+                                    };
+
+                                    // Set mặc định nếu param không có
+                                    current.checkIn =
+                                      current.checkIn || formatDate(now);
+                                    current.checkOut =
+                                      current.checkOut || formatDate(now);
+                                    current.checkInTime =
+                                      current.checkInTime || formatHour(now);
+                                    current.duration = current.duration || 2;
+                                    current.type = "hourly";
+
+                                    // ---- build URL ---- //
+                                    navigate(
+                                      `/room/${loc.id}?${new URLSearchParams(
+                                        current
+                                      ).toString()}&name=${parseName(loc.name)}`
+                                    );
+                                  }}
+                                  sx={{
+                                    px: 2,
+                                    py: 1.5,
+                                    borderBottom:
+                                      i < data.length - 1
+                                        ? "1px solid #eee"
+                                        : "none",
+                                    "&:hover": { bgcolor: "#f0f8f0" },
+                                  }}>
+                                  <ListItemIcon sx={{ minWidth: 36 }}>
+                                    <img src={building} alt='' />
+                                  </ListItemIcon>
+                                  <Box>
+                                    <ListItemText
+                                      primary={parseName(loc?.name)}
+                                      primaryTypographyProps={{
+                                        fontSize: "0.95rem",
+                                        color: "#333",
+                                        fontWeight: 500,
+                                      }}
+                                    />
+                                    <ListItemText
+                                      primary={parseName(loc?.address)}
+                                      primaryTypographyProps={{
+                                        fontSize: "0.95rem",
+                                        color: "#333",
+                                        fontWeight: 500,
+                                      }}
+                                    />
+                                  </Box>
+                                </ListItemButton>
+                              ))}
+                            </List>
+                          )}
                         </Paper>
                       )}
                     </Popper>
@@ -1295,8 +1385,7 @@ const filteredLocations = !keyword
                         borderRight: "1px solid #eee",
                         height: 40,
                         px: 1,
-                      }}
-                    >
+                      }}>
                       <Box
                         sx={{
                           height: "100%",
@@ -1304,15 +1393,19 @@ const filteredLocations = !keyword
                           alignItems: "center",
                           justifyContent: "center",
                           gap: 1,
-                          border: typeDropdownOpen ? "1px solid #98b720" : "1px solid transparent",
-                          borderRadius: "7px"
+                          border: typeDropdownOpen
+                            ? "1px solid #98b720"
+                            : "1px solid transparent",
+                          borderRadius: "7px",
                         }}>
                         {bookingType === "hourly" ? (
                           <AccessTime sx={{ color: "#98b720", fontSize: 18 }} />
                         ) : bookingType === "overnight" ? (
                           <Nightlight sx={{ color: "#98b720", fontSize: 18 }} />
                         ) : (
-                          <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                          <CalendarToday
+                            sx={{ color: "#98b720", fontSize: 18 }}
+                          />
                         )}
                         <Typography
                           sx={{
@@ -1347,11 +1440,13 @@ const filteredLocations = !keyword
                         px: 2,
                         display: "flex",
                         alignItems: "center",
-                        border: pickerOpen ? "1px solid #98b720" : "1px solid transparent",
+                        border: pickerOpen
+                          ? "1px solid #98b720"
+                          : "1px solid transparent",
                         borderRadius: "7px",
-                        gap:1
+                        gap: 1,
                       }}>
-                       <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
+                      <CalendarToday sx={{ color: "#98b720", fontSize: 18 }} />
                       <Typography
                         sx={{
                           flex: 1,
@@ -1373,52 +1468,49 @@ const filteredLocations = !keyword
                       bgcolor: "#98b720",
                       color: "white",
                       px: 1,
-                      mr:1,
+                      mr: 1,
                       minWidth: "auto",
                       height: 35,
                       "&:hover": { bgcolor: "#7a8f1a" },
                     }}>
-                   {name?t("search_bar_update_button") : <Search sx={{ fontSize: 22 }} />}
+                    {name ? (
+                      t("search_bar_update_button")
+                    ) : (
+                      <Search sx={{ fontSize: 22 }} />
+                    )}
                   </Button>
                 </Stack>
               )}
             </Paper>
 
             {/* Dropdown loại (desktop) */}
-           
-              <BookingTypeDropdown
-                open={typeDropdownOpen}
-                anchorEl={typeRef.current}
-                onClose={() => setTypeDropdownOpen(false)}
-                value={bookingType}
-                onChange={setBookingType}
-              />
-            
+
+            <BookingTypeDropdown
+              open={typeDropdownOpen}
+              anchorEl={typeRef.current}
+              onClose={() => setTypeDropdownOpen(false)}
+              value={bookingType}
+              onChange={setBookingType}
+            />
 
             {/* Popup ngày giờ (desktop) */}
-             
-              <DateRangePicker
-                open={pickerOpen}
-                anchorEl={dateRef.current}
-                onClose={() => setPickerOpen(false)}
-                onApply={(ci, co, t, d) => {
-                  setCheckIn(ci);
-                  setCheckOut(co);
-                  if (t) setCheckInTime(t);
-                  if (d) setCheckInDuration(d);
-                }}
-                bookingType={bookingType}
-                initialCheckIn={checkIn}
-                initialCheckOut={checkOut}
-                initialTime={checkInTime}
-                initialDuration={checkInDuration}
-              />
-            
 
-         
-           
-
-          
+            <DateRangePicker
+              open={pickerOpen}
+              anchorEl={dateRef.current}
+              onClose={() => setPickerOpen(false)}
+              onApply={(ci, co, t, d) => {
+                setCheckIn(ci);
+                setCheckOut(co);
+                if (t) setCheckInTime(t);
+                if (d) setCheckInDuration(d);
+              }}
+              bookingType={bookingType}
+              initialCheckIn={checkIn}
+              initialCheckOut={checkOut}
+              initialTime={checkInTime}
+              initialDuration={checkInDuration}
+            />
           </Container>
         </Box>
       </ClickAwayListener>
