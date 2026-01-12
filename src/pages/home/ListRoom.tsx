@@ -126,7 +126,7 @@ const HotelCard = ({
         current.checkOut = current.checkOut || formatDate(now);
         current.checkInTime = current.checkInTime || formatHour(now);
         current.duration = current.duration || 2;
-        current.type = "hourly"
+        current.type = "hourly";
 
         // ---- build URL ---- //
         navigate(
@@ -216,7 +216,7 @@ const HotelCard = ({
             spacing={0.5}
             sx={{ mt: 1.5 }}>
             <Typography variant='caption' color='#999' sx={{ fontWeight: 500 }}>
-            {t('from_only')}
+              {t("from_only")}
             </Typography>
             <Typography
               variant='h6'
@@ -229,7 +229,7 @@ const HotelCard = ({
               {price ? `${price.toLocaleString("vi-VN")}đ` : "160.000đ"}
             </Typography>
             <Typography variant='body2' color='#666'>
-            {t('per_2_hours')}
+              {t("per_2_hours")}
             </Typography>
           </Stack>
         </Stack>
@@ -281,7 +281,7 @@ const ListRoom = ({
   };
 
   return (
-    <>
+    <Box mt={isDetail || category == "recommend" ? 0 : 5}>
       {loading ? (
         <ListRoomLoading />
       ) : (
@@ -311,12 +311,13 @@ const ListRoom = ({
             {!isDetail && (
               <Typography
                 onClick={() => {
-                  navigate(`/rooms?catrgory=${category}&location=${location}`);
+                  navigate(`/rooms?category=${category}&location=${location}`);
                 }}
                 sx={{ cursor: "pointer" }}
                 color='rgba(152, 159, 173, 1)'
                 fontSize={"15px"}>
-               {t('view_all')} <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
+                {t("view_all")}{" "}
+                <ArrowForwardIosIcon sx={{ fontSize: "12px" }} />
               </Typography>
             )}
           </Box>
@@ -342,7 +343,7 @@ const ListRoom = ({
                         hotelName={name}
                         hotelAddress={address}
                         rating={hotel.rating}
-                        price={hotel.price_min['hourly']}
+                        price={hotel.price_min["hourly"]}
                         id={hotel.id}
                         reviewCount={hotel.review_count}
                       />
@@ -354,7 +355,7 @@ const ListRoom = ({
           </Box>
         </Box>
       )}
-    </>
+    </Box>
   );
 };
 

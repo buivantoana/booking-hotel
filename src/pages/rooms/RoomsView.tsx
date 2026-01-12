@@ -863,21 +863,39 @@ const RoomsView = ({
                   mb: 2,
                   pl: isMobile ? 2 : "unset",
                 }}>
-                <Stack direction='row' alignItems='center' spacing={1}>
-                  <Typography
-                    fontWeight={600}
-                    fontSize={{ xs: "0.95rem", sm: "1rem" }}>
-                    {loading ? (
-                      <CircularProgress
-                        size={14}
-                        sx={{ color: "#98b720", fontSize: "15px" }}
-                      />
-                    ) : (
-                      <>{totalAll}</>
-                    )}{" "}
-                    {t("search_results")}
-                  </Typography>
-                </Stack>
+                <Box>
+                  {searchParams.get("category") == "recommend" && (
+                    <Typography variant='h5' fontWeight={"bold"}>
+                      {t("suggestions_for_you")}
+                    </Typography>
+                  )}
+                  {searchParams.get("category") == "new" && (
+                    <Typography variant='h5' fontWeight={"bold"}>
+                      {t("new_hotels")}
+                    </Typography>
+                  )}
+                  {searchParams.get("category") == "toprated" && (
+                    <Typography variant='h5' fontWeight={"bold"}>
+                      {t("top_voted")}
+                    </Typography>
+                  )}
+
+                  <Stack direction='row' alignItems='center' spacing={1}>
+                    <Typography
+                      fontWeight={600}
+                      fontSize={{ xs: "0.95rem", sm: "1rem" }}>
+                      {loading ? (
+                        <CircularProgress
+                          size={14}
+                          sx={{ color: "#98b720", fontSize: "15px" }}
+                        />
+                      ) : (
+                        <>{totalAll}</>
+                      )}{" "}
+                      {t("search_results")}
+                    </Typography>
+                  </Stack>
+                </Box>
 
                 <SortButton
                   queryHotel={queryHotel}
@@ -1042,18 +1060,26 @@ const FilterMap = ({
               }}>
               {/* MARKERS */}
               {dataHotel?.map((hotel) => {
-                const imgs = parseField(hotel.images) || [];
-                const nameObj = parseField(hotel.name) || {};
-                const addressObj = parseField(hotel.address) || {};
+                const type = searchParams.get("type") || "default"; // lấy type từ params, fallback nếu ko có
+                const price = hotel?.price_min?.[type];
 
-                const hotelName = nameObj.vi || nameObj.en || "Unnamed";
-                const hotelAddress = addressObj.vi || addressObj.en || "";
+                const priceText = price
+                  ? `${price.toLocaleString("vi-VN")}đ`
+                  : "N/A";
 
                 return (
                   <Marker
                     key={hotel.id}
                     position={{ lat: hotel.latitude, lng: hotel.longitude }}
                     onClick={() => setActiveHotel(hotel)}
+                    label={{
+                      text: priceText,
+                      color: "black", // màu chữ
+                      fontSize: "12px", // kích thước chữ
+                      fontWeight: "bold",
+                    }}
+                    // Tùy chọn: ẩn icon đỏ mặc định nếu chỉ muốn label
+                    // icon={{ url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII" }} // transparent pixel
                   />
                 );
               })}
@@ -1406,6 +1432,7 @@ const ItemHotel = ({
                             direction='row'
                             alignItems='center'
                             spacing={0.5}
+                            ml={"2px"}
                             mt={0.5}>
                             <Box
                               component='img'
@@ -1420,6 +1447,24 @@ const ItemHotel = ({
                             </Typography>
                             <Typography fontSize='0.8rem' color='#666'>
                               ({hotel.review_count || 100})
+                            </Typography>
+                          </Stack>
+                          <Stack
+                            direction='row'
+                            alignItems='center'
+                            spacing={0.5}
+                            mt={0.5}>
+                            <LocationOnIcon
+                              sx={{ fontSize: "18px", color: "#ccc" }}
+                            />
+                            <Typography
+                              fontSize='0.9rem'
+                              color='#98b720'
+                              fontWeight={600}>
+                              {hotel?.distance_km?.toFixed(1)}km
+                            </Typography>
+                            <Typography fontSize='0.8rem' color='#666'>
+                              ({parseName(hotel?.address) || 100})
                             </Typography>
                           </Stack>
                         </Box>
