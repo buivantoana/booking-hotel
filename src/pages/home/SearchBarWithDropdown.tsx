@@ -21,6 +21,7 @@ import {
   IconButton,
   Container,
   Modal,
+  CircularProgress,
 } from "@mui/material";
 
 import {
@@ -44,8 +45,10 @@ import in_time from "../../images/login.png";
 import out_time from "../../images/logout.png";
 import query from "../../images/location-load.gif";
 import { useNavigate } from "react-router-dom";
-import { getLocation } from "../../service/hotel";
+import { getLocation, getSuggest } from "../../service/hotel";
 import { useTranslation } from "react-i18next";
+import { parseName } from "../../utils/utils";
+import building from "../../images/buildings.png";
 // === POPUP CHUNG ===
 interface DateRangePickerProps {
   open: boolean;
@@ -322,7 +325,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                     {t('hours_of_use')}
+                      {t('hours_of_use')}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -395,7 +398,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       color='#666'
                       fontSize='0.9rem'
                       mb={0.5}>
-                       {t('check_out_time')}
+                      {t('check_out_time')}
                     </Typography>
                     <Typography fontWeight={600} color='#333'>
                       {endTime
@@ -531,7 +534,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   textTransform: "none",
                   fontSize: "0.9rem",
                 }}>
-                {bookingType === "hourly" ?     t('any_date_time') :   t('any_date')}
+                {bookingType === "hourly" ? t('any_date_time') : t('any_date')}
               </Button>
               <Button
                 variant='contained'
@@ -545,7 +548,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   fontSize: "0.9rem",
                   "&:hover": { bgcolor: "#43a047" },
                 }}>
-               {t('apply')}
+                {t('apply')}
               </Button>
             </Stack>
           </Stack>
@@ -577,13 +580,49 @@ const SearchBarWithDropdown = ({ location, address }) => {
   const [coords, setCoords] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false); // Chỉ 1 popup
   const [selectedLocation, setSelectedLocation] = useState<string>("");
-const selectingRef = useRef(false);
-const { t } = useTranslation();
+  const [data, setData] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
+  const selectingRef = useRef(false);
+  const { t } = useTranslation();
   const geoResolveRef = useRef(null);
-  const filteredLocations = location.filter((loc) =>
-    loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
-  );
+  const normalize = (str = "") =>
+    str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const keyword = normalize(searchValue?.trim());
+
+  const filteredLocations = !keyword
+  ? location
+  : location.filter((loc) => {
+      const words = normalize(loc?.name?.vi).split(/\s+/);
+
+      return words.some(word =>
+        word.includes(keyword) // ho -> hồ, nội (no), hà (ha)
+      );
+    });
   console.log("AAAA address", address);
+
+
+  useEffect(() => {
+    // nếu chưa nhập gì thì không call
+    if (!searchValue.trim()) return;
+
+    const timer = setTimeout(async () => {
+      setDataLoading(true)
+      console.log("CALL API:", searchValue);
+      let result = await getSuggest(searchValue)
+      if (result?.hotels) {
+        setData(result?.hotels)
+      }
+      setDataLoading(false)
+
+    }, 500);
+
+    // nếu người dùng nhập tiếp -> huỷ timeout cũ
+    return () => clearTimeout(timer);
+  }, [searchValue]);
   useEffect(() => {
     if (address) {
       const name = location.find((item) => item.id == address.id)?.name.vi;
@@ -788,7 +827,7 @@ const { t } = useTranslation();
           zIndex={10}>
           <Container maxWidth='lg'>
             {/* Toggle */}
-            <Stack direction='row' justifyContent='center' sx={{ mb: isMobile?"-10px":"-40px" }}>
+            <Stack direction='row' justifyContent='center' sx={{ mb: isMobile ? "-10px" : "-40px" }}>
               <ToggleButtonGroup
                 value={bookingType}
                 exclusive
@@ -797,23 +836,23 @@ const { t } = useTranslation();
                   bgcolor: "rgba(0,0,0,0.4)",
                   backdropFilter: "blur(10px)",
                   borderRadius: "32px",
-                  p: isMobile?"10px":"16px 24px",
+                  p: isMobile ? "10px" : "16px 24px",
                   gap: "20px",
                   flexDirection: "row",
-                  justifyContent:"space-between",
-                  width: isMobile?"80%":"unset"
+                  justifyContent: "space-between",
+                  width: isMobile ? "80%" : "unset"
                 }}>
                 {[
-                  { v: "hourly", i: <AccessTime sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l:  t('by_hour') },
-                  { v: "overnight", i: <Nightlight sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: t('overnight') },
-                  { v: "daily", i: <CalendarToday sx={{fontSize:isMobile?"15px":"1.5rem"}} />, l: t('by_day') },
+                  { v: "hourly", i: <AccessTime sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('by_hour') },
+                  { v: "overnight", i: <Nightlight sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('overnight') },
+                  { v: "daily", i: <CalendarToday sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('by_day') },
                 ].map((x) => (
                   <ToggleButton
                     key={x.v}
                     value={x.v}
                     sx={{
                       px: { xs: 1, md: 4 },
-                      py: isMobile?.5:1,
+                      py: isMobile ? .5 : 1,
                       color:
                         bookingType === x.v
                           ? "rgba(152, 183, 32, 1) !important"
@@ -831,7 +870,7 @@ const { t } = useTranslation();
                             ? "white"
                             : "rgba(255,255,255,0.1)",
                       },
-                      fontSize:isMobile?"10px":"unset"
+                      fontSize: isMobile ? "10px" : "unset"
                     }}>
                     {x.i}
                     <Box component='span' sx={{ ml: 1, textTransform: "none" }}>
@@ -851,14 +890,14 @@ const { t } = useTranslation();
                 bgcolor: "white",
                 p: { xs: 1.5, md: "70px 20px 20px" },
                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                
+
               }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
                 spacing={{ xs: 1.5, md: 1 }}
                 sx={{
                   borderRadius: "50px",
-                  border:isMobile?"unset": "1px solid #eee",
+                  border: isMobile ? "unset" : "1px solid #eee",
                   p: 1,
                 }}
                 alignItems='stretch'>
@@ -890,16 +929,16 @@ const { t } = useTranslation();
                     onBlur={() => {
                       // Nếu đang click item → bỏ qua blur
                       if (selectingRef.current) return;
-                  
+
                       const isValid = location.some(
                         (loc) => loc.name.vi === searchValue
                       );
-                  
+
                       if (!isValid) {
                         // Trả lại giá trị đã chọn trước đó
                         setSearchValue(selectedLocation || "");
                       }
-                  
+
                       setDropdownOpen(false);
                     }}
                     inputRef={inputRef}
@@ -912,12 +951,12 @@ const { t } = useTranslation();
 
                       "& .MuiOutlinedInput-root": {
                         height: { xs: 48, md: 45 },
-                        fontSize:isMobile?"12px":"unset",
-                        borderRadius:isMobile?"10px": "50px 10px 10px 50px",
+                        fontSize: isMobile ? "12px" : "unset",
+                        borderRadius: isMobile ? "10px" : "50px 10px 10px 50px",
                         "& fieldset": {
                           border: dropdownOpen
                             ? "1px solid rgba(152, 183, 32, 1) !important"
-                            :isMobile?"1px solid rgba(152, 183, 32, 1) !important": "none !important",
+                            : isMobile ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important",
                         },
                         "&.Mui-focused": {
                           borderColor: "rgba(152, 183, 32, 1)",
@@ -930,8 +969,8 @@ const { t } = useTranslation();
                     open={dropdownOpen}
                     anchorEl={inputRef.current}
                     placement='bottom-start'
-                    sx={{ zIndex: 20, width: isMobile?"max-content":"18%" }}>
-                    {filteredLocations.length == 0 ? (
+                    sx={{ zIndex: 20, width: isMobile ? "max-content" : "20%" }}>
+                    {filteredLocations.length == 0 && data?.length == 0 ? (
                       <Paper
                         elevation={3}
                         className='hidden-add-voice'
@@ -943,7 +982,7 @@ const { t } = useTranslation();
                           overflowY: "auto",
                         }}>
                         <Typography color='rgba(152, 159, 173, 1)'>
-                        {t('no_data_found')}
+                          {t('no_data_found')}
                         </Typography>
                       </Paper>
                     ) : (
@@ -962,7 +1001,7 @@ const { t } = useTranslation();
                             variant='subtitle2'
                             color='#666'
                             fontWeight={600}>
-                             {t('address')}
+                            {t('address')}
                           </Typography>
                         </Box>
                         <List disablePadding>
@@ -998,6 +1037,95 @@ const { t } = useTranslation();
                             </ListItemButton>
                           ))}
                         </List>
+                        <Box p={2} bgcolor='#f9f9f9'>
+                          <Typography
+                            variant='subtitle2'
+                            color='#666'
+                            fontWeight={600}>
+                            {t('hotels')}
+                          </Typography>
+                        </Box>
+                        {dataLoading ?
+                          <Box display={"flex"} justifyContent={"center"}>
+                            <CircularProgress sx={{ fontSize: "15px", color: "rgba(152, 183, 32, 1)" }} />
+                          </Box>
+                          :
+                          <List disablePadding>
+                            {data.map((loc, i) => (
+                              <ListItemButton
+                                key={i}
+                                onMouseDown={() => {
+                                  selectingRef.current = true; // 🔥 chặn blur
+                                }}
+                                onClick={() => {
+                                  const current = Object.fromEntries([]);
+
+                                  // ---- xử lý mặc định ---- //
+                                  const now = new Date();
+
+                                  // format yyyy-MM-dd
+                                  const formatDate = (d) => d.toISOString().split("T")[0];
+
+                                  // format lên giờ chẵn
+                                  const formatHour = (d) => {
+                                    let hour = d.getHours();
+                                    let minute = d.getMinutes();
+
+                                    // round up: nếu phút > 0 thì cộng 1 giờ
+                                    if (minute > 0) hour++;
+
+                                    // format HH:00 (VD: 09:00, 20:00)
+                                    return `${String(hour).padStart(2, "0")}:00`;
+                                  };
+
+                                  // Set mặc định nếu param không có
+                                  current.checkIn = current.checkIn || formatDate(now);
+                                  current.checkOut = current.checkOut || formatDate(now);
+                                  current.checkInTime = current.checkInTime || formatHour(now);
+                                  current.duration = current.duration || 2;
+                                  current.type = "hourly";
+
+                                  // ---- build URL ---- //
+                                  navigate(
+                                    `/room/${loc.id}?${new URLSearchParams(
+                                      current
+                                    ).toString()}&name=${parseName(loc.name)}`
+                                  );
+                                }}
+                                sx={{
+                                  px: 2,
+                                  py: 1.5,
+                                  borderBottom:
+                                    i < data.length - 1
+                                      ? "1px solid #eee"
+                                      : "none",
+                                  "&:hover": { bgcolor: "#f0f8f0" },
+                                }}>
+                                <ListItemIcon sx={{ minWidth: 36 }}>
+                                  <img src={building} alt="" />
+                                </ListItemIcon>
+                                <Box>
+
+                                  <ListItemText
+                                    primary={parseName(loc?.name)}
+                                    primaryTypographyProps={{
+                                      fontSize: "0.95rem",
+                                      color: "#333",
+                                      fontWeight: 500,
+                                    }}
+                                  />
+                                  <ListItemText
+                                    primary={parseName(loc?.address)}
+                                    primaryTypographyProps={{
+                                      fontSize: "0.95rem",
+                                      color: "#333",
+                                      fontWeight: 500,
+                                    }}
+                                  />
+                                </Box>
+                              </ListItemButton>
+                            ))}
+                          </List>}
                       </Paper>
                     )}
                   </Popper>
@@ -1015,11 +1143,11 @@ const { t } = useTranslation();
                   <Box
                     ref={checkInRef}
                     sx={{
-                      flex: {xs:1, md: 1 },
+                      flex: { xs: 1, md: 1 },
                       cursor: "pointer",
                       border: pickerOpen
                         ? "1px solid rgba(152, 183, 32, 1)"
-                        : isMobile?"1px solid rgba(152, 183, 32, 1)": "1px solid transparent",
+                        : isMobile ? "1px solid rgba(152, 183, 32, 1)" : "1px solid transparent",
                       borderRight: "none",
                       borderRadius: "10px 0 0 10px",
                     }}
@@ -1033,8 +1161,8 @@ const { t } = useTranslation();
                       }}>
                       <img
                         src={in_time}
-                        width={isMobile?15:20}
-                        height={isMobile?15:20}
+                        width={isMobile ? 15 : 20}
+                        height={isMobile ? 15 : 20}
                         style={{ marginRight: "5px" }}
                         alt=''
                       />
@@ -1043,7 +1171,7 @@ const { t } = useTranslation();
                           flex: 1,
                           color: checkIn ? "#333" : "#999",
                           fontWeight: checkIn ? 500 : 400,
-                          fontSize:isMobile?"12px":"unset"
+                          fontSize: isMobile ? "12px" : "unset"
                         }}>
                         {formatCheckIn()}
                       </Typography>
@@ -1064,11 +1192,11 @@ const { t } = useTranslation();
                   <Box
                     ref={checkOutRef}
                     sx={{
-                      flex: { xs:1,md: 1 },
+                      flex: { xs: 1, md: 1 },
                       cursor: "pointer",
                       border: pickerOpen
                         ? "1px solid rgba(152, 183, 32, 1)"
-                        : isMobile?"1px solid rgba(152, 183, 32, 1)": "1px solid transparent",
+                        : isMobile ? "1px solid rgba(152, 183, 32, 1)" : "1px solid transparent",
                       borderLeft: "none",
                       borderRadius: "0 10px 10px 0",
                     }}
@@ -1082,8 +1210,8 @@ const { t } = useTranslation();
                       }}>
                       <img
                         src={out_time}
-                        width={isMobile?15:20}
-                        height={isMobile?15:20}
+                        width={isMobile ? 15 : 20}
+                        height={isMobile ? 15 : 20}
                         style={{ marginRight: "5px" }}
                         alt=''
                       />
@@ -1092,7 +1220,7 @@ const { t } = useTranslation();
                           flex: 1,
                           color: checkOut ? "#333" : "#999",
                           fontWeight: checkOut ? 500 : 400,
-                          fontSize:isMobile?"12px":"unset"
+                          fontSize: isMobile ? "12px" : "unset"
                         }}>
                         {formatCheckOut()}
                       </Typography>
@@ -1172,7 +1300,7 @@ const { t } = useTranslation();
           {/* HEADER */}
           <Stack direction='row' justifyContent='space-between' mb={2}>
             <Typography fontSize='1.2rem' fontWeight={700}>
-            {t('accessing_location')}
+              {t('accessing_location')}
             </Typography>
 
             <IconButton onClick={() => cancelGeo()}>

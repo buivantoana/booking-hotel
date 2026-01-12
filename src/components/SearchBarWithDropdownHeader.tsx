@@ -20,6 +20,7 @@ import {
   Grid,
   useMediaQuery,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import {
   LocationOn,
@@ -38,7 +39,9 @@ import dayjs, { Dayjs } from "dayjs";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
-
+import { getSuggest } from "../service/hotel";
+import { parseName } from "../utils/utils";
+import building from "../../src/images/buildings.png";
 // === DROPDOWN CHỌN LOẠI (giống ảnh) ===
 const BookingTypeDropdown: React.FC<{
   open: boolean;
@@ -646,7 +649,27 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const addressOldRef = useRef("");
   const isMobile = useMediaQuery('(max-width:900px)'); // Thêm breakpoint cho mobile
   const selectingRef = useRef(false);
+  const [data, setData] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
   const {t} = useTranslation()
+  useEffect(() => {
+    // nếu chưa nhập gì thì không call
+    if (!searchValue.trim()) return;
+
+    const timer = setTimeout(async() => {
+      setDataLoading(true)
+      console.log("CALL API:", searchValue);
+      let result = await getSuggest(searchValue)
+      if(result?.hotels){
+        setData(result?.hotels)
+      }
+      setDataLoading(false)
+      
+    }, 500);
+
+    // nếu người dùng nhập tiếp -> huỷ timeout cũ
+    return () => clearTimeout(timer);
+  }, [searchValue]);
   useEffect(() => {
     // Giữ nguyên logic
     const locationParam = searchParams.get("location") || "";
@@ -730,10 +753,23 @@ export default function SearchBarWithDropdown({ locationAddress }) {
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   
-  const filteredLocations = locationAddress.filter((loc) =>
-    loc.name.vi.toLowerCase().includes(searchValue.toLowerCase())
-  );
+const normalize = (str = "") =>
+  str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
+const keyword = normalize(searchValue?.trim());
+
+const filteredLocations = !keyword
+  ? locationAddress
+  : locationAddress.filter((loc) => {
+      const words = normalize(loc?.name?.vi).split(/\s+/);
+
+      return words.some(word =>
+        word.startsWith(keyword) // ho -> hồ, ha -> hà
+      );
+    });
   const formatDateDisplay = () => {
     if (!checkIn) return t("search_bar_select_date");
   
@@ -1084,7 +1120,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                       anchorEl={inputRef.current}
                       placement='bottom-start'
                       sx={{ zIndex: 20, padding: "0px !important" }}>
-                      {filteredLocations.length == 0 ? (
+                      {filteredLocations.length == 0 && data?.length == 0  ? (
                         <Paper
                           elevation={3}
                           className='hidden-add-voice'
@@ -1109,6 +1145,14 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                             overflow: "auto",
                             padding: .5
                           }}>
+                             <Box p={2} bgcolor='#f9f9f9'>
+                          <Typography
+                            variant='subtitle2'
+                            color='#666'
+                            fontWeight={600}>
+                             {t('address')}
+                          </Typography>
+                        </Box>
                           <List disablePadding>
                             {filteredLocations.map((loc, i) => (
                               <ListItemButton
@@ -1145,6 +1189,96 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                               </ListItemButton>
                             ))}
                           </List>
+                          
+                          <Box p={2} bgcolor='#f9f9f9'>
+                          <Typography
+                            variant='subtitle2'
+                            color='#666'
+                            fontWeight={600}>
+                             {t('hotels')}
+                          </Typography>
+                        </Box>
+                        {dataLoading?
+                        <Box display={"flex"} justifyContent={"center"}>
+                          <CircularProgress sx={{fontSize:"15px" ,color:"rgba(152, 183, 32, 1)"}}/>
+                        </Box>
+                        :
+                        <List disablePadding>
+                          {data.map((loc, i) => (
+                            <ListItemButton
+                              key={i}
+                              onMouseDown={() => {
+                                selectingRef.current = true; // 🔥 chặn blur
+                              }}
+                              onClick={() => {
+                                const current = Object.fromEntries([]);
+                        
+                                // ---- xử lý mặc định ---- //
+                                const now = new Date();
+                        
+                                // format yyyy-MM-dd
+                                const formatDate = (d) => d.toISOString().split("T")[0];
+                        
+                                // format lên giờ chẵn
+                                const formatHour = (d) => {
+                                  let hour = d.getHours();
+                                  let minute = d.getMinutes();
+                        
+                                  // round up: nếu phút > 0 thì cộng 1 giờ
+                                  if (minute > 0) hour++;
+                        
+                                  // format HH:00 (VD: 09:00, 20:00)
+                                  return `${String(hour).padStart(2, "0")}:00`;
+                                };
+                        
+                                // Set mặc định nếu param không có
+                                current.checkIn = current.checkIn || formatDate(now);
+                                current.checkOut = current.checkOut || formatDate(now);
+                                current.checkInTime = current.checkInTime || formatHour(now);
+                                current.duration = current.duration || 2;
+                                current.type = "hourly";
+                        
+                                // ---- build URL ---- //
+                                navigate(
+                                  `/room/${loc.id}?${new URLSearchParams(
+                                    current
+                                  ).toString()}&name=${parseName(loc.name)}`
+                                );
+                              }}
+                              sx={{
+                                px: 2,
+                                py: 1.5,
+                                borderBottom:
+                                  i < data.length - 1
+                                    ? "1px solid #eee"
+                                    : "none",
+                                "&:hover": { bgcolor: "#f0f8f0" },
+                              }}>
+                              <ListItemIcon sx={{ minWidth: 36 }}>
+                                <img src={building} alt="" />
+                              </ListItemIcon>
+                              <Box>
+
+                              <ListItemText
+                                primary={parseName(loc?.name)}
+                                primaryTypographyProps={{
+                                  fontSize: "0.95rem",
+                                  color: "#333",
+                                  fontWeight: 500,
+                                }}
+                              />
+                               <ListItemText
+                                primary={parseName(loc?.address)}
+                                primaryTypographyProps={{
+                                  fontSize: "0.95rem",
+                                  color: "#333",
+                                  fontWeight: 500,
+                                }}
+                              />
+                              </Box>
+                            </ListItemButton>
+                          ))}
+                        </List>}
                         </Paper>
                       )}
                     </Popper>
