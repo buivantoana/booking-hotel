@@ -33,7 +33,7 @@ import {
 } from "@mui/icons-material";
 import dayjs from "dayjs";
 import imgMain from "../../images/Rectangle 12.png";
-import vnpay from "../../images/Frame 1321317955.png";
+import vnpay from "../../images/Rectangle 30024 (1).png";
 import momo from "../../images/Rectangle 30024.png";
 import wallet from "../../images/wallet-3.png";
 import building from "../../images/building.png";

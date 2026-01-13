@@ -19,7 +19,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 // Images
 import image_left from "../../images/Frame 1321317999.png";
 import vn from "../../images/VN - Vietnam.png";
-import { checkUser, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
+import { LoginApple, LoginGoogle, checkUser, sendOtp, userUpdate, verifyOtp } from "../../service/admin";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useBookingContext } from "../../App";
@@ -35,10 +35,14 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "dayjs/locale/vi";
 import google from "../../images/Social media logo.png";
 import apple from "../../images/Group.png";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import AppleLogin from "react-apple-login";
 dayjs.locale("vi");
 // ──────────────────────────────────────────────────────────────
 // 1. Registration Form Component
 // ──────────────────────────────────────────────────────────────
+const GOOGLE_CLIENT_ID =
+  "285312507829-8puo8pp5kikc3ahdivtr9ehq1fm3kkks.apps.googleusercontent.com";
 interface RegistrationFormProps {
   phoneNumber: string;
   setPhoneNumber: (v: string) => void;
@@ -57,12 +61,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   birthDate,
   setBirthDate,
   onNext,
+  isLoginGoogle,
+  setIsLoginGoogle,
+  dataLoginGoogle,
+  setDataLoginGoogle,
 }) => {
   const { t } = useTranslation();
   const [touched, setTouched] = useState(false);
   const [touchedName, setTouchedName] = useState(false);
   const [touchedDate, setTouchedDate] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorExits, setErrorExits] = useState(false);
+  const context = useBookingContext();
   const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
@@ -140,6 +150,94 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   );
   const maxDate = minAge.toISOString().split("T")[0];
 
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    try {
+      const result = await LoginGoogle({
+        platform: "ios",
+        id_token:
+          credentialResponse?.access_token || credentialResponse?.credential,
+        location: "hanoi",
+      });
+
+      if (!result?.user?.phone) {
+        setIsLoginGoogle(true);
+        setDataLoginGoogle(result);
+        return;
+      }
+
+      if (result.access_token) {
+        localStorage.setItem("access_token", result.access_token);
+        localStorage.setItem("refresh_token", result.refresh_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        context.dispatch({
+          type: "LOGIN",
+          payload: { ...context.state, user: result.user },
+        });
+        toast.success("Login success");
+        setTimeout(() => navigate("/"), 300);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleGoogleError = () => toast.error("Google login failed");
+
+  const handleUpdatePhoneGoogle = async () => {
+    setLoading(true);
+    try {
+      const checkResult = await checkUser({
+        type: "phone",
+        value: "+84" + normalizePhoneForAPI(phoneNumber),
+      });
+      if (checkResult.code === "OK") {
+        setErrorExits(true);
+        setLoading(false);
+        return;
+      }
+      const otpResult = await sendOtp({
+        platform: "ios",
+        type: "phone",
+        value: "+84" + normalizePhoneForAPI(phoneNumber),
+      });
+      if (otpResult.success) onNext();
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+
+  const handleAppleResponse = async (response: any) => {
+    if (response?.authorization?.id_token) {
+      try {
+        const result = await LoginApple({
+          platform: "ios",
+          id_token: response.authorization.id_token,
+          location: "hanoi",
+        });
+
+        if (!result?.user?.phone) {
+          setIsLoginGoogle(true);
+          setDataLoginGoogle(result);
+          return;
+        }
+
+        if (result.access_token) {
+          localStorage.setItem("access_token", result.access_token);
+          localStorage.setItem("refresh_token", result.refresh_token);
+          localStorage.setItem("user", JSON.stringify(result.user));
+          context.dispatch({
+            type: "LOGIN",
+            payload: { ...context.state, user: result.user },
+          });
+          toast.success("Login success");
+          setTimeout(() => navigate("/"), 300);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
   return (
     <Container
       maxWidth='lg'
@@ -170,11 +268,13 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 fontWeight: 700,
                 mb: 1,
               }}>
-              {t("register_title")}
+              {isLoginGoogle
+                ? t("enter_phone_to_continue")
+                : t("register_title")}
             </Typography>
-            <Typography sx={{ fontSize: "16px", mb: 4 }} color='text.secondary'>
+            {!isLoginGoogle && <Typography sx={{ fontSize: "16px", mb: 4 }} color='text.secondary'>
               {t("register_description")}
-            </Typography>
+            </Typography>}
 
             <Box component='form' onSubmit={handleSubmit}>
               {/* Phone */}
@@ -251,132 +351,138 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               />
 
               {/* Name */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                {t("name_label")}
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder={t("name_placeholder")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={() => setTouchedName(true)}
-                error={touchedName && !isValidName(name)}
-                helperText={
-                  touchedName && !isValidName(name)
-                    ? t("invalid_name_error")
-                    : ""
-                }
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "16px",
-                    height: "60px",
-                    backgroundColor: "#fff",
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#98b720",
-                      borderWidth: 1.5,
-                    },
-                  },
-                }}
-                InputProps={{
-                  endAdornment:
-                    touchedName && !isValidName(name) ? (
-                      <InputAdornment position='end'>
-                        <Box
-                          sx={{
-                            cursor: "pointer",
-                            fontSize: 22,
-                            color: "#999",
-                          }}
-                          onClick={() => {
-                            setName("");
-                            setTouchedName(false);
-                          }}>
-                          ✕
-                        </Box>
-                      </InputAdornment>
-                    ) : null,
-                }}
-              />
-
-              {/* Birth date */}
-              <Typography fontSize={14} fontWeight={500} mb={0.5}>
-                {t("birthdate_label")}
-              </Typography>
-              <LocalizationProvider
-                adapterLocale='vi'
-                dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  value={birthDate ? dayjs(birthDate) : null}
-                  dayOfWeekFormatter={(day) => {
-                    const map = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-                    return map[day.day()];
-                  }}
-                  onChange={(newValue) => {
-                    setBirthDate(newValue ? newValue.format("YYYY-MM-DD") : "");
-                  }}
-                  maxDate={dayjs(maxDate)}
-                  /* 🔥 CUSTOM POPPER */
-                  slots={{
-                    popper: (props) => (
-                      <Popper
-                        {...props}
-                        placement='bottom-start'
-                        style={{
-                          width: props.anchorEl
-                            ? props.anchorEl.clientWidth
-                            : undefined,
-                        }}
-                      />
-                    ),
-                  }}
-                  slotProps={{
-                    textField: {
-                      fullWidth: true,
-                      error: touchedDate && !isValidBirthDate(birthDate),
-                      helperText:
-                        touchedDate && !isValidBirthDate(birthDate)
-                          ? t("invalid_birthdate_error")
-                          : "",
-                      onBlur: () => setTouchedDate(true),
-
-                      InputProps: {
-                        sx: {
-                          height: "60px",
-                          borderRadius: "16px",
-                          backgroundColor: "#fff",
-
-                          "& .MuiOutlinedInput-notchedOutline": {
-                            borderRadius: "16px",
-                            borderColor: "#cddc39",
-                          },
-
-                          "&:focus-within .MuiOutlinedInput-notchedOutline": {
-                            borderColor: "#98b720",
-                            borderWidth: 2,
-                          },
-
-                          "& input": {
-                            padding: "18px 14px",
-                            fontSize: "16px",
-                          },
-                        },
-                      },
-
-                      sx: { mb: 3 },
-                    },
-
-                    /* OPTIONAL: style calendar box */
-                    popper: {
-                      sx: {
-                        "& .MuiPaper-root": {
-                          borderRadius: "16px",
-                        },
+              {!isLoginGoogle && <>
+                <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                  {t("name_label")}
+                </Typography>
+                <TextField
+                  fullWidth
+                  placeholder={t("name_placeholder")}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => setTouchedName(true)}
+                  error={touchedName && !isValidName(name)}
+                  helperText={
+                    touchedName && !isValidName(name)
+                      ? t("invalid_name_error")
+                      : ""
+                  }
+                  sx={{
+                    mb: 3,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "16px",
+                      height: "60px",
+                      backgroundColor: "#fff",
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#98b720",
+                        borderWidth: 1.5,
                       },
                     },
+                  }}
+                  InputProps={{
+                    endAdornment:
+                      touchedName && !isValidName(name) ? (
+                        <InputAdornment position='end'>
+                          <Box
+                            sx={{
+                              cursor: "pointer",
+                              fontSize: 22,
+                              color: "#999",
+                            }}
+                            onClick={() => {
+                              setName("");
+                              setTouchedName(false);
+                            }}>
+                            ✕
+                          </Box>
+                        </InputAdornment>
+                      ) : null,
                   }}
                 />
-              </LocalizationProvider>
+
+              </>}
+
+              {/* Birth date */}
+              {!isLoginGoogle && <>
+                <Typography fontSize={14} fontWeight={500} mb={0.5}>
+                  {t("birthdate_label")}
+                </Typography>
+                <LocalizationProvider
+                  adapterLocale='vi'
+                  dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    value={birthDate ? dayjs(birthDate) : null}
+                    dayOfWeekFormatter={(day) => {
+                      const map = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+                      return map[day.day()];
+                    }}
+                    onChange={(newValue) => {
+                      setBirthDate(newValue ? newValue.format("YYYY-MM-DD") : "");
+                    }}
+                    maxDate={dayjs(maxDate)}
+                    /* 🔥 CUSTOM POPPER */
+                    slots={{
+                      popper: (props) => (
+                        <Popper
+                          {...props}
+                          placement='bottom-start'
+                          style={{
+                            width: props.anchorEl
+                              ? props.anchorEl.clientWidth
+                              : undefined,
+                          }}
+                        />
+                      ),
+                    }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: true,
+                        error: touchedDate && !isValidBirthDate(birthDate),
+                        helperText:
+                          touchedDate && !isValidBirthDate(birthDate)
+                            ? t("invalid_birthdate_error")
+                            : "",
+                        onBlur: () => setTouchedDate(true),
+
+                        InputProps: {
+                          sx: {
+                            height: "60px",
+                            borderRadius: "16px",
+                            backgroundColor: "#fff",
+
+                            "& .MuiOutlinedInput-notchedOutline": {
+                              borderRadius: "16px",
+                              borderColor: "#cddc39",
+                            },
+
+                            "&:focus-within .MuiOutlinedInput-notchedOutline": {
+                              borderColor: "#98b720",
+                              borderWidth: 2,
+                            },
+
+                            "& input": {
+                              padding: "18px 14px",
+                              fontSize: "16px",
+                            },
+                          },
+                        },
+
+                        sx: { mb: 3 },
+                      },
+
+                      /* OPTIONAL: style calendar box */
+                      popper: {
+                        sx: {
+                          "& .MuiPaper-root": {
+                            borderRadius: "16px",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </LocalizationProvider>
+
+              </>}
               <Typography
                 sx={{ fontSize: "14px", mb: 3 }}
                 color='text.secondary'>
@@ -393,7 +499,47 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 {t("terms_and_privacy")} của Hotel Booking
               </Typography>
 
-              <Button
+              {isLoginGoogle ? (
+                <Button
+                  onClick={handleUpdatePhoneGoogle}
+                  fullWidth
+                  disabled={loading || !isValidVietnamPhone(phoneNumber)}
+                  sx={{
+                    mb: 3,
+                    py: 1.5,
+                    borderRadius: "16px",
+                    backgroundColor:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#e0e0e0"
+                        : "#98b720",
+                    color:
+                      loading || !isValidVietnamPhone(phoneNumber)
+                        ? "#888"
+                        : "#fff",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    fontSize: "18px",
+                    height: "56px",
+                    "&:hover": {
+                      backgroundColor:
+                        loading || !isValidVietnamPhone(phoneNumber)
+                          ? "#e0e0e0"
+                          : "#98b720",
+                    },
+                  }}>
+                  {loading ? (
+                    <>
+                      <CircularProgress
+                        size={20}
+                        sx={{ color: "#fff", mr: 1 }}
+                      />
+                      {t("continue")}...
+                    </>
+                  ) : (
+                    t("continue")
+                  )}
+                </Button>
+              ) : <Button
                 type='submit'
                 fullWidth
                 disabled={isDisabled}
@@ -420,8 +566,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 ) : (
                   t("register_button")
                 )}
-              </Button>
-              <>
+              </Button>}
+              {!isLoginGoogle && <>
                 <Typography
                   variant='body2'
                   align='center'
@@ -429,42 +575,54 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                   color='text.secondary'>
                   {t("or")}
                 </Typography>
-
                 <Grid container spacing={2} mb={3}>
                   <Grid item xs={12} sm={6}>
-                    <Button
-                      variant='outlined'
-                      fullWidth
-                      onClick={() => {
-                        navigate(`/login?type=apple`);
-                      }}
-                      sx={{
-                        py: 1.2,
-                        textTransform: "none",
-                        fontWeight: 500,
-                        borderRadius: 3,
-                        borderColor: "#e0e0e0",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 1,
-                        "&:hover": { borderColor: "#bdbdbd" },
-                      }}>
-                      <Box
-                        component='img'
-                        src={apple}
-                        alt='Apple'
-                        sx={{ width: 20, mt: -0.7 }}
-                      />
-                      {t("sign_up_with_apple")}
-                    </Button>
+                    <AppleLogin
+                      clientId='com.zeezoo.hotelbooking.login'
+                      redirectURI='https://booking-hotel-liard.vercel.app'
+                      responseType='code'
+                      responseMode='query'
+                      usePopup={true}
+                      scope='name email'
+                      callback={handleAppleResponse}
+                      render={(renderProps: any) => (
+                        <Button
+                          variant='outlined'
+                          onClick={renderProps.onClick}
+                          fullWidth
+                          sx={{
+                            py: 1.2,
+                            textTransform: "none",
+                            fontWeight: 500,
+                            borderRadius: 3,
+                            borderColor: "#e0e0e0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 1,
+                            "&:hover": { borderColor: "#bdbdbd" },
+                          }}>
+                          <Box
+                            component='img'
+                            src={apple}
+                            alt='Apple'
+                            sx={{ width: 20, mt: -0.7 }}
+                          />
+                          {t("sign_up_with_apple")}
+                        </Button>
+                      )}
+                    />
                   </Grid>
 
                   <Grid item xs={12} sm={6}>
-                    <GoogleCustomButton />
+                    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                      <GoogleCustomButton
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                      />
+                    </GoogleOAuthProvider>
                   </Grid>
                 </Grid>
-
                 <Typography sx={{ fontSize: "14px" }} color='text.secondary'>
                   {t("no_account_yet")}
                   <Link
@@ -479,7 +637,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     {t("register_now_link")}
                   </Link>
                 </Typography>
-              </>
+              </>}
             </Box>
           </Box>
         </Grid>
@@ -515,6 +673,8 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   onBack,
   name,
   birthDate,
+  isLoginGoogle,
+  dataLoginGoogle
 }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -527,7 +687,10 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if(e){
+      e.preventDefault();
+
+    }
     console.log("AAAAA countSpam", countSpam);
     if (countSpam == 5) {
       toast.warning("Quá số lần nhập OTP");
@@ -538,15 +701,27 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
     setLoading(true);
     if (otp.length === 4) {
       try {
-        let result = await verifyOtp({
-          platform: "ios",
-          type: "phone",
-          value: "+84" + normalizePhoneForAPI(phoneNumber),
-          otp: otp,
-          location: "hanoi",
-          name: name,
-          birthday: birthDate,
-        });
+        let body 
+        if(isLoginGoogle){
+          body = {
+            platform: "ios",
+            type: "phone",
+            value: "+84" + normalizePhoneForAPI(phoneNumber),
+            otp: otp,
+           
+          }
+        }else{
+          body = {
+            platform: "ios",
+            type: "phone",
+            value: "+84" + normalizePhoneForAPI(phoneNumber),
+            otp: otp,
+            location: "hanoi",
+            name: name,
+            birthday: birthDate,
+          }
+        }
+        let result = await verifyOtp(body,dataLoginGoogle?.access_token);
         if (result.access_token) {
           onSuccess(result);
         } else {
@@ -560,7 +735,12 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
     }
     setLoading(false);
   };
-
+  useEffect(() => {
+    if (otp.length === 4 && !loading) {
+      handleSubmit();
+    }
+   
+  }, [otp]);
   return (
     <Container
       maxWidth='lg'
@@ -649,7 +829,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 )}
               </Typography>
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={otp.length !== 4 || loading}
@@ -677,7 +857,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 ) : (
                   t("verify_otp")
                 )}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -693,11 +873,36 @@ const PinCreation = ({ onNext, onBack, pin, setPin }: any) => {
   const { t } = useTranslation();
   const [showPin, setShowPin] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+   
     if (pin.length === 6) onNext();
   };
 
+ 
+  const isInitialMount = React.useRef(true);
+
+  useEffect(() => {
+    // Lần đầu mount → không auto submit
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Từ lần thay đổi thứ 2 trở đi mới auto submit
+    if (pin.length === 6) {
+      onNext();
+    }
+  }, [pin, onNext]);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Ngăn hành vi mặc định (nếu có form submit)
+      
+      // Chỉ submit nếu pin có ít nhất 1 ký tự (hoặc theo logic bạn muốn)
+      if (pin.length ===6) {
+        onNext();
+      }
+    }
+  };
   return (
     <Container
       maxWidth='lg'
@@ -753,6 +958,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }: any) => {
 
             <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
+              onKeyDown={handleKeyDown}
                 value={pin}
                 onChange={setPin}
                 length={6}
@@ -778,7 +984,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }: any) => {
                 }}
               />
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={pin.length !== 6}
@@ -796,7 +1002,7 @@ const PinCreation = ({ onNext, onBack, pin, setPin }: any) => {
                   },
                 }}>
                 {t("continue")}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -819,7 +1025,10 @@ const PinCreationConfirm = ({
   const context = useBookingContext();
   const [count, setCount] = useState(1);
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if(e){
+      e.preventDefault();
+    }
+   
     if (count == 5) {
       toast.warning("Nhập mã pin sai quá 5 lần ");
       onBack(true);
@@ -848,10 +1057,18 @@ const PinCreationConfirm = ({
     } else {
       setShowConfirm(true);
       setCount(count + 1);
+      setPin("")
+      
     }
     setLoading(false);
   };
-
+  useEffect(() => {
+    if (pin.length === 6 ) {
+      handleSubmit()
+    }
+   
+  }, [pin]);
+  
   return (
     <Container
       maxWidth='lg'
@@ -886,7 +1103,7 @@ const PinCreationConfirm = ({
               }}>
               {onBack && (
                 <ArrowBackIosNewIcon
-                  onClick={onBack}
+                  onClick={()=>onBack()}
                   sx={{ cursor: "pointer" }}
                 />
               )}
@@ -944,7 +1161,7 @@ const PinCreationConfirm = ({
                 </Typography>
               )}
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={pin.length !== 6 || loading}
@@ -972,7 +1189,7 @@ const PinCreationConfirm = ({
                 ) : (
                   t("complete_registration")
                 )}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -996,6 +1213,8 @@ const RegisterView = () => {
   const [dataUser, setDataUser] = useState<any>(null);
   const [timer, setTimer] = useState(55);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
+  const [dataLoginGoogle, setDataLoginGoogle] = useState<any>(null);
+  const [isLoginGoogle, setIsLoginGoogle] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -1026,6 +1245,8 @@ const RegisterView = () => {
     setOtp("");
   };
 
+  
+  
   return (
     <>
       {currentStep === "register" && (
@@ -1037,6 +1258,10 @@ const RegisterView = () => {
           birthDate={birthDate}
           setBirthDate={setBirthDate}
           onNext={goToOtp}
+          dataLoginGoogle={dataLoginGoogle}
+          setDataLoginGoogle={setDataLoginGoogle}
+          setIsLoginGoogle={setIsLoginGoogle}
+          isLoginGoogle={isLoginGoogle}
         />
       )}
 
@@ -1052,6 +1277,8 @@ const RegisterView = () => {
           onBack={goBack}
           name={name}
           birthDate={birthDate}
+          isLoginGoogle={isLoginGoogle}
+          dataLoginGoogle={dataLoginGoogle}
         />
       )}
 
@@ -1083,16 +1310,16 @@ const RegisterView = () => {
 };
 
 export default RegisterView;
-const GoogleCustomButton = () => {
+
+
+const GoogleCustomButton = ({ onSuccess, onError }: any) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const login = useGoogleLogin({ onSuccess, onError });
   return (
     <Button
       variant='outlined'
+      onClick={() => login()} // click vẫn hoạt động
       fullWidth
-      onClick={() => {
-        navigate(`/login?type=google`);
-      }}
       sx={{
         py: 1.2,
         textTransform: "none",

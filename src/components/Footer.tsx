@@ -19,7 +19,7 @@ import {
   YouTube as YouTubeIcon,
 } from "@mui/icons-material";
 import momo from "../../src/images/Rectangle 30024.png";
-import vnpay from "../../src/images/Frame 1321317955.png";
+import vnpay from "../../src/images/Rectangle 30024 (1).png";
 import app from "../../src/images/App.png";
 import app1 from "../../src/images/App (1).png";
 import ins from "../../src/images/Logos.png";

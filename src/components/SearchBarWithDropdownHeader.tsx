@@ -886,7 +886,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
           }
         }}>
         <Box>
-          <Container sx={{ px: 0 }} maxWidth={isMobile ? "sm" : "md"}>
+          <Box>
             {/* === THANH TÌM KIẾM === */}
             <Paper
               elevation={0}
@@ -896,6 +896,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 bgcolor: "white",
                 border: isMobile ? "none" : "1px solid #ddd",
                 p: isMobile ? 1.5 : 0.5,
+                width:"100%"
               }}>
               {isMobile ? (
                 // MOBILE VERSION - Layout dọc
@@ -1133,9 +1134,9 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                 </Box>
               ) : (
                 // DESKTOP VERSION - Giữ nguyên layout cũ
-                <Stack direction='row' alignItems='center'>
+                <Stack direction='row' justifyContent={"space-between"} alignItems="center">
                   {/* Địa điểm */}
-                  <Box sx={{ flex: "250px 0 0", position: "relative" }}>
+                  <Box sx={{ flex:location.pathname == "/" ?"180px 0 0": "250px 0 0", position: "relative" }}>
                     <TextField
                       fullWidth
                       disabled={name}
@@ -1377,7 +1378,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   {/* Loại đặt phòng */}
                   <Box
                     ref={typeRef}
-                    sx={{ cursor: "pointer", flex: "0 0 170px", mx: 1 }}
+                    sx={{ cursor: "pointer", flex:location.pathname == "/" ?"0 0 150px": "0 0 170px", mx: 1 }}
                     onClick={() => setTypeDropdownOpen(!typeDropdownOpen)}>
                     <Box
                       sx={{
@@ -1432,7 +1433,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
                   {/* Ngày giờ */}
                   <Box
                     ref={dateRef}
-                    sx={{ flex: 1, cursor: "pointer", mr: 1 }}
+                    sx={{ flex:location.pathname == "/"?1:1, cursor: "pointer", mr: 1 }}
                     onClick={() => setPickerOpen(true)}>
                     <Box
                       sx={{
@@ -1511,7 +1512,7 @@ export default function SearchBarWithDropdown({ locationAddress }) {
               initialTime={checkInTime}
               initialDuration={checkInDuration}
             />
-          </Container>
+          </Box>
         </Box>
       </ClickAwayListener>
     </LocalizationProvider>

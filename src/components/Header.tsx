@@ -132,7 +132,7 @@ const Header = () => {
               location.pathname.includes("room")) &&
               !isMobile && (
                 <Box
-                  width={isMobile ? "100%" : "70%"}
+                  width={isMobile ? "100%" :location.pathname == "/"?"48%": "70%"}
                   ref={ref}
                   sx={{
                     display: "flex",
@@ -140,7 +140,7 @@ const Header = () => {
                     justifyContent: "center",
                     fontSize: 20,
                     borderRadius: 2,
-
+                    pointerEvents:visible || location.pathname != "/"? "auto":"none",
                     opacity: visible || location.pathname != "/" ? 1 : 0,
                     transform:
                       visible || location.pathname != "/"

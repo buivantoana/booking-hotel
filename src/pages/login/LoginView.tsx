@@ -154,6 +154,30 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
     if (pin.length === 6) onNext();
   };
 
+  const isInitialMount = React.useRef(true);
+
+  useEffect(() => {
+    // Lần đầu mount → không auto submit
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Từ lần thay đổi thứ 2 trở đi mới auto submit
+    if (pin.length === 6) {
+      onNext();
+    }
+  }, [pin, onNext]);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Ngăn hành vi mặc định (nếu có form submit)
+      
+      // Chỉ submit nếu pin có ít nhất 1 ký tự (hoặc theo logic bạn muốn)
+      if (pin.length ===6) {
+        onNext();
+      }
+    }
+  };
   return (
     <Container
       maxWidth='lg'
@@ -210,6 +234,7 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
             <Box component='form' onSubmit={handleSubmit}>
               <MuiOtpInput
                 value={pin}
+                onKeyDown={handleKeyDown}
                 onChange={setPin}
                 length={6}
                 validateChar={validateChar}
@@ -234,7 +259,7 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                 }}
               />
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={pin.length !== 6}
@@ -252,7 +277,7 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
                   },
                 }}>
                 {t("continue")}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -277,7 +302,7 @@ const PinCreationConfirm = ({
   const context = useBookingContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // e.preventDefault();
     setLoading(true);
 
     if (pin.length === 6 && pin === pinConfirm) {
@@ -311,6 +336,12 @@ const PinCreationConfirm = ({
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (pin.length === 6 && !loading ) {
+      handleSubmit();
+    }
+   
+  }, [pin]);
   return (
     <Container
       maxWidth='lg'
@@ -403,7 +434,7 @@ const PinCreationConfirm = ({
                 </Typography>
               )}
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={pin.length !== 6 || loading}
@@ -431,7 +462,7 @@ const PinCreationConfirm = ({
                 ) : (
                   t("complete_registration")
                 )}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -462,7 +493,7 @@ const OtpVerification = ({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    // e.preventDefault();
     setLoading(true);
     if (otp.length === 4) {
       try {
@@ -487,6 +518,12 @@ const OtpVerification = ({
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (otp.length === 4 && !loading ) {
+      handleSubmit();
+    }
+   
+  }, [otp]);
   return (
     <Container
       maxWidth='lg'
@@ -574,7 +611,7 @@ const OtpVerification = ({
                 )}
               </Typography>
 
-              <Button
+              {/* <Button
                 type='submit'
                 fullWidth
                 disabled={otp.length !== 4 || loading}
@@ -602,7 +639,7 @@ const OtpVerification = ({
                 ) : (
                   t("verify_otp")
                 )}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -1090,8 +1127,18 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
     if (pin.length === 6 && !loading && attemptsLeft > 0) {
       handleSubmit();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [pin]);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Ngăn hành vi mặc định (nếu có form submit)
+      
+      // Chỉ submit nếu pin có ít nhất 1 ký tự (hoặc theo logic bạn muốn)
+      if (pin.length ===6) {
+        handleSubmit();
+      }
+    }
+  };
   return (
     <Container
       maxWidth='lg'
@@ -1151,6 +1198,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
               <MuiOtpInput
                 value={pin}
                 onChange={setPin}
+                onKeyDown={handleKeyDown}
                 length={6}
                 validateChar={validateChar}
                 TextFieldsProps={{ type: showPin ? "text" : "password" }}
@@ -1212,7 +1260,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                 </Link>
               </Typography>
 
-              <Button
+              {/* <Button
                 fullWidth
                 disabled={pin.length !== 6 || loading}
                 sx={{
@@ -1238,7 +1286,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
                 ) : (
                   t("continue")
                 )}
-              </Button>
+              </Button> */}
             </Box>
           </Box>
         </Grid>
@@ -1250,24 +1298,7 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
 // ==================== GOOGLE CUSTOM BUTTON ====================
 const GoogleCustomButton = ({ onSuccess, onError }: any) => {
   const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const login = useGoogleLogin({ onSuccess, onError });
-
-  // ✅ Auto login nếu URL có ?type=google
-  useEffect(() => {
-    if (searchParams.get("type") === "google") {
-      // defer để popup login chạy đúng
-      setTimeout(() => {
-        login();
-        // Xóa param
-        const newParams = new URLSearchParams(searchParams);
-        newParams.delete("type");
-        setSearchParams(newParams, { replace: true });
-      }, 0);
-    }
-  }, [searchParams, setSearchParams, login]);
-
   return (
     <Button
       variant='outlined'

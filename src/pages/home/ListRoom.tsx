@@ -152,7 +152,7 @@ const HotelCard = ({
       }}>
       {/* Badge "Đăng tin cậy" */}
       <Box sx={{ position: "absolute", top: 10, left: 30, zIndex: 2 }}>
-        <img src={tag} alt='' />
+        <img src={tag}  alt='' />
       </Box>
 
       {/* Ảnh phòng */}
