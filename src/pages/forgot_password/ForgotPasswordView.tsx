@@ -50,7 +50,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
 }) => {
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
     e.preventDefault();
@@ -73,31 +73,31 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
   const normalizePhone = (phone) => {
     if (!phone) return "";
     let p = phone.trim().replace(/\D/g, "");
-  
+
     // Nếu bắt đầu bằng 84 → thay thành 0
     if (p.startsWith("84")) {
       p = "0" + p.slice(2);
     }
-  
+
     // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
     if (!p.startsWith("0")) {
       p = "0" + p;
     }
-  
+
     return p;
   };
-  
+
   const isValidVietnamPhone = (phone) => {
     if (!phone) return false;
-  
+
     const normalized = normalizePhone(phone);
-  
+
     // chỉ cho phép đúng 10 hoặc 11 số
     if (normalized.length !== 10 && normalized.length !== 11) return false;
-  
+
     // đầu số VN hợp lệ
     if (!/^0[35789]/.test(normalized)) return false;
-  
+
     return true;
   };
 
@@ -142,11 +142,11 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
             <Box component='form' onSubmit={handleSubmit}>
               {/* Phone */}
               <Typography fontSize={14} fontWeight={500} mb={0.5}>
-              {t("phone_label")}
+                {t("phone_label")}
               </Typography>
               <TextField
                 fullWidth
-                placeholder=   {t("phone_placeholder")}
+                placeholder={t("phone_placeholder")}
                 variant='outlined'
                 value={phoneNumber}
                 onChange={(e) => {
@@ -160,7 +160,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 error={touched && !isValidVietnamPhone(phoneNumber)}
                 helperText={
                   touched && !isValidVietnamPhone(phoneNumber)
-                    ?  t("phone_invalid_error")
+                    ? t("phone_invalid_error")
                     : ""
                 }
                 sx={{
@@ -226,7 +226,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
               <Typography
                 sx={{ fontSize: "14px", mb: 3 }}
                 color='text.secondary'>
-               { t("terms_text")}
+                {t("terms_text")}
                 <Link
                   href='#'
                   sx={{
@@ -234,9 +234,9 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                     fontWeight: 500,
                     textDecoration: "underline",
                   }}>
-                  { t("terms_link")}
+                  {t("terms_link")}
                 </Link>{" "}
-                { t("terms_of")}
+                {t("terms_of")}
               </Typography>
 
               <Button
@@ -261,7 +261,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    { t("sending_otp")}
+                    {t("sending_otp")}
                   </>
                 ) : (
                   t("continue_button")
@@ -306,7 +306,8 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   birthDate,
 }) => {
   const [loading, setLoading] = useState(false);
-  const {t} = useTranslation()
+  const { t } = useTranslation()
+  const [otpKey, setOtpKey] = useState(0);
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -335,7 +336,11 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
         if (result.access_token) {
           onSuccess(result);
         } else {
-          toast.error(getErrorMessage(result.code) || result.detail);
+          setOtp("");                    // xóa
+          toast.error(getErrorMessage(result.code) || result.message);
+
+          // Force re-mount MuiOtpInput → tự động focus ô đầu
+          setOtpKey(prev => prev + 1);
         }
       } catch (error) {
         console.log(error);
@@ -380,20 +385,22 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 onClick={onBack}
                 sx={{ cursor: "pointer" }}
               />
-            {   t("enter_otp_title")}
+              {t("enter_otp_title")}
             </Typography>
 
             <Typography
               sx={{ fontSize: "16px", mb: 4, color: "text.secondary" }}>
-                 {   t("otp_sent_to")}<b>+84{normalizePhoneForAPI(phoneNumber)}</b>
+              {t("otp_sent_to")}<b>+84{normalizePhoneForAPI(phoneNumber)}</b>
             </Typography>
 
             <Box component='form' onSubmit={handleSubmit}>
               <Box sx={{ mb: 2 }}>
                 <MuiOtpInput
+                  key={otpKey}
                   value={otp}
                   onChange={setOtp}
                   length={4}
+                  autoFocus
                   validateChar={validateChar}
                   sx={{
                     gap: 2,
@@ -425,10 +432,10 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 }}>
                 {isResendEnabled ? (
                   <Link onClick={onResend} sx={{ cursor: "pointer" }}>
-                   {   t("resend_otp_link")}
+                    {t("resend_otp_link")}
                   </Link>
                 ) : (
-                  `${ t("resend_otp_timer")} (${formatTime(timer)})`
+                  `${t("resend_otp_timer")} (${formatTime(timer)})`
                 )}
               </Typography>
 
@@ -455,7 +462,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                    { t("verifying_otp")}
+                    {t("verifying_otp")}
                   </>
                 ) : (
                   t("verify_otp_button")
@@ -475,7 +482,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
 
 const PinCreation = ({ onNext, onBack, pin, setPin }) => {
   const [showPin, setShowPin] = useState(false);
-const {t} = useTranslation()
+  const { t } = useTranslation()
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length === 6) {
@@ -521,18 +528,18 @@ const {t} = useTranslation()
                   sx={{ cursor: "pointer" }}
                 />
               )}
-             {  t("create_pin_title")}
+              {t("create_pin_title")}
             </Typography>
 
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
               <Typography fontSize={14} color='#5D6679' fontWeight={500}>
-              {  t("confirm_pin_title")}
+                {t("confirm_pin_title")}
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
                 sx={{ cursor: "pointer", fontSize: 14, color: "#5D6679" }}>
-                {showPin ? t("hide_pin") : t("show_pin") }
+                {showPin ? t("hide_pin") : t("show_pin")}
               </Typography>
             </Box>
 
@@ -580,7 +587,7 @@ const {t} = useTranslation()
                     backgroundColor: pin.length === 6 ? "#7cb400" : "#e0e0e0",
                   },
                 }}>
-              { t("continue_button")}
+                {t("continue_button")}
               </Button>
             </Box>
           </Box>
@@ -595,7 +602,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
-  const {t} = useTranslation()
+  const { t } = useTranslation()
   const context = useBookingContext();
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true);
@@ -668,13 +675,13 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                   sx={{ cursor: "pointer" }}
                 />
               )}
-                { t("confirm_pin_title")}
+              {t("confirm_pin_title")}
             </Typography>
 
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
               <Typography fontSize={14} color='#5D6679' fontWeight={500}>
-              { t("pin_usage_note")}
+                {t("pin_usage_note")}
               </Typography>
               <Typography
                 onClick={() => setShowPin(!showPin)}
@@ -718,7 +725,7 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                     mb: 2,
                     fontWeight: 500,
                   }}>
-                 { t("pin_mismatch_error")}
+                  {t("pin_mismatch_error")}
                 </Typography>
               )}
 
@@ -745,10 +752,10 @@ const PinCreationConfirm = ({ onSuccess, onBack, pinConfirm, dataUser }) => {
                 {loading ? (
                   <>
                     <CircularProgress size={20} sx={{ color: "#fff", mr: 1 }} />
-                   { t("completing")}
+                    {t("completing")}
                   </>
                 ) : (
-                   t("complete_button")
+                  t("complete_button")
                 )}
               </Button>
             </Box>

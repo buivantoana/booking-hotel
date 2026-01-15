@@ -281,7 +281,7 @@ const ListRoom = ({
   };
 
   return (
-    <Box mt={isDetail || category == "recommend" ? 0 : 5}>
+    <Box mt={isDetail ? 0 : category == "recommend"?-7:5}>
       {loading ? (
         <ListRoomLoading />
       ) : (

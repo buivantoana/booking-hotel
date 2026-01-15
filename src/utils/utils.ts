@@ -332,3 +332,11 @@ export const facilities = [
     icon: "https://raw.githubusercontent.com/buivantoana/host-file/main/Frame%201321317937%20(1).png",
   },
 ];
+
+export const mapLocale = (lng: string) => {
+  if (lng.startsWith("vi")) return "vi";
+  if (lng.startsWith("en")) return "en";
+  if (lng.startsWith("ko")) return "ko";
+  if (lng.startsWith("ja")) return "ja";
+  return "en";
+};

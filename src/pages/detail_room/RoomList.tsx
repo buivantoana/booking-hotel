@@ -143,6 +143,9 @@ const RoomCard = ({
         "&:hover": { boxShadow: 6 },
         opacity: isSoldOut ? 0.7 : 1,
         position: "relative",
+        height: "90%",           // ← Quan trọng: card full height
+        display: "flex",
+        flexDirection: "column",
       }}>
       {/* HẾT PHÒNG BADGE */}
 
@@ -268,8 +271,8 @@ const RoomCard = ({
                   typeof room.amenities === "string"
                     ? JSON.parse(room.amenities)
                     : Array.isArray(room.amenities)
-                    ? room.amenities
-                    : [];
+                      ? room.amenities
+                      : [];
                 return Array.isArray(parsed) ? parsed : [];
               } catch (e) {
                 console.warn("Parse facilities error:", e);
@@ -293,7 +296,7 @@ const RoomCard = ({
 
             return (
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 1 }}>
-                {selectedFacilities.map((fac) => (
+                {selectedFacilities.slice(0, 3).map((fac) => (
                   <Box
                     key={fac.id}
                     sx={{
@@ -384,7 +387,7 @@ const RoomCard = ({
   );
 };
 
-const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
+const RoomList = ({ loading, data, hotel, section1Ref, amenities, attribute }) => {
   let booking = localStorage.getItem("booking")
     ? JSON.parse(localStorage.getItem("booking"))
     : {};
@@ -437,7 +440,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
       <Stack spacing={3} sx={{}}>
         <Typography
           fontWeight={700}
-          fontSize={{ xs: "1.25rem", md: "1.5rem" }}
+          fontSize='1.1rem'
           color='#333'>
           {t("room_list_title")}
         </Typography>
@@ -641,6 +644,7 @@ const RoomList = ({ loading, data, hotel, section1Ref, amenities }) => {
           searchParams={searchParams}
           room={selectedRoom}
           amenities={amenities}
+          attribute={attribute}
         />
 
         {loading ? (
@@ -748,7 +752,9 @@ const RoomDetailModal = ({
   openModalDetail,
   setOpenModalDetail,
   amenities,
+  attribute
 }) => {
+  if (!room) return null;
   const sliderRef = useRef<any>(null);
   const thumbRef = useRef<any>(null);
   const navigate = useNavigate();
@@ -761,6 +767,12 @@ const RoomDetailModal = ({
   const sliderMain = useRef();
   const sliderThumb = useRef();
 
+  const getLabelsByIds = (ids: string[] | null | undefined, list) => {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) return [];
+    return ids
+      .map((id) => list.find((item) => item.id === id)?.name[currentLang])
+      .filter(Boolean) as string[];
+  };
   const settingsMain = {
     asNavFor: navThumb,
     arrows: false,
@@ -775,7 +787,7 @@ const RoomDetailModal = ({
     centerMode: false,
   };
 
-  if (!room) return null;
+
 
   const handleBooking = () => {
     if (localStorage.getItem("booking")) {
@@ -803,6 +815,36 @@ const RoomDetailModal = ({
       }, 300);
     }
   };
+  const bedTypeIds = React.useMemo(() => {
+    if (!room?.bed_type) return [];
+    try {
+      return typeof room.bed_type === "string"
+        ? JSON.parse(room.bed_type)
+        : Array.isArray(room.bed_type)
+          ? room.bed_type
+          : [];
+    } catch {
+      return [];
+    }
+  }, [room?.bed_type]);
+
+  const directionIds = React.useMemo(() => {
+    if (!room?.direction) return [];
+    try {
+      return typeof room.direction === "string"
+        ? JSON.parse(room.direction)
+        : Array.isArray(room.direction)
+          ? room.direction
+          : [];
+    } catch {
+      return [];
+    }
+  }, [room?.direction]);
+  console.log("AAAA bedTypeIds", bedTypeIds)
+  const bedTypeLabels = getLabelsByIds(bedTypeIds, attribute?.bed_type || []);
+  const directionLabels = getLabelsByIds(directionIds, attribute?.direction || []);
+  console.log("AAAA bedTypeIds",  attribute?.bed_type)
+  console.log("AAAA amenities?.bed_type", amenities)
   return (
     <Modal
       open={open || openModalDetail}
@@ -975,6 +1017,28 @@ const RoomDetailModal = ({
             <Typography fontWeight={600} fontSize='1.1rem' mb={1}>
               {t("room_info_title")}
             </Typography>
+            <Typography sx={{mt:1}} fontSize='0.9rem' >{t("bed_type")}   {bedTypeLabels.length > 0 ? (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {bedTypeLabels.map((label, i) => (
+                  <Typography color='gray' fontSize='0.9rem' >{label}</Typography>
+                ))}
+              </Box>
+            ) : (
+              "-"
+            )}</Typography>
+           
+             <Typography  sx={{mt:1}} fontSize='0.9rem' >{t("room_direction")}  {directionLabels.length > 0 ? (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {directionLabels.map((label, i) => (
+                   <Typography color='gray' fontSize='0.9rem' >{label}</Typography>
+                ))}
+              </Box>
+            ) : (
+              "-"
+            )}</Typography>
+           
+             <Typography  sx={{mt:1}} fontSize='0.9rem' >{t("area_room")}  <Typography color='gray' fontSize='0.9rem' >{  room?.area_m2 ? `${room.area_m2}m²` : "-"}</Typography></Typography>
+          
             <FacilitiesList facilities={room?.facilities || {}} />
 
             <Typography fontWeight={600} mb={1}>
@@ -999,8 +1063,8 @@ const RoomDetailModal = ({
                       typeof room.amenities === "string"
                         ? JSON.parse(room.amenities)
                         : Array.isArray(room.amenities)
-                        ? room.amenities
-                        : [];
+                          ? room.amenities
+                          : [];
                     return Array.isArray(parsed) ? parsed : [];
                   } catch (e) {
                     console.warn("Parse facilities error:", e);
@@ -1130,7 +1194,7 @@ const PinCreation = ({ phoneNumber, setOpenModal }) => {
           },
         });
 
-        toast.success("Login success");
+        toast.success("Đăng nhập thành công");
         setOpenModal(false);
       } else {
         toast.error(getErrorMessage(result.code) || result.message);

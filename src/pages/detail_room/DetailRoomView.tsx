@@ -64,6 +64,7 @@ const DetailRoomView = ({
   hastag,
   amenities,
   rooms,
+  attribute
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -421,6 +422,7 @@ const DetailRoomView = ({
             data={rooms || []}
             section1Ref={section1Ref}
             amenities={amenities}
+            attribute={attribute}
           />
           <HotelDetailInfo
             info={detailHotel?.hotel || {}}

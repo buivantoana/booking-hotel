@@ -139,7 +139,7 @@
   "min_price": "Giá tối thiểu",
   "max_price": "Giá tối đa",
   "rating_title": "Điểm đánh giá",
-  "amenities_title": "Tiện ích khách sạn",
+  "amenities_title": "Tiện ích phòng",
   "view_on_map": "Xem trên bản đồ",
   "view_list": "Xem danh sách khách sạn",
   "filter_title": "Bộ lọc tìm kiếm",
@@ -477,5 +477,9 @@
       "price_higher": "Giá cao hơn giá khách sạn",
       "other": "Lý do khác"
     }
-  }
+  },
+  "hour":"Giờ",
+  "area_room": "Diện tích",
+  "bed_type": "Loại giường",
+  "room_direction": "Hướng phòng"
 }

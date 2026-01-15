@@ -680,6 +680,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
   const [loading, setLoading] = useState(false);
   const [countSpam, setCountSpam] = useState(1);
 
+  const [otpKey, setOtpKey] = useState(0);
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -728,6 +729,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
           setCountSpam(countSpam + 1);
           setOtp("");
           toast.error(getErrorMessage(result.code) || result.message);
+          setOtpKey(prev => prev + 1);
         }
       } catch (error) {
         console.log(error);
@@ -788,9 +790,11 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({
             <Box component='form' onSubmit={handleSubmit}>
               <Box sx={{ mb: 2 }}>
                 <MuiOtpInput
+                key={otpKey}
                   value={otp}
                   onChange={setOtp}
                   length={4}
+                  autoFocus
                   validateChar={validateChar}
                   sx={{
                     gap: 2,

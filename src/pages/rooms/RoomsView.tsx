@@ -14,6 +14,7 @@ import {
   Skeleton,
   Slider,
   Stack,
+  TextField,
   Typography,
   useMediaQuery,
   useTheme,
@@ -69,9 +70,9 @@ const RoomsView = ({
   const [amenityList, setAmenityList] = useState(amenities);
   const [activeMap, setActiveMap] = useState(false);
   const [ratingList, setRatingList] = useState(ratings);
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    20000, 10000000,
-  ]);
+  // const [priceRange, setPriceRange] = useState<[number, number]>([
+  //   20000, 10000000,
+  // ]);
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
   const context = useBookingContext();
@@ -103,68 +104,144 @@ const RoomsView = ({
     setPage(1);
     setAmenityList(newList);
   };
-
+  const formatPrice = (value: number): string => {
+    if (value >= 10000000) return "10.000.000đ+";
+    return `${value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}đ`;
+  };
   const handleRatingToggle = (index: number) => {
-    const newList = ratingList.map((item, i) => {
-      if (index == i) {
-        return {
-          ...item,
-          active: true,
-        };
-      }
-      return {
-        ...item,
-        active: false,
-      };
-    });
+    const clickedRating = ratingList[index];
+
+    // Nếu đang active → click để bỏ chọn → tất cả false
+    if (clickedRating.active) {
+      const newList = ratingList.map(item => ({ ...item, active: false }));
+      setRatingList(newList);
+
+      setQueryHotel({
+        ...queryHotel,
+        page: 1,
+        min_rating: null,  // Xóa filter rating
+      });
+      return;
+    }
+
+    // Nếu chưa active → chọn nó (và bỏ chọn các cái khác)
+    const newList = ratingList.map((item, i) => ({
+      ...item,
+      active: i === index,
+    }));
 
     setRatingList(newList);
+
     setQueryHotel({
       ...queryHotel,
       page: 1,
-      min_rating: newList
-        .filter((item) => item.active)
-        .map((item) => item.value)
-        .join(","),
+      min_rating: ratingList[index].value.toString(), // chỉ 1 giá trị
     });
   };
+  const [priceRange, setPriceRange] = useState<[number, number]>([20000, 10000000]);
+  const [minPriceRaw, setMinPriceRaw] = useState<string>(""); // raw khi focus
+  const [maxPriceRaw, setMaxPriceRaw] = useState<string>("");
+  // Hàm xử lý khi kéo slider (onChange)
 
-  const formatPrice = (value: number): string => {
-    // Trường hợp >= 10_000_000 → hiển thị dạng "10.000.000đ+"
-    if (value >= 10_000_000) {
-      const billions = value / 1_000_000;
-      // Làm tròn xuống để tránh 10.000.001đ+ thành 10.000.001đ+
-      const floored = Math.floor(billions * 10) / 10; // giữ 1 chữ số thập phân nếu cần
-      return `${floored
-        .toFixed(0)
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ".")}.000.000đ+`;
-    }
 
-    // Các trường hợp còn lại: thêm dấu chấm ngăn cách và chữ đ
-    const formatted = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    return `${formatted}đ`;
-  };
-
-  const handlePriceChange = (_: Event, newValue: number | number[]) => {
-    const value = newValue as [number, number];
-    setPriceRange(value);
-
-    // Xóa timeout cũ
+  // Hàm chung để gọi API sau debounce (dùng cho cả slider và input)
+  const debounceUpdateQuery = (newMin: number, newMax: number) => {
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
 
-    // Đặt timeout mới: sau 1s mới gọi API
     debounceTimeout.current = setTimeout(() => {
-      console.log("Gọi API sau 1s dừng kéo:", value);
-      setQueryHotel({
-        ...queryHotel,
-        min_price: newValue[0],
-        max_price: newValue[1],
+      console.log("Debounce gọi API với giá:", newMin, newMax); // debug
+      setQueryHotel(prev => ({
+        ...prev,
+        min_price: newMin,
+        max_price: newMax,
         page: 1,
-      });
-    }, 1000);
+      }));
+    }, 800); // 800ms hoặc 1000ms tùy bạn
   };
+  const handlePriceChange = (_: Event, newValue: number | number[]) => {
+    let [newMin, newMax] = newValue as [number, number];
+
+    // Nếu kéo min vượt quá max → giữ nguyên min cũ
+    if (newMin > newMax) {
+      newMin = priceRange[0];  // Giữ nguyên min cũ
+    }
+
+    // Nếu kéo max nhỏ hơn min → giữ nguyên max cũ
+    if (newMax < newMin) {
+      newMax = priceRange[1];  // Giữ nguyên max cũ
+    }
+
+    // Cập nhật state
+    setPriceRange([newMin, newMax]);
+
+    // Debounce gọi API
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+    debounceUpdateQuery(newMin, newMax);
+  };
+
+  // Hàm xử lý khi người dùng nhập tay vào input min/max
+
+
+  // Hàm format VND (dùng khi blur hoặc hiển thị không focus)
+  const formatVND = (value: number | string): string => {
+    const num = typeof value === 'string' ? parseInt(value.replace(/[^0-9]/g, '') || '0') : value;
+    if (num === 0) return '';
+    if (num >= 10000000) return '10.000.000+';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+
+  // Khi focus: hiển thị số thô
+  const handleMinFocus = () => {
+    setMinPriceRaw(priceRange[0] === 0 ? "" : priceRange[0].toString());
+  };
+
+  const handleMaxFocus = () => {
+    setMaxPriceRaw(priceRange[1] >= 10000000 ? "10000000" : priceRange[1].toString());
+  };
+
+  // Khi blur: format lại đẹp và cập nhật priceRange
+  const handleMinBlur = () => {
+    const num = parseInt(minPriceRaw.replace(/[^0-9]/g, '') || '0');
+    const newMin = Math.max(0, Math.min(num, priceRange[1]));
+    setPriceRange([newMin, priceRange[1]]);
+    // Không cần set lại raw, vì focus sẽ set lại
+  };
+
+  const handleMaxBlur = () => {
+    const num = parseInt(maxPriceRaw.replace(/[^0-9]/g, '') || '0');
+    const newMax = Math.min(10000000, Math.max(num, priceRange[0]));
+    setPriceRange([priceRange[0], newMax]);
+    // Không set raw ở đây
+  };
+
+  // onChange: chỉ cập nhật raw (giữ nguyên số khi gõ)
+  const handleMinInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setMinPriceRaw(value);
+
+    const num = value ? Number(value) : 0;
+    const newMin = Math.max(0, Math.min(num, priceRange[1]));
+    setPriceRange([newMin, priceRange[1]]);
+    debounceUpdateQuery(newMin, priceRange[1]);
+  };
+
+  const handleMaxInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, '');
+    setMaxPriceRaw(value);
+
+    const num = value ? Number(value) : 0;
+    const newMax = Math.min(10000000, Math.max(num, priceRange[0]));
+    setPriceRange([priceRange[0], newMax]);
+    debounceUpdateQuery(priceRange[0], newMax);
+  };
+
+  // Quan trọng: value của TextField sẽ thay đổi theo trạng thái focus/blur
+  const isMinFocused = document.activeElement?.id === 'min-price';
+  const isMaxFocused = document.activeElement?.id === 'max-price';
 
   // Đừng quên cleanup khi component unmount
   useEffect(() => {
@@ -284,11 +361,12 @@ const RoomsView = ({
                         {t("price_includes_all")}
                       </Typography>
 
-                      <Box display={"flex"} justifyContent={"center"}>
+                      <Box display="flex" justifyContent="center">
                         <Slider
                           value={priceRange}
                           onChange={handlePriceChange}
-                          valueLabelDisplay='off'
+                          valueLabelDisplay="auto"           // ← Bật để thấy giá khi kéo (tùy chọn)
+                          valueLabelFormat={(value) => formatPrice(value)}
                           min={0}
                           max={10000000}
                           step={10000}
@@ -318,83 +396,78 @@ const RoomsView = ({
                         />
                       </Box>
 
-                      <Stack
-                        direction='row'
-                        alignItems='center'
-                        justifyContent='space-evenly'
-                        mt={2}
-                        spacing={1}>
-                        <Typography
-                          fontSize='0.75rem'
-                          color='#666'
-                          whiteSpace='nowrap'>
-                          {t("min_price")}
-                        </Typography>
-                        <Box
-                          sx={{
-                            width: "100px",
-                            height: 1,
-                            bgcolor: "#e0e0e0",
-                            mx: 1,
-                          }}
-                        />
-                        <Typography
-                          fontSize='0.75rem'
-                          color='#666'
-                          whiteSpace='nowrap'>
-                          {t("max_price")}
-                        </Typography>
-                      </Stack>
+                      {/* Input nhập tay min & max - UX tốt hơn khi nhập thủ công */}
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" mt={3} spacing={2}>
+                        <Box flex={1}>
+                          <Typography fontSize="0.8rem" color="#666" mb={0.5}>
+                            {t("min_price")}
+                          </Typography>
+                          <TextField
+                            id="min-price"
+                            fullWidth
+                            size="small"
+                            type="text"
+                            value={isMinFocused ? minPriceRaw : formatVND(priceRange[0])}
+                            onChange={handleMinInputChange}
+                            onFocus={handleMinFocus}
+                            onBlur={handleMinBlur}
+                            InputProps={{
+                              startAdornment: <Typography sx={{ mr: 1 }}>₫</Typography>,
+                            }}
+                            placeholder="0"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "16px",
 
-                      <Stack
-                        direction='row'
-                        alignItems='center'
-                        justifyContent='space-between'
-                        mt={1}
-                        spacing={2}>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            bgcolor: "white",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "50px",
-                            px: 2,
-                            py: 1.5,
-                            textAlign: "center",
-                            fontSize: "0.9rem",
-                            fontWeight: 600,
-                            color: "#98b720",
-                          }}>
-                          {formatPrice(priceRange[0])}
+                                backgroundColor: "#fff",
+                                "&.Mui-focused fieldset": {
+                                  borderColor: "#98b720",
+                                  borderWidth: 1.5,
+                                },
+                              },
+                            }}
+                          />
                         </Box>
 
-                        <Box
-                          sx={{
-                            color: "#666",
-                            fontSize: "1.2rem",
-                            fontWeight: 300,
-                          }}>
-                          —
-                        </Box>
 
-                        <Box
-                          sx={{
-                            flex: 1,
-                            bgcolor: "white",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "50px",
-                            px: 2,
-                            py: 1.5,
-                            textAlign: "center",
-                            fontSize: "0.9rem",
-                            fontWeight: 600,
-                            color: "#98b720",
-                          }}>
-                          {priceRange[1] >= 10000000
-                            ? "10.000.000đ+"
-                            : formatPrice(priceRange[1])}
+
+                        <Box flex={1}>
+                          <Typography fontSize="0.8rem" color="#666" mb={0.5}>
+                            {t("max_price")}
+                          </Typography>
+                          <TextField
+                            id="max-price"
+                            fullWidth
+                            size="small"
+                            type="text"
+                            value={isMaxFocused ? maxPriceRaw : formatVND(priceRange[1])}
+                            onChange={handleMaxInputChange}
+                            onFocus={handleMaxFocus}
+                            onBlur={handleMaxBlur}
+                            InputProps={{
+                              startAdornment: <Typography sx={{ mr: 1 }}>₫</Typography>,
+                              endAdornment: priceRange[1] >= 10000000 ? (
+                                <Typography sx={{ ml: 1, color: "#98b720" }}>+</Typography>
+                              ) : null,
+                            }}
+                            placeholder="10.000.000"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "16px",
+
+                                backgroundColor: "#fff",
+                                "&.Mui-focused fieldset": {
+                                  borderColor: "#98b720",
+                                  borderWidth: 1.5,
+                                },
+                              },
+                            }}
+                          />
                         </Box>
                       </Stack>
+
+
+
                     </Stack>
                     <Divider />
 
@@ -425,9 +498,8 @@ const RoomsView = ({
                               color: rating.active
                                 ? "#98b720"
                                 : "rgba(185, 189, 199, 1)",
-                              border: `1px solid ${
-                                rating.active ? "#98b720" : "#eee"
-                              }`,
+                              border: `1px solid ${rating.active ? "#98b720" : "#eee"
+                                }`,
                               borderRadius: "50px",
                               fontSize: "0.85rem",
                               height: 36,
@@ -475,9 +547,8 @@ const RoomsView = ({
                                 color: item.active
                                   ? "#98b720"
                                   : "rgba(185, 189, 199, 1)",
-                                border: `1px solid ${
-                                  item.active ? "#98b720" : "#eee"
-                                }`,
+                                border: `1px solid ${item.active ? "#98b720" : "#eee"
+                                  }`,
                                 borderRadius: "50px",
                                 fontSize: "0.8rem",
                                 height: 40,
@@ -586,11 +657,12 @@ const RoomsView = ({
                         {t("price_includes_all")}
                       </Typography>
 
-                      <Box display={"flex"} justifyContent={"center"}>
+                      <Box display="flex" justifyContent="center">
                         <Slider
                           value={priceRange}
                           onChange={handlePriceChange}
-                          valueLabelDisplay='off'
+                          valueLabelDisplay="auto"           // ← Bật để thấy giá khi kéo (tùy chọn)
+                          valueLabelFormat={(value) => formatPrice(value)}
                           min={0}
                           max={10000000}
                           step={10000}
@@ -620,81 +692,73 @@ const RoomsView = ({
                         />
                       </Box>
 
-                      <Stack
-                        direction='row'
-                        alignItems='center'
-                        justifyContent='space-evenly'
-                        mt={2}
-                        spacing={1}>
-                        <Typography
-                          fontSize='0.75rem'
-                          color='#666'
-                          whiteSpace='nowrap'>
-                          {t("min_price")}
-                        </Typography>
-                        <Box
-                          sx={{
-                            width: "100px",
-                            height: 1,
-                            bgcolor: "#e0e0e0",
-                            mx: 1,
-                          }}
-                        />
-                        <Typography
-                          fontSize='0.75rem'
-                          color='#666'
-                          whiteSpace='nowrap'>
-                          {t("max_price")}
-                        </Typography>
-                      </Stack>
+                      {/* Input nhập tay min & max - UX tốt hơn khi nhập thủ công */}
+                      <Stack direction="row" alignItems="center" justifyContent="space-between" mt={3} spacing={2}>
+                        <Box flex={1}>
+                          <Typography fontSize="0.8rem" color="#666" mb={0.5}>
+                            {t("min_price")}
+                          </Typography>
+                          <TextField
+                            id="min-price"
+                            fullWidth
+                            size="small"
+                            type="text"
+                            value={isMinFocused ? minPriceRaw : formatVND(priceRange[0])}
+                            onChange={handleMinInputChange}
+                            onFocus={handleMinFocus}
+                            onBlur={handleMinBlur}
+                            InputProps={{
+                              startAdornment: <Typography sx={{ mr: 1 }}>₫</Typography>,
+                            }}
+                            placeholder="0"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "16px",
 
-                      <Stack
-                        direction='row'
-                        alignItems='center'
-                        justifyContent='space-between'
-                        mt={1}
-                        spacing={2}>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            bgcolor: "white",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "50px",
-                            px: 2,
-                            py: 1.5,
-                            textAlign: "center",
-                            fontSize: "0.9rem",
-                            fontWeight: 600,
-                            color: "#98b720",
-                          }}>
-                          {formatPrice(priceRange[0])}
+                                backgroundColor: "#fff",
+                                "&.Mui-focused fieldset": {
+                                  borderColor: "#98b720",
+                                  borderWidth: 1.5,
+                                },
+                              },
+                            }}
+                          />
                         </Box>
 
-                        <Box
-                          sx={{
-                            color: "#666",
-                            fontSize: "1.2rem",
-                            fontWeight: 300,
-                          }}>
-                          —
-                        </Box>
 
-                        <Box
-                          sx={{
-                            flex: 1,
-                            bgcolor: "white",
-                            border: "1px solid #e0e0e0",
-                            borderRadius: "50px",
-                            px: 2,
-                            py: 1.5,
-                            textAlign: "center",
-                            fontSize: "0.9rem",
-                            fontWeight: 600,
-                            color: "#98b720",
-                          }}>
-                          {priceRange[1] >= 10000000
-                            ? "10.000.000đ+"
-                            : formatPrice(priceRange[1])}
+
+                        <Box flex={1}>
+                          <Typography fontSize="0.8rem" color="#666" mb={0.5}>
+                            {t("max_price")}
+                          </Typography>
+                          <TextField
+                            id="max-price"
+                            fullWidth
+                            size="small"
+                            type="text"
+                            value={isMaxFocused ? maxPriceRaw : formatVND(priceRange[1])}
+                            onChange={handleMaxInputChange}
+                            onFocus={handleMaxFocus}
+                            onBlur={handleMaxBlur}
+                            InputProps={{
+                              startAdornment: <Typography sx={{ mr: 1 }}>₫</Typography>,
+                              endAdornment: priceRange[1] >= 10000000 ? (
+                                <Typography sx={{ ml: 1, color: "#98b720" }}>+</Typography>
+                              ) : null,
+                            }}
+                            placeholder="10.000.000"
+                            sx={{
+                              "& .MuiOutlinedInput-root": {
+                                borderRadius: "16px",
+
+                                backgroundColor: "#fff",
+                                "&.Mui-focused fieldset": {
+                                  borderColor: "#98b720",
+                                  borderWidth: 1.5,
+                                },
+                              },
+                            }}
+                          />
                         </Box>
                       </Stack>
                     </Stack>
@@ -727,9 +791,8 @@ const RoomsView = ({
                               color: rating.active
                                 ? "#98b720"
                                 : "rgba(185, 189, 199, 1)",
-                              border: `1px solid ${
-                                rating.active ? "#98b720" : "#eee"
-                              }`,
+                              border: `1px solid ${rating.active ? "#98b720" : "#eee"
+                                }`,
                               borderRadius: "50px",
                               fontSize: "0.85rem",
                               height: 36,
@@ -777,9 +840,8 @@ const RoomsView = ({
                                 color: item.active
                                   ? "#98b720"
                                   : "rgba(185, 189, 199, 1)",
-                                border: `1px solid ${
-                                  item.active ? "#98b720" : "#eee"
-                                }`,
+                                border: `1px solid ${item.active ? "#98b720" : "#eee"
+                                  }`,
                                 borderRadius: "50px",
                                 fontSize: "0.8rem",
                                 height: 40,
@@ -947,11 +1009,34 @@ const FilterMap = ({
   const mapRef = useRef(null);
   const navigate = useNavigate();
   const [activeHotel, setActiveHotel] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
   const onLoad = useCallback((map) => {
     mapRef.current = map;
   }, []);
   const { t } = useTranslation();
   // Khi map dừng di chuyển (drag, zoom…)
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const newPos = { lat: latitude, lng: longitude };
+          setCenter(newPos);
+          setUserLocation(newPos);
+          // Optional: zoom gần hơn khi có vị trí thật
+          if (mapRef.current) {
+            mapRef.current.panTo(newPos);
+            mapRef.current.setZoom(15);
+          }
+        },
+        (error) => {
+          console.warn("Không lấy được vị trí:", error.message);
+          // fallback về Hà Nội hoặc vị trí mặc định
+        },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    }
+  }, []);
   const onIdle = () => {
     if (!mapRef.current) return;
 
@@ -1073,13 +1158,14 @@ const FilterMap = ({
                     position={{ lat: hotel.latitude, lng: hotel.longitude }}
                     onClick={() => setActiveHotel(hotel)}
                     label={{
-                      text: priceText,
-                      color: "black", // màu chữ
-                      fontSize: "12px", // kích thước chữ
+                      text: priceText,                    // ví dụ: "1.250.000đ"
+                      color: "white",
+                      fontSize: "13px",
                       fontWeight: "bold",
+                      className: "custom-marker-label",   // thêm class để style
                     }}
-                    // Tùy chọn: ẩn icon đỏ mặc định nếu chỉ muốn label
-                    // icon={{ url: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII" }} // transparent pixel
+                  // Ẩn icon mặc định nếu chỉ muốn label (tùy chọn)
+                  // icon={{ url: "data:image/svg+xml,<svg></svg>" }} // transparent
                   />
                 );
               })}
@@ -1354,8 +1440,7 @@ const ItemHotel = ({
                     navigate(
                       `/room/${hotel.id}?${new URLSearchParams(
                         current
-                      ).toString()}&name=${
-                        JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
+                      ).toString()}&name=${JSON.parse(hotel.name).vi || JSON.parse(hotel.name).en
                       }`
                     );
                   }}

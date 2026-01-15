@@ -171,9 +171,9 @@ const PinCreationGoogle = ({ onNext, onBack, pin, setPin }: any) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault(); // Ngăn hành vi mặc định (nếu có form submit)
-      
+
       // Chỉ submit nếu pin có ít nhất 1 ký tự (hoặc theo logic bạn muốn)
-      if (pin.length ===6) {
+      if (pin.length === 6) {
         onNext();
       }
     }
@@ -337,10 +337,10 @@ const PinCreationConfirm = ({
   };
 
   useEffect(() => {
-    if (pin.length === 6 && !loading ) {
+    if (pin.length === 6 && !loading) {
       handleSubmit();
     }
-   
+
   }, [pin]);
   return (
     <Container
@@ -485,7 +485,7 @@ const OtpVerification = ({
 }: any) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
-
+  const [otpKey, setOtpKey] = useState(0);
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -510,6 +510,11 @@ const OtpVerification = ({
           onSuccess(result);
         } else {
           toast.error(getErrorMessage(result.code) || result.detail);
+          setOtp("");                    // xóa
+          toast.error(getErrorMessage(result.code) || result.message);
+
+          // Force re-mount MuiOtpInput → tự động focus ô đầu
+          setOtpKey(prev => prev + 1);
         }
       } catch (error) {
         console.error(error);
@@ -519,10 +524,10 @@ const OtpVerification = ({
   };
 
   useEffect(() => {
-    if (otp.length === 4 && !loading ) {
+    if (otp.length === 4 && !loading) {
       handleSubmit();
     }
-   
+
   }, [otp]);
   return (
     <Container
@@ -573,6 +578,8 @@ const OtpVerification = ({
                 value={otp}
                 validateChar={validateChar}
                 onChange={setOtp}
+                key={otpKey}
+                autoFocus
                 length={4}
                 sx={{
                   gap: 2,
@@ -1127,14 +1134,14 @@ const PinCreation = ({ phoneNumber, setCurrentStep }: any) => {
     if (pin.length === 6 && !loading && attemptsLeft > 0) {
       handleSubmit();
     }
-   
+
   }, [pin]);
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault(); // Ngăn hành vi mặc định (nếu có form submit)
-      
+
       // Chỉ submit nếu pin có ít nhất 1 ký tự (hoặc theo logic bạn muốn)
-      if (pin.length ===6) {
+      if (pin.length === 6) {
         handleSubmit();
       }
     }

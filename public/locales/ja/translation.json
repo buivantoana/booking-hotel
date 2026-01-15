@@ -139,7 +139,7 @@
   "min_price": "最低価格",
   "max_price": "最高価格",
   "rating_title": "評価",
-  "amenities_title": "ホテル設備",
+  "amenities_title": "客室アメニティ",
   "view_on_map": "地図で見る",
   "view_list": "ホテル一覧を表示",
   "filter_title": "検索フィルター",
@@ -434,4 +434,9 @@
       "other": "その他の理由"
     }
   }
+  ,
+  "hour":"時間",
+  "area_room": "面積",
+  "bed_type": "ベッドタイプ",
+  "room_direction": "部屋の向き"
 }

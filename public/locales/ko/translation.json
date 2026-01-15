@@ -139,7 +139,7 @@
   "min_price": "최저가",
   "max_price": "최고가",
   "rating_title": "평점",
-  "amenities_title": "호텔 편의시설",
+  "amenities_title": "객실 편의시설",
   "view_on_map": "지도에서 보기",
   "view_list": "호텔 목록 보기",
   "filter_title": "검색 필터",
@@ -435,4 +435,9 @@
       "other": "기타 사유"
     }
   }
+  ,
+  "hour":"시간",
+  "area_room": "면적",
+  "bed_type": "침대 유형",
+  "room_direction": "객실 방향"
 }

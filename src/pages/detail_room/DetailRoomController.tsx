@@ -25,6 +25,7 @@ const DetailRoomController = (props: Props) => {
   const [rooms, setRooms] = useState([]);
   const [idHotel, setIdHotel] = useState(null);
   const [amenities, setAmenities] = useState([]);
+  const [attribute, setAttribute] = useState({});
   useEffect(() => {
     const checkIn = searchParams.get("checkIn"); // 2026-01-05
     const checkOut = searchParams.get("checkOut");
@@ -79,7 +80,7 @@ const DetailRoomController = (props: Props) => {
     (async () => {
       try {
         let result = await getAttribute();
-
+        setAttribute(result)
         if (result?.amenities?.length > 0) {
           setAmenities(
             result?.amenities.map((item) => {
@@ -166,6 +167,7 @@ const DetailRoomController = (props: Props) => {
       hastag={hastag}
       rooms={rooms}
       amenities={amenities}
+      attribute={attribute}
     />
   );
 };

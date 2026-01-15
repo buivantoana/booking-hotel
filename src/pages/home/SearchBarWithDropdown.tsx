@@ -47,8 +47,12 @@ import query from "../../images/location-load.gif";
 import { useNavigate } from "react-router-dom";
 import { getLocation, getSuggest } from "../../service/hotel";
 import { useTranslation } from "react-i18next";
-import { parseName } from "../../utils/utils";
+import { mapLocale, parseName } from "../../utils/utils";
 import building from "../../images/buildings.png";
+import "dayjs/locale/vi";
+import "dayjs/locale/en";
+import "dayjs/locale/ko";
+import "dayjs/locale/ja";
 // === POPUP CHUNG ===
 interface DateRangePickerProps {
   open: boolean;
@@ -82,14 +86,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
   const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const now = dayjs();
   const hours = Array.from(
     { length: 24 },
     (_, i) => String(i).padStart(2, "0") + ":00"
   );
   const durations = [2, 3, 4, 5, 6, 8, 10, 12];
-
+  const locale = mapLocale(i18n.language);
   const hourIndex = hours.indexOf(time);
   const durationIndex = durations.indexOf(duration);
 
@@ -132,36 +136,54 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       return hourNum <= now.hour(); // disable những giờ đã qua
     })
     : [];
-  const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
-    if (bookingType === "overnight") {
-      setCheckIn(date);
-      setCheckOut(date.add(1, "day"));
-    } else if (bookingType === "daily") {
-      if (!checkIn || (checkOut && date.isBefore(checkIn))) {
+    const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
+      if (bookingType === "overnight") {
         setCheckIn(date);
-        setCheckOut(null);
-      } else if (!checkOut && date.isAfter(checkIn)) {
-        setCheckOut(date);
-      } else {
+        setCheckOut(date.add(1, "day"));
+      } else if (bookingType === "daily") {
+        // Logic mới: Phân biệt theo calendar
+        if (isSecondCalendar) {
+          // Click ở calendar bên phải (tháng sau) → ưu tiên đặt checkOut
+          if (!checkIn) {
+            // Nếu chưa có checkIn → đặt checkIn trước
+            setCheckIn(date);
+            setCheckOut(null);
+          } else if (date.isAfter(checkIn)) {
+            // Đã có checkIn và ngày click sau checkIn → đặt checkOut
+            setCheckOut(date);
+          } else {
+            // Ngày click trước checkIn → reset checkIn thành ngày mới
+            setCheckIn(date);
+            setCheckOut(null);
+          }
+        } else {
+          // Click ở calendar bên trái (tháng hiện tại) → ưu tiên đặt checkIn
+          if (!checkIn || (checkOut && date.isBefore(checkIn))) {
+            setCheckIn(date);
+            setCheckOut(null);
+          } else if (!checkOut && date.isAfter(checkIn)) {
+            setCheckOut(date);
+          } else {
+            setCheckIn(date);
+            setCheckOut(null);
+          }
+        }
+      } else if (bookingType === "hourly") {
         setCheckIn(date);
-        setCheckOut(null);
+    
+        const selectedIsToday = date.isSame(now, "day");
+    
+        if (selectedIsToday) {
+          const nextHour = now.hour() + 1;
+          const nextHourStr = hours[nextHour] || hours[hours.length - 1];
+          setTime(nextHourStr);
+        } else {
+          setTime("00:00");
+        }
+    
+        setDuration(2);
       }
-    } else if (bookingType === "hourly") {
-      setCheckIn(date);
-
-      const selectedIsToday = date.isSame(now, "day");
-
-      if (selectedIsToday) {
-        const nextHour = now.hour() + 1;
-        const nextHourStr = hours[nextHour] || hours[hours.length - 1];
-        setTime(nextHourStr);
-      } else {
-        setTime("00:00"); // ngày khác → active 00:00
-      }
-
-      setDuration(2); // mặc định luôn chọn 2h
-    }
-  };
+    };
 
   if (!open || !anchorEl) return null;
 
@@ -177,6 +199,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       open={open}
       anchorEl={anchorEl}
       placement='bottom-start'
+      modifiers={[
+        {
+          name: 'flip',
+          enabled: false,
+        },
+      ]}
       sx={{ zIndex: 50 }}>
       <Paper
         elevation={8}
@@ -195,12 +223,14 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           },
           bgcolor: "white",
         }}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider   adapterLocale={locale} dateAdapter={AdapterDayjs}>
           <Stack>
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
               <Typography fontWeight={600} color='#333'>
-                {dayjs().format("[Tháng] MM, YYYY")}
+              {dayjs()
+        .locale(i18n.language)
+        .format("MMMM YYYY")}
               </Typography>
             </Box>
 
@@ -368,7 +398,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                       : "#e0e0e0",
                                 },
                               }}>
-                              {d} Giờ
+                              {d} {t("hour")}
                             </Button>
                           ))}
                       </Stack>
@@ -444,7 +474,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                             sx={{
                               minWidth: 36,
                               height: 36,
-                              borderRadius: isStart || isEnd ? "50%" : "8px",
+                              borderRadius: isStart || isEnd ? "50%" : "50%",
                               bgcolor:
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
@@ -466,8 +496,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 {bookingType === "daily" && (
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
-                      value={checkIn}
+                       referenceDate={dayjs().add(1, "month")}
+                      // value={checkIn}
                       onChange={() => { }}
+                     
                       disablePast
                       sx={{
                         width: "100%",
@@ -492,11 +524,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                           return (
                             <Button
                               {...props}
-                              onClick={() => handleDateSelect(props.day)}
+                              onClick={() => handleDateSelect(props.day,true)}
                               sx={{
                                 minWidth: 36,
                                 height: 36,
-                                borderRadius: isStart || isEnd ? "50%" : "8px",
+                                borderRadius: isStart || isEnd ? "50%" : "50%",
                                 bgcolor:
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
@@ -966,6 +998,12 @@ const SearchBarWithDropdown = ({ location, address }) => {
                     }}
                   />
                   <Popper
+                   modifiers={[
+                    {
+                      name: 'flip',
+                      enabled: false,
+                    },
+                  ]}
                     open={dropdownOpen}
                     anchorEl={inputRef.current}
                     placement='bottom-start'

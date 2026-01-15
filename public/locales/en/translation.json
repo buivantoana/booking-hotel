@@ -139,7 +139,7 @@
   "min_price": "Minimum price",
   "max_price": "Maximum price",
   "rating_title": "Rating",
-  "amenities_title": "Hotel amenities",
+  "amenities_title": "Room amenities",
   "view_on_map": "View on map",
   "view_list": "View hotel list",
   "filter_title": "Search filter",
@@ -434,5 +434,9 @@
       "price_higher": "Higher price than hotel",
       "other": "Other reason"
     }
-  }
+  },
+  "hour":"Hour",
+  "area_room": "Area",
+  "bed_type": "Bed Type",
+  "room_direction": "Room Direction"
 }
