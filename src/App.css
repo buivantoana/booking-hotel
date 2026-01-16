@@ -253,3 +253,6 @@ input[type="number"] {
   object-fit: cover;
   border-radius: 10px;
 } */
+.MuiPickersCalendarHeader-label{
+  text-transform: capitalize;
+}

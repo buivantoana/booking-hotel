@@ -802,12 +802,13 @@ const RoomDetailModal = ({
             },
           ],
           price: room.price_daily,
-          address: hotel?.address?.en || hotel?.address?.vi,
-          name: hotel?.name?.en || hotel?.name?.vi,
+          address: parseName(hotel?.address),
+          name: parseName(hotel?.name),
           image: hotel?.images?.[0],
           ...Object.fromEntries([...searchParams]),
           phone: "+84" + phoneNumber,
           rent_types: hotel.rent_types,
+          room_name:parseName(room?.name)
         })
       );
       setTimeout(() => {

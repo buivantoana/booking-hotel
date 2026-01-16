@@ -38,7 +38,7 @@ import {
   Close,
 } from "@mui/icons-material";
 
-import { DateCalendar, LocalizationProvider } from "@mui/x-date-pickers";
+import { DateCalendar, LocalizationProvider, PickersCalendarHeader } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import in_time from "../../images/login.png";
@@ -227,11 +227,11 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
           <Stack>
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
-              <Typography fontWeight={600} color='#333'>
+              {/* <Typography fontWeight={600} color='#333'>
               {dayjs()
         .locale(i18n.language)
         .format("MMMM YYYY")}
-              </Typography>
+              </Typography> */}
             </Box>
 
             {bookingType === "hourly" ? (
@@ -253,7 +253,15 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         },
                       },
                     }}
+                    dayOfWeekFormatter={(date) => {
+                      // Lấy tên ngắn 2 ký tự của ngày trong tuần theo locale vi
+                      const shortDay = date.format('dd'); // 'T2', 'T3', ..., 'CN'
+                      return shortDay;
+                    }}
+                   
+                   
                     slots={{
+                    
                       day: (props) => {
                         const isSelected = checkIn?.isSame(props.day, "day");
                         return (

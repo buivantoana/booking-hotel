@@ -43,7 +43,37 @@ import { toast } from "react-toastify";
 import { getErrorMessage } from "../../utils/utils";
 import Flag from "react-country-flag";
 import { useTranslation } from "react-i18next";
+const normalizePhone = (phone) => {
+  if (!phone) return "";
+  let p = phone.trim().replace(/\D/g, "");
 
+  // Nếu bắt đầu bằng 84 → thay thành 0
+  if (p.startsWith("84")) {
+    p = "0" + p.slice(2);
+  }
+
+  // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
+  if (!p.startsWith("0")) {
+    p = "0" + p;
+  }
+
+  return p;
+};
+
+
+const isValidVietnamPhone = (phone) => {
+  if (!phone) return false;
+
+  const normalized = normalizePhone(phone);
+
+  // chỉ cho phép đúng 10 hoặc 11 số
+  if (normalized.length !== 10 && normalized.length !== 9) return false;
+
+  // đầu số VN hợp lệ
+  if (!/^0[35789]/.test(normalized)) return false;
+
+  return true;
+};
 const CheckOutView = ({ dataCheckout }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -64,6 +94,16 @@ const CheckOutView = ({ dataCheckout }) => {
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [touchedPhone, setTouchedPhone] = useState(false);
+const [touchedName, setTouchedName] = useState(false);
+
+const isPhoneEmpty = phone.trim() === "";
+const isNameEmpty = name.trim() === "";
+const phoneError =
+  touchedPhone && (isPhoneEmpty || !isValidVietnamPhone(phone));
+
+const nameError =
+  touchedName && isNameEmpty;
 
   // Dữ liệu từ props
   const {
@@ -76,6 +116,7 @@ const CheckOutView = ({ dataCheckout }) => {
     address = "Chưa có địa chỉ",
     image = imgMain, // fallback nếu không có ảnh
     price = 0,
+    room_name
   } = dataCheckout || {};
 
   // Format tiền
@@ -310,36 +351,8 @@ const CheckOutView = ({ dataCheckout }) => {
     setLoading(false);
   };
 
-  const normalizePhone = (phone) => {
-    if (!phone) return "";
-    let p = phone.trim().replace(/\D/g, "");
 
-    // Nếu bắt đầu bằng 84 → thay thành 0
-    if (p.startsWith("84")) {
-      p = "0" + p.slice(2);
-    }
 
-    // Nếu không có 84 và người dùng không nhập 0 ở đầu → tự thêm 0
-    if (!p.startsWith("0")) {
-      p = "0" + p;
-    }
-
-    return p;
-  };
-
-  const isValidVietnamPhone = (phone) => {
-    if (!phone) return false;
-
-    const normalized = normalizePhone(phone);
-
-    // chỉ cho phép đúng 10 hoặc 11 số
-    if (normalized.length !== 10 && normalized.length !== 9) return false;
-
-    // đầu số VN hợp lệ
-    if (!/^0[35789]/.test(normalized)) return false;
-
-    return true;
-  };
   return (
     <Box sx={{ bgcolor: "#f9f9f9", py: { xs: 2, md: 3 } }}>
       <Container maxWidth='lg'>
@@ -359,6 +372,7 @@ const CheckOutView = ({ dataCheckout }) => {
             </Typography>
           </Stack>
 
+        <Typography variant="h5" fontWeight={"bold"} textAlign={"center"}>  { t("confirmation_and_payment")}</Typography>
           <Grid container spacing={isMobile?0:2}>
             {/* CỘT TRÁI */}
             <Grid item xs={12} md={6}>
@@ -472,18 +486,18 @@ const CheckOutView = ({ dataCheckout }) => {
                           fontWeight={600}
                           fontSize='16px'
                           color='rgba(93, 102, 121, 1)'>
-                          {hotelName}
+                          {t("hotels")} : {hotelName}
                         </Typography>
-                        {/* <Typography
-                          fontSize='18px'
+                        <Typography
+                          fontSize='14px'
                           fontWeight={500}
-                          color='rgba(43, 47, 56, 1)'>
-                          {}
-                        </Typography> */}
+                          color='rgba(93, 102, 121, 1)'>
+                          {t("room")} : {room_name}
+                        </Typography>
                         <Typography
                           fontSize='0.8rem'
                           color='rgba(152, 159, 173, 1)'>
-                          {address}
+                          {t("address")} : {address}
                         </Typography>
                       </Stack>
                     </Stack>
@@ -511,9 +525,10 @@ const CheckOutView = ({ dataCheckout }) => {
                     </Typography>
                     <IconButton
                       size='small'
+
                       onClick={() => setIsEditing(!isEditing)}
-                      sx={{ color: "#98b720" }}>
-                      {isEditing ? <CheckIcon /> : <EditIcon />}
+                      sx={{ color: "#98b720" , pointerEvents:phoneError || nameError ? "none": "auto",cursor:"pointer",opacity:phoneError || nameError ?.5:1 }}>
+                      {isEditing ? <CheckIcon  /> : <EditIcon />}
                     </IconButton>
                   </Stack>
 
@@ -530,15 +545,21 @@ const CheckOutView = ({ dataCheckout }) => {
 
                     <Box sx={{ position: "relative", width: 200 }}>
                       <TextField
-                        value={phone}
-                        onChange={(e) => {
-                          let val = e.target.value.replace(/\D/g, ""); // chỉ giữ số
-                          // loại bỏ 0 đầu tiên
-                          if (val.length > 20) val = val.slice(0, 20);
-                          setPhone(val);
-                        }}
-                        onBlur={() => setTouched(true)} // chỉ validate khi blur
-                        error={touched && !isValidVietnamPhone(phone)}
+                       value={phone}
+                       onChange={(e) => {
+                         let val = e.target.value.replace(/\D/g, "");
+                         if (val.length > 20) val = val.slice(0, 20);
+                         setPhone(val);
+                       }}
+                       onBlur={() => setTouchedPhone(true)}
+                       error={phoneError}
+                       helperText={
+                         touchedPhone && isPhoneEmpty
+                           ? t("phone_required")           // "Phone number is required"
+                           : touchedPhone && !isValidVietnamPhone(phone)
+                           ? t("phone_invalid")            // "Invalid phone number"
+                           : ""
+                       }
                         placeholder=  { t("phone_placeholder")}
                         variant='outlined'
                         size='small'
@@ -606,8 +627,13 @@ const CheckOutView = ({ dataCheckout }) => {
                     </Typography>
                     <Box sx={{ position: "relative", width: 200 }}>
                       <TextField
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                         value={name}
+                         onChange={(e) => setName(e.target.value)}
+                         onBlur={() => setTouchedName(true)}
+                         error={nameError}
+                         helperText={
+                           touchedName && isNameEmpty ? t("name_required") : ""
+                         }
                         placeholder= {t("name_placeholder")}
                         variant='outlined'
                         size='small'
@@ -833,7 +859,7 @@ const CheckOutView = ({ dataCheckout }) => {
                   </Typography>
                   <Button
                     onClick={handleCreateBooking}
-                    disabled={loading}
+                    disabled={loading||phoneError||nameError}
                     variant='contained'
                     sx={{
                       bgcolor: "#98b720",

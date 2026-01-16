@@ -149,6 +149,21 @@ const HomeView = ({
                 alignItems: "center",
                 gap: 1,
                 justifyContent: "center",
+                transition: "all 0.35s ease",          // chuyển động mượt
+                transform: "scale(1)",                 // trạng thái ban đầu
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)", // bóng nhẹ mặc định
+                borderRadius: "12px",                  // bo góc nhẹ (tùy chọn, đẹp hơn)
+                // tránh nội dung tràn khi scale
+
+                "&:hover": {
+                  transform: "scale(1.1)",             // ← scale 1.1 khi hover
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.25)", // bóng sâu hơn
+                  zIndex: 10,                          // nổi lên trên các phần tử khác nếu cần
+                },
+
+                "&:active": {                          // khi click (nhấn xuống)
+                  transform: "scale(1.05)",            // thu nhỏ nhẹ để cảm giác nhấn
+                },
               }}
               onClick={() => {
                 navigate(
@@ -167,6 +182,21 @@ const HomeView = ({
                 alignItems: "center",
                 gap: 1,
                 justifyContent: "center",
+                transition: "all 0.35s ease",          // chuyển động mượt
+                transform: "scale(1)",                 // trạng thái ban đầu
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)", // bóng nhẹ mặc định
+                borderRadius: "12px",                  // bo góc nhẹ (tùy chọn, đẹp hơn)
+                // tránh nội dung tràn khi scale
+
+                "&:hover": {
+                  transform: "scale(1.1)",             // ← scale 1.1 khi hover
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.25)", // bóng sâu hơn
+                  zIndex: 10,                          // nổi lên trên các phần tử khác nếu cần
+                },
+
+                "&:active": {                          // khi click (nhấn xuống)
+                  transform: "scale(1.05)",            // thu nhỏ nhẹ để cảm giác nhấn
+                },
               }}
               onClick={() => {
                 navigate(
@@ -189,6 +219,21 @@ const HomeView = ({
                 alignItems: "center",
                 gap: 1,
                 justifyContent: "center",
+                transition: "all 0.35s ease",          // chuyển động mượt
+                transform: "scale(1)",                 // trạng thái ban đầu
+                boxShadow: "0 8px 24px rgba(0,0,0,0.12)", // bóng nhẹ mặc định
+                borderRadius: "12px",                  // bo góc nhẹ (tùy chọn, đẹp hơn)
+                // tránh nội dung tràn khi scale
+
+                "&:hover": {
+                  transform: "scale(1.1)",             // ← scale 1.1 khi hover
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.25)", // bóng sâu hơn
+                  zIndex: 10,                          // nổi lên trên các phần tử khác nếu cần
+                },
+
+                "&:active": {                          // khi click (nhấn xuống)
+                  transform: "scale(1.05)",            // thu nhỏ nhẹ để cảm giác nhấn
+                },
               }}
               onClick={() => {
                 navigate(

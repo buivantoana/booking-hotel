@@ -438,5 +438,9 @@
   "hour":"時間",
   "area_room": "面積",
   "bed_type": "ベッドタイプ",
-  "room_direction": "部屋の向き"
+  "room_direction": "部屋の向き",
+  "confirmation_and_payment":"確認と支払い",
+  "phone_required": "電話番号を入力してください",
+  "name_required": "名前を入力してください",
+  "cancel_booking_confirm":"この操作は元に戻せません。本当にこの予約をキャンセルしますか？"
 }

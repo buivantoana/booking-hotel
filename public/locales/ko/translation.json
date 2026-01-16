@@ -439,5 +439,10 @@
   "hour":"시간",
   "area_room": "면적",
   "bed_type": "침대 유형",
-  "room_direction": "객실 방향"
+  "room_direction": "객실 방향",
+  "confirmation_and_payment":"확인 및 결제",
+  "phone_required": "전화번호를 입력해주세요",
+ 
+  "name_required": "이름을 입력해주세요",
+  "cancel_booking_confirm":"이 작업은 되돌릴 수 없습니다. 정말로 예약을 취소하시겠습니까?"
 }

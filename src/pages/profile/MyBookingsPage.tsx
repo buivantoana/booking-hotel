@@ -147,7 +147,7 @@ const BookingCard = ({
       return { label: t("no_show_status"), color: "#E91E1E", bg: "#FFEBEE" };
     }
 
-    if (paymentStatus === "paid") {
+    if (paymentStatus === "paid" && bookingStatus == "checked_out") {
       return { label: t("completed_status"), color: "#1A9A50", bg: "#E8F5E9" };
     }
 

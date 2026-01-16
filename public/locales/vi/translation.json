@@ -481,5 +481,10 @@
   "hour":"Giờ",
   "area_room": "Diện tích",
   "bed_type": "Loại giường",
-  "room_direction": "Hướng phòng"
+  "room_direction": "Hướng phòng",
+  "confirmation_and_payment":"Xác nhận và thanh toán",
+  "phone_required": "Vui lòng nhập số điện thoại",
+
+  "name_required": "Vui lòng nhập tên",
+  "cancel_booking_confirm":"Thao tác này không thể hoàn tác. Bạn có thực sự muốn hủy lịch đặt phòng không?"
 }

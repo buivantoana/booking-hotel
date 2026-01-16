@@ -485,7 +485,7 @@ const ProfileView = ({
       setLoadingSubmit(true);
       try {
         if (getBookingNameStatus(detailBooking) == t("button_cancel_booking")) {
-          setOpenReason(true);
+          setOpenCancelBooking(true);
           // let result = await cancelBooking(detailBooking.booking_id);
           // if (result?.code == "OK") {
           //   toast.success(result?.message);
@@ -751,8 +751,9 @@ const ProfileView = ({
               </Stack>
             </Paper>
           )}
-        {detailBooking.status === "cancelled" ||
-          (detailBooking.status === "no_show" && (
+          
+        {(detailBooking.status === "cancelled" ||
+          detailBooking.status === "no_show") && (
             <Paper
               elevation={0}
               sx={{ borderRadius: "16px", bgcolor: "white", p: 2.5 }}>
@@ -764,10 +765,10 @@ const ProfileView = ({
                   <img src={cancel} alt='Thành công' width={48} />
                   <Stack>
                     <Typography fontWeight={700} fontSize='1rem' color='red'>
-                      {t("status_no_show")}
+                      {detailBooking.status === "cancelled" ?t("cancelled_status"): t("status_no_show")}
                     </Typography>
                     <Typography fontSize='0.8rem' color='#666' lineHeight={1.4}>
-                      {t("no_show_message")}
+                      {detailBooking.status === "cancelled"?`${t("reason_modal_title") } : ${detailBooking?.cancel_reason}`:t("no_show_message")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -792,7 +793,7 @@ const ProfileView = ({
                 </Button>
               </Stack>
             </Paper>
-          ))}
+          )}
 
         {/* LỰA CHỌN CỦA BẠN */}
         <Paper
@@ -1142,6 +1143,7 @@ const ProfileView = ({
           </Button>
         </DialogActions>
       </Dialog>
+     
       <Container maxWidth='lg'>
         <Grid container spacing={3}>
           <Grid item xs={12} md={4} lg={3.5}>
@@ -1277,27 +1279,29 @@ function CancelBookingModal({
   const { t } = useTranslation();
 
   const [reason, setReason] = useState("");
+  const [onfirmCancelDialogOpen, setConfirmCancelDialogOpen] = useState(false);
   const [note, setNote] = useState("");
 
   // reset state khi đóng modal
   useEffect(() => {
-    if (!open) {
+    if (!onfirmCancelDialogOpen) {
       setReason("");
       setNote("");
     }
-  }, [open]);
+  }, [onfirmCancelDialogOpen]);
 
   const handleSubmit = async () => {
+    console.log("Toan",reason)
     if (!reason) return;
     try {
       let result = await cancelBooking({
         id: detailBooking.booking_id,
-        reason: reason,
+        reason: reason + note,
       });
       if (result?.code == "OK") {
         toast.success(result?.message);
         getHistoryBooking();
-        onClose();
+        setConfirmCancelDialogOpen(false)
       }
     } catch (error) {
       console.log(error);
@@ -1307,6 +1311,88 @@ function CancelBookingModal({
   const isDisableSubmit = !reason || (reason === "other" && !note.trim());
 
   return (
+    <>
+     <Dialog
+        open={onfirmCancelDialogOpen}
+        onClose={() => setConfirmCancelDialogOpen(false)}
+        maxWidth='xs'
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: "16px" },
+        }}>
+        <DialogTitle sx={{ textAlign: "center", pt: 4, pb: 1 }}>
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                bgcolor: "#ffebee",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}>
+              <img src={logout} alt='' />
+            </Box>
+            <IconButton
+              onClick={() => setConfirmCancelDialogOpen(false)}
+              sx={{ position: "absolute", top: -40, left: -30 }}>
+              <Close />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ textAlign: "center", px: 4, pb: 3 }}>
+          <Typography fontWeight={600} fontSize='18px' mb={1}>
+            {t("button_cancel_booking")}
+          </Typography>
+          <Typography fontSize='14px' color='#666'>
+            {t("cancel_booking_confirm")}
+          </Typography>
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            pb: 4,
+            gap: 2,
+            flexDirection: "column",
+          }}>
+          <Button
+            onClick={() => {
+             
+              handleSubmit()
+              
+            }}
+            variant='contained'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              bgcolor: "#98b720",
+              "&:hover": { bgcolor: "#8ab020" },
+              width: "100%",
+            }}>
+            {t("logout_confirm_button")}
+          </Button>
+          <Button
+            onClick={()=>{
+              setConfirmCancelDialogOpen(false);
+            }}
+            variant='outlined'
+            sx={{
+              borderRadius: "24px",
+              textTransform: "none",
+              borderColor: "#ddd",
+              color: "#666",
+              width: "100%",
+              ml: "0px !important",
+            }}>
+            {t("logout_cancel_button")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       {/* ===== HEADER ===== */}
       <DialogTitle
@@ -1332,7 +1418,7 @@ function CancelBookingModal({
           {REASON_KEYS.map((key) => (
             <FormControlLabel
               key={key}
-              value={key}
+              value={t(`cancel_booking.reasons.${key}`)}
               control={<Radio />}
               label={t(`cancel_booking.reasons.${key}`)}
               labelPlacement='start'
@@ -1347,7 +1433,7 @@ function CancelBookingModal({
         </RadioGroup>
 
         {/* ===== OTHER REASON ===== */}
-        {reason === "other" && (
+        {reason === t(`cancel_booking.reasons.other`) && (
           <Box mt={1}>
             <TextField
               fullWidth
@@ -1378,7 +1464,10 @@ function CancelBookingModal({
           fullWidth
           variant='contained'
           disabled={isDisableSubmit}
-          onClick={handleSubmit}
+          onClick={()=>{
+            setConfirmCancelDialogOpen(true)
+            onClose();
+          }}
           sx={{
             height: 44,
             borderRadius: 999,
@@ -1393,5 +1482,6 @@ function CancelBookingModal({
         </Button>
       </DialogActions>
     </Dialog>
+    </>
   );
 }
