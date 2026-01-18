@@ -38,7 +38,11 @@ import {
   Close,
 } from "@mui/icons-material";
 
-import { DateCalendar, LocalizationProvider, PickersCalendarHeader } from "@mui/x-date-pickers";
+import {
+  DateCalendar,
+  LocalizationProvider,
+  PickersCalendarHeader,
+} from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import in_time from "../../images/login.png";
@@ -86,7 +90,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const [checkOut, setCheckOut] = useState<Dayjs | null>(initialCheckOut);
   const [time, setTime] = useState<string>(initialTime);
   const [duration, setDuration] = useState<number>(initialDuration || 2);
-  const { t,i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const now = dayjs();
   const hours = Array.from(
     { length: 24 },
@@ -132,66 +136,66 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   const isToday = checkIn && checkIn.isSame(now, "day");
   const disabledHours = isToday
     ? hours.filter((h) => {
-      const hourNum = parseInt(h.split(":")[0]);
-      return hourNum <= now.hour(); // disable những giờ đã qua
-    })
+        const hourNum = parseInt(h.split(":")[0]);
+        return hourNum <= now.hour(); // disable những giờ đã qua
+      })
     : [];
-    const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
-      if (bookingType === "overnight") {
-        setCheckIn(date);
-        setCheckOut(date.add(1, "day"));
-      } else if (bookingType === "daily") {
-        // Logic mới: Phân biệt theo calendar
-        if (isSecondCalendar) {
-          // Click ở calendar bên phải (tháng sau) → ưu tiên đặt checkOut
-          if (!checkIn) {
-            // Nếu chưa có checkIn → đặt checkIn trước
-            setCheckIn(date);
-            setCheckOut(null);
-          } else if (date.isAfter(checkIn)) {
-            // Đã có checkIn và ngày click sau checkIn → đặt checkOut
-            setCheckOut(date);
-          } else {
-            // Ngày click trước checkIn → reset checkIn thành ngày mới
-            setCheckIn(date);
-            setCheckOut(null);
-          }
+  const handleDateSelect = (date: Dayjs, isSecondCalendar: boolean = false) => {
+    if (bookingType === "overnight") {
+      setCheckIn(date);
+      setCheckOut(date.add(1, "day"));
+    } else if (bookingType === "daily") {
+      // Logic mới: Phân biệt theo calendar
+      if (isSecondCalendar) {
+        // Click ở calendar bên phải (tháng sau) → ưu tiên đặt checkOut
+        if (!checkIn) {
+          // Nếu chưa có checkIn → đặt checkIn trước
+          setCheckIn(date);
+          setCheckOut(null);
+        } else if (date.isAfter(checkIn)) {
+          // Đã có checkIn và ngày click sau checkIn → đặt checkOut
+          setCheckOut(date);
         } else {
-          // Click ở calendar bên trái (tháng hiện tại) → ưu tiên đặt checkIn
-          if (!checkIn || (checkOut && date.isBefore(checkIn))) {
-            setCheckIn(date);
-            setCheckOut(null);
-          } else if (!checkOut && date.isAfter(checkIn)) {
-            setCheckOut(date);
-          } else {
-            setCheckIn(date);
-            setCheckOut(null);
-          }
+          // Ngày click trước checkIn → reset checkIn thành ngày mới
+          setCheckIn(date);
+          setCheckOut(null);
         }
-      } else if (bookingType === "hourly") {
-        setCheckIn(date);
-    
-        const selectedIsToday = date.isSame(now, "day");
-    
-        if (selectedIsToday) {
-          const nextHour = now.hour() + 1;
-          const nextHourStr = hours[nextHour] || hours[hours.length - 1];
-          setTime(nextHourStr);
+      } else {
+        // Click ở calendar bên trái (tháng hiện tại) → ưu tiên đặt checkIn
+        if (!checkIn || (checkOut && date.isBefore(checkIn))) {
+          setCheckIn(date);
+          setCheckOut(null);
+        } else if (!checkOut && date.isAfter(checkIn)) {
+          setCheckOut(date);
         } else {
-          setTime("00:00");
+          setCheckIn(date);
+          setCheckOut(null);
         }
-    
-        setDuration(2);
       }
-    };
+    } else if (bookingType === "hourly") {
+      setCheckIn(date);
+
+      const selectedIsToday = date.isSame(now, "day");
+
+      if (selectedIsToday) {
+        const nextHour = now.hour() + 1;
+        const nextHourStr = hours[nextHour] || hours[hours.length - 1];
+        setTime(nextHourStr);
+      } else {
+        setTime("00:00");
+      }
+
+      setDuration(2);
+    }
+  };
 
   if (!open || !anchorEl) return null;
 
   const endTime = checkIn
     ? checkIn
-      .hour(parseInt(time?.split(":")[0]))
-      .minute(0)
-      .add(duration, "hour")
+        .hour(parseInt(time?.split(":")[0]))
+        .minute(0)
+        .add(duration, "hour")
     : null;
 
   return (
@@ -201,7 +205,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
       placement='bottom-start'
       modifiers={[
         {
-          name: 'flip',
+          name: "flip",
           enabled: false,
         },
       ]}
@@ -218,12 +222,12 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
               bookingType === "hourly"
                 ? 760
                 : bookingType === "daily"
-                  ? 680
-                  : 380,
+                ? 680
+                : 380,
           },
           bgcolor: "white",
         }}>
-        <LocalizationProvider   adapterLocale={locale} dateAdapter={AdapterDayjs}>
+        <LocalizationProvider adapterLocale={locale} dateAdapter={AdapterDayjs}>
           <Stack>
             {/* Header */}
             <Box p={2} bgcolor='#f9f9f9' borderBottom='1px solid #eee'>
@@ -241,7 +245,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1 }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -255,13 +259,10 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                     }}
                     dayOfWeekFormatter={(date) => {
                       // Lấy tên ngắn 2 ký tự của ngày trong tuần theo locale vi
-                      const shortDay = date.format('dd'); // 'T2', 'T3', ..., 'CN'
+                      const shortDay = date.format("dd"); // 'T2', 'T3', ..., 'CN'
                       return shortDay;
                     }}
-                   
-                   
                     slots={{
-                    
                       day: (props) => {
                         const isSelected = checkIn?.isSame(props.day, "day");
                         return (
@@ -276,7 +277,6 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 ? "rgba(152, 183, 32, 1)"
                                 : "transparent",
                               color: isSelected ? "white" : "inherit",
-                              "&:hover": { bgcolor: "#f0f8f0" },
                             }}>
                             {props.day.format("D")}
                           </Button>
@@ -295,7 +295,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      {t('check_in_time')}
+                      {t("check_in_time")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -363,7 +363,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       mb={1}
                       color='#666'
                       fontSize='0.95rem'>
-                      {t('hours_of_use')}
+                      {t("hours_of_use")}
                     </Typography>
                     <Stack direction='row' alignItems='center' spacing={1}>
                       <IconButton
@@ -415,7 +415,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                         onClick={() =>
                           setDuration(
                             durations[
-                            Math.min(durations.length - 1, durationIndex + 1)
+                              Math.min(durations.length - 1, durationIndex + 1)
                             ]
                           )
                         }
@@ -436,7 +436,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                       color='#666'
                       fontSize='0.9rem'
                       mb={0.5}>
-                      {t('check_out_time')}
+                      {t("check_out_time")}
                     </Typography>
                     <Typography fontWeight={600} color='#333'>
                       {endTime
@@ -453,7 +453,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 <Box sx={{ flex: 1, p: 1, borderRight: "1px solid #eee" }}>
                   <DateCalendar
                     value={checkIn}
-                    onChange={() => { }}
+                    onChange={() => {}}
                     disablePast
                     sx={{
                       width: "100%",
@@ -487,10 +487,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                 isStart || isEnd
                                   ? "rgba(152, 183, 32, 1)"
                                   : isInRange
-                                    ? "#f0f8f0"
-                                    : "transparent",
+                                  ? "#f0f8f0"
+                                  : "transparent",
                               color: isStart || isEnd ? "white" : "inherit",
-                              "&:hover": { bgcolor: "#e8f5e8" },
                             }}>
                             {props.day.format("D")}
                           </Button>
@@ -504,10 +503,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                 {bookingType === "daily" && (
                   <Box sx={{ flex: 1, p: 1 }}>
                     <DateCalendar
-                       referenceDate={dayjs().add(1, "month")}
+                      referenceDate={dayjs().add(1, "month")}
                       // value={checkIn}
-                      onChange={() => { }}
-                     
+                      onChange={() => {}}
                       disablePast
                       sx={{
                         width: "100%",
@@ -532,7 +530,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                           return (
                             <Button
                               {...props}
-                              onClick={() => handleDateSelect(props.day,true)}
+                              onClick={() => handleDateSelect(props.day, true)}
                               sx={{
                                 minWidth: 36,
                                 height: 36,
@@ -541,10 +539,9 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                                   isStart || isEnd
                                     ? "rgba(152, 183, 32, 1)"
                                     : isInRange
-                                      ? "#f0f8f0"
-                                      : "transparent",
+                                    ? "#f0f8f0"
+                                    : "transparent",
                                 color: isStart || isEnd ? "white" : "inherit",
-                                "&:hover": { bgcolor: "#e8f5e8" },
                               }}>
                               {props.day.format("D")}
                             </Button>
@@ -574,7 +571,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   textTransform: "none",
                   fontSize: "0.9rem",
                 }}>
-                {bookingType === "hourly" ? t('any_date_time') : t('any_date')}
+                {bookingType === "hourly" ? t("any_date_time") : t("any_date")}
               </Button>
               <Button
                 variant='contained'
@@ -588,7 +585,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
                   fontSize: "0.9rem",
                   "&:hover": { bgcolor: "#43a047" },
                 }}>
-                {t('apply')}
+                {t("apply")}
               </Button>
             </Stack>
           </Stack>
@@ -634,30 +631,28 @@ const SearchBarWithDropdown = ({ location, address }) => {
   const keyword = normalize(searchValue?.trim());
 
   const filteredLocations = !keyword
-  ? location
-  : location.filter((loc) => {
-      const words = normalize(loc?.name?.vi).split(/\s+/);
+    ? location
+    : location.filter((loc) => {
+        const words = normalize(loc?.name?.vi).split(/\s+/);
 
-      return words.some(word =>
-        word.includes(keyword) // ho -> hồ, nội (no), hà (ha)
-      );
-    });
+        return words.some(
+          (word) => word.includes(keyword) // ho -> hồ, nội (no), hà (ha)
+        );
+      });
   console.log("AAAA address", address);
-
 
   useEffect(() => {
     // nếu chưa nhập gì thì không call
     if (!searchValue.trim()) return;
 
     const timer = setTimeout(async () => {
-      setDataLoading(true)
+      setDataLoading(true);
       console.log("CALL API:", searchValue);
-      let result = await getSuggest(searchValue)
+      let result = await getSuggest(searchValue);
       if (result?.hotels) {
-        setData(result?.hotels)
+        setData(result?.hotels);
       }
-      setDataLoading(false)
-
+      setDataLoading(false);
     }, 500);
 
     // nếu người dùng nhập tiếp -> huỷ timeout cũ
@@ -689,16 +684,18 @@ const SearchBarWithDropdown = ({ location, address }) => {
       setCheckOut(checkIn.add(1, "day"));
       setCheckInTime(null);
       setCheckInDuration(null);
-    }
-    else if (bookingType === "daily") {
+    } else if (bookingType === "daily") {
       // Theo ngày: nếu chưa có checkOut cũ mà nó <= checkIn → đẩy lên +1 ngày (tối thiểu 1 đêm)
-      if (!checkOut || checkOut.isSame(checkIn, "day") || checkOut.isBefore(checkIn)) {
+      if (
+        !checkOut ||
+        checkOut.isSame(checkIn, "day") ||
+        checkOut.isBefore(checkIn)
+      ) {
         setCheckOut(checkIn.add(1, "day"));
       }
       setCheckInTime(null);
       setCheckInDuration(null);
-    }
-    else if (bookingType === "hourly") {
+    } else if (bookingType === "hourly") {
       // Theo giờ: xóa checkOut cũ (vì giờ dùng endTime tính từ giờ + duration)
       // Giữ lại checkIn để chọn ngày
 
@@ -715,7 +712,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
       }
       // setCheckInDuration(3); // mặc định 3 tiếng hoặc 2 tùy bạn
     }
-  }, [bookingType, checkIn])
+  }, [bookingType, checkIn]);
 
   const handleClickAway = (e: any) => {
     if (inputRef.current && !inputRef.current.contains(e.target))
@@ -727,7 +724,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
   };
 
   const formatCheckIn = () => {
-    if (!checkIn) return t('check_in');
+    if (!checkIn) return t("check_in");
     if (bookingType === "hourly" && checkInTime)
       return `${checkInTime}, ${checkIn.format("DD/MM")}`;
     return checkIn.format(bookingType === "daily" ? "DD/MM/YYYY" : "DD/MM");
@@ -735,12 +732,12 @@ const SearchBarWithDropdown = ({ location, address }) => {
 
   const formatCheckOut = () => {
     if (bookingType === "hourly") {
-      if (!checkOut) return t('check_out');
+      if (!checkOut) return t("check_out");
 
       return checkOut.format("HH:mm, DD/MM");
     }
 
-    if (!checkOut) return t('check_out');
+    if (!checkOut) return t("check_out");
     return checkOut.format("DD/MM/YYYY");
   };
   // Hàm convert "Hà Nội" -> "hanoi"
@@ -867,7 +864,10 @@ const SearchBarWithDropdown = ({ location, address }) => {
           zIndex={10}>
           <Container maxWidth='lg'>
             {/* Toggle */}
-            <Stack direction='row' justifyContent='center' sx={{ mb: isMobile ? "-10px" : "-40px" }}>
+            <Stack
+              direction='row'
+              justifyContent='center'
+              sx={{ mb: isMobile ? "-10px" : "-40px" }}>
               <ToggleButtonGroup
                 value={bookingType}
                 exclusive
@@ -880,19 +880,43 @@ const SearchBarWithDropdown = ({ location, address }) => {
                   gap: "20px",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  width: isMobile ? "80%" : "unset"
+                  width: isMobile ? "80%" : "unset",
                 }}>
                 {[
-                  { v: "hourly", i: <AccessTime sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('by_hour') },
-                  { v: "overnight", i: <Nightlight sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('overnight') },
-                  { v: "daily", i: <CalendarToday sx={{ fontSize: isMobile ? "15px" : "1.5rem" }} />, l: t('by_day') },
+                  {
+                    v: "hourly",
+                    i: (
+                      <AccessTime
+                        sx={{ fontSize: isMobile ? "15px" : "1.5rem" }}
+                      />
+                    ),
+                    l: t("by_hour"),
+                  },
+                  {
+                    v: "overnight",
+                    i: (
+                      <Nightlight
+                        sx={{ fontSize: isMobile ? "15px" : "1.5rem" }}
+                      />
+                    ),
+                    l: t("overnight"),
+                  },
+                  {
+                    v: "daily",
+                    i: (
+                      <CalendarToday
+                        sx={{ fontSize: isMobile ? "15px" : "1.5rem" }}
+                      />
+                    ),
+                    l: t("by_day"),
+                  },
                 ].map((x) => (
                   <ToggleButton
                     key={x.v}
                     value={x.v}
                     sx={{
                       px: { xs: 1, md: 4 },
-                      py: isMobile ? .5 : 1,
+                      py: isMobile ? 0.5 : 1,
                       color:
                         bookingType === x.v
                           ? "rgba(152, 183, 32, 1) !important"
@@ -910,7 +934,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                             ? "white"
                             : "rgba(255,255,255,0.1)",
                       },
-                      fontSize: isMobile ? "10px" : "unset"
+                      fontSize: isMobile ? "10px" : "unset",
                     }}>
                     {x.i}
                     <Box component='span' sx={{ ml: 1, textTransform: "none" }}>
@@ -930,7 +954,6 @@ const SearchBarWithDropdown = ({ location, address }) => {
                 bgcolor: "white",
                 p: { xs: 1.5, md: "70px 20px 20px" },
                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-
               }}>
               <Stack
                 direction={{ xs: "column", md: "row" }}
@@ -945,7 +968,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                 <Box sx={{ flex: { md: 1 }, position: "relative" }}>
                   <TextField
                     fullWidth
-                    placeholder={t('where_do_you_want_to_go')}
+                    placeholder={t("where_do_you_want_to_go")}
                     variant='outlined'
                     value={searchValue}
                     onChange={(e) => {
@@ -984,11 +1007,12 @@ const SearchBarWithDropdown = ({ location, address }) => {
                     inputRef={inputRef}
                     InputProps={{
                       startAdornment: (
-                        <LocationOn sx={{ fontSize: 20, color: "#999", mr: 1 }} />
+                        <LocationOn
+                          sx={{ fontSize: 20, color: "#999", mr: 1 }}
+                        />
                       ),
                     }}
                     sx={{
-
                       "& .MuiOutlinedInput-root": {
                         height: { xs: 48, md: 45 },
                         fontSize: isMobile ? "12px" : "unset",
@@ -996,7 +1020,9 @@ const SearchBarWithDropdown = ({ location, address }) => {
                         "& fieldset": {
                           border: dropdownOpen
                             ? "1px solid rgba(152, 183, 32, 1) !important"
-                            : isMobile ? "1px solid rgba(152, 183, 32, 1) !important" : "none !important",
+                            : isMobile
+                            ? "1px solid rgba(152, 183, 32, 1) !important"
+                            : "none !important",
                         },
                         "&.Mui-focused": {
                           borderColor: "rgba(152, 183, 32, 1)",
@@ -1006,16 +1032,19 @@ const SearchBarWithDropdown = ({ location, address }) => {
                     }}
                   />
                   <Popper
-                   modifiers={[
-                    {
-                      name: 'flip',
-                      enabled: false,
-                    },
-                  ]}
+                    modifiers={[
+                      {
+                        name: "flip",
+                        enabled: false,
+                      },
+                    ]}
                     open={dropdownOpen}
                     anchorEl={inputRef.current}
                     placement='bottom-start'
-                    sx={{ zIndex: 20, width: isMobile ? "max-content" : "20%" }}>
+                    sx={{
+                      zIndex: 20,
+                      width: isMobile ? "max-content" : "20%",
+                    }}>
                     {filteredLocations.length == 0 && data?.length == 0 ? (
                       <Paper
                         elevation={3}
@@ -1028,7 +1057,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                           overflowY: "auto",
                         }}>
                         <Typography color='rgba(152, 159, 173, 1)'>
-                          {t('no_data_found')}
+                          {t("no_data_found")}
                         </Typography>
                       </Paper>
                     ) : (
@@ -1047,7 +1076,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                             variant='subtitle2'
                             color='#666'
                             fontWeight={600}>
-                            {t('address')}
+                            {t("address")}
                           </Typography>
                         </Box>
                         <List disablePadding>
@@ -1088,14 +1117,19 @@ const SearchBarWithDropdown = ({ location, address }) => {
                             variant='subtitle2'
                             color='#666'
                             fontWeight={600}>
-                            {t('hotels')}
+                            {t("hotels")}
                           </Typography>
                         </Box>
-                        {dataLoading ?
+                        {dataLoading ? (
                           <Box display={"flex"} justifyContent={"center"}>
-                            <CircularProgress sx={{ fontSize: "15px", color: "rgba(152, 183, 32, 1)" }} />
+                            <CircularProgress
+                              sx={{
+                                fontSize: "15px",
+                                color: "rgba(152, 183, 32, 1)",
+                              }}
+                            />
                           </Box>
-                          :
+                        ) : (
                           <List disablePadding>
                             {data.map((loc, i) => (
                               <ListItemButton
@@ -1110,7 +1144,8 @@ const SearchBarWithDropdown = ({ location, address }) => {
                                   const now = new Date();
 
                                   // format yyyy-MM-dd
-                                  const formatDate = (d) => d.toISOString().split("T")[0];
+                                  const formatDate = (d) =>
+                                    d.toISOString().split("T")[0];
 
                                   // format lên giờ chẵn
                                   const formatHour = (d) => {
@@ -1121,13 +1156,19 @@ const SearchBarWithDropdown = ({ location, address }) => {
                                     if (minute > 0) hour++;
 
                                     // format HH:00 (VD: 09:00, 20:00)
-                                    return `${String(hour).padStart(2, "0")}:00`;
+                                    return `${String(hour).padStart(
+                                      2,
+                                      "0"
+                                    )}:00`;
                                   };
 
                                   // Set mặc định nếu param không có
-                                  current.checkIn = current.checkIn || formatDate(now);
-                                  current.checkOut = current.checkOut || formatDate(now);
-                                  current.checkInTime = current.checkInTime || formatHour(now);
+                                  current.checkIn =
+                                    current.checkIn || formatDate(now);
+                                  current.checkOut =
+                                    current.checkOut || formatDate(now);
+                                  current.checkInTime =
+                                    current.checkInTime || formatHour(now);
                                   current.duration = current.duration || 2;
                                   current.type = "hourly";
 
@@ -1148,10 +1189,9 @@ const SearchBarWithDropdown = ({ location, address }) => {
                                   "&:hover": { bgcolor: "#f0f8f0" },
                                 }}>
                                 <ListItemIcon sx={{ minWidth: 36 }}>
-                                  <img src={building} alt="" />
+                                  <img src={building} alt='' />
                                 </ListItemIcon>
                                 <Box>
-
                                   <ListItemText
                                     primary={parseName(loc?.name)}
                                     primaryTypographyProps={{
@@ -1171,7 +1211,8 @@ const SearchBarWithDropdown = ({ location, address }) => {
                                 </Box>
                               </ListItemButton>
                             ))}
-                          </List>}
+                          </List>
+                        )}
                       </Paper>
                     )}
                   </Popper>
@@ -1193,7 +1234,9 @@ const SearchBarWithDropdown = ({ location, address }) => {
                       cursor: "pointer",
                       border: pickerOpen
                         ? "1px solid rgba(152, 183, 32, 1)"
-                        : isMobile ? "1px solid rgba(152, 183, 32, 1)" : "1px solid transparent",
+                        : isMobile
+                        ? "1px solid rgba(152, 183, 32, 1)"
+                        : "1px solid transparent",
                       borderRight: "none",
                       borderRadius: "10px 0 0 10px",
                     }}
@@ -1217,7 +1260,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                           flex: 1,
                           color: checkIn ? "#333" : "#999",
                           fontWeight: checkIn ? 500 : 400,
-                          fontSize: isMobile ? "12px" : "unset"
+                          fontSize: isMobile ? "12px" : "unset",
                         }}>
                         {formatCheckIn()}
                       </Typography>
@@ -1242,7 +1285,9 @@ const SearchBarWithDropdown = ({ location, address }) => {
                       cursor: "pointer",
                       border: pickerOpen
                         ? "1px solid rgba(152, 183, 32, 1)"
-                        : isMobile ? "1px solid rgba(152, 183, 32, 1)" : "1px solid transparent",
+                        : isMobile
+                        ? "1px solid rgba(152, 183, 32, 1)"
+                        : "1px solid transparent",
                       borderLeft: "none",
                       borderRadius: "0 10px 10px 0",
                     }}
@@ -1266,7 +1311,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                           flex: 1,
                           color: checkOut ? "#333" : "#999",
                           fontWeight: checkOut ? 500 : 400,
-                          fontSize: isMobile ? "12px" : "unset"
+                          fontSize: isMobile ? "12px" : "unset",
                         }}>
                         {formatCheckOut()}
                       </Typography>
@@ -1320,7 +1365,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
                     height: { xs: 48, md: 45 },
                     "&:hover": { bgcolor: "#43a047" },
                   }}>
-                  {t('search')}
+                  {t("search")}
                 </Button>
               </Stack>
             </Paper>
@@ -1346,7 +1391,7 @@ const SearchBarWithDropdown = ({ location, address }) => {
           {/* HEADER */}
           <Stack direction='row' justifyContent='space-between' mb={2}>
             <Typography fontSize='1.2rem' fontWeight={700}>
-              {t('accessing_location')}
+              {t("accessing_location")}
             </Typography>
 
             <IconButton onClick={() => cancelGeo()}>
